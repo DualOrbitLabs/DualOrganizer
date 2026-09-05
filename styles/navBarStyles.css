@@ -1,5 +1,52 @@
-.navBar{
+@font-face {
+  font-family: 'Avenir';
+  src: url('/global/fonts/Avenir Regular.ttf') format('ttf');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
+
+.navBar{
+    display: inline;
+    background-color: #000000;
+    padding: 2rem;
+    margin-left: -1rem;
+}
+
+
+.link{
+    width: 10rem;
+    padding-top: 1rem;
+    padding-right: 0.5rem;
+}
+
 .navBar img{
-    
+    width: 10rem;
+    padding-top: 1rem;
+    padding-right: 0.5rem;
+    background-position: left calc(95% - 0.125rem) !important; 
+}
+
+.navBar a {
+    font-size: 1.5rem;
+    font-weight: bold; 
+    color: #192A88;
+    text-decoration: none;
+    font-family: 'Avenir', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin-bottom: 1rem;
+}
+
+.navBar a, img{
+    transition: 
+        background-size 0.4s ease-in-out, 
+        transform 0.2s ease;
+}
+
+.navBar a:hover, img:hover {
+    transform: scale(1.1);
+    background-size: 100% 0.125rem;
+}
+
+.navBar a:active, img:active {
+    transform: scale(0.9);
 }
