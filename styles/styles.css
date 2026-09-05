@@ -1,0 +1,281 @@
+/* ==========================================================================
+   Estructura Base CSS para Dashboard
+   Paleta de Colores:
+   - Primary Dark Blue: #192A88
+   - Secondary Accent / Light Lavender: #DCDEF7
+   - Page Background: #F3F3F3
+   - Card Background: #FFFFFF
+   - Headings / Text Dark: #000000
+   ========================================================================== */
+
+/* Declaración básica de fuentes locales (Avenir) */
+@font-face {
+    font-family: 'Avenir';
+    src: url('global/fonts/Avenir/Avenir Regular/Avenir Regular.ttf') format('truetype');
+    font-weight: 400;
+}
+@font-face {
+    font-family: 'Avenir';
+    src: url('global/fonts/Avenir/Avenir Heavy/Avenir Heavy.ttf') format('truetype');
+    font-weight: 700;
+}
+@font-face {
+    font-family: 'Avenir';
+    src: url('global/fonts/Avenir/Avenir Black/Avenir Black.ttf') format('truetype');
+    font-weight: 900;
+}
+
+:root {
+    --primary-blue: #192A88;
+    --accent-lavender: #DCDEF7;
+    --bg-page: #F3F3F3;
+    --bg-card: #FFFFFF;
+    --text-dark: #000000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Avenir', sans-serif;
+}
+
+body {
+    background-color: var(--bg-page);
+    color: var(--text-dark);
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-card);
+    padding: 10px 20px;
+    border-bottom: 2px solid var(--accent-lavender);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    height: 40px;
+}
+
+.btn-export {
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Layout Principal */
+.main-container {
+    display: flex;
+    height: calc(100vh - 65px);
+}
+
+/* Calendario Colapsable Superior */
+.calendar-wrapper {
+    background-color: var(--bg-card);
+    border-bottom: 2px solid var(--accent-lavender);
+    transition: max-height 0.3s ease;
+    overflow: hidden;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid var(--accent-lavender);
+}
+
+.calendar-header h3 {
+    font-size: 1rem;
+    color: var(--primary-blue);
+}
+
+.btn-toggle-calendar {
+    background: none;
+    border: 1px solid var(--primary-blue);
+    color: var(--primary-blue);
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.calendar-content {
+    padding: 20px;
+    max-height: 500px;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.calendar-wrapper.collapsed .calendar-content {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+}
+
+/* Top KPI Bar */
+.top-kpi-bar {
+    background-color: var(--bg-card);
+    padding: 15px 20px;
+    border-bottom: 2px solid var(--accent-lavender);
+    text-align: center;
+    margin-bottom: 20px;
+}
+.top-kpi-bar h2 {
+    color: var(--primary-blue);
+    font-size: 1.5rem;
+}
+
+/* Calendar Main */
+.calendar-main {
+    background-color: var(--bg-card);
+    border: 1px solid var(--accent-lavender);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 0 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.calendar-header-controls h3 {
+    font-size: 1.2rem;
+    color: var(--primary-blue);
+}
+.btn-nav {
+    background-color: var(--accent-lavender);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--primary-blue);
+}
+
+/* Weekly Grid */
+.weekly-calendar-grid {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    grid-auto-rows: minmax(60px, auto);
+    border-top: 1px solid var(--accent-lavender);
+    border-left: 1px solid var(--accent-lavender);
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.grid-cell {
+    border-right: 1px solid var(--accent-lavender);
+    border-bottom: 1px solid var(--accent-lavender);
+    padding: 5px;
+    position: relative;
+    background-color: var(--bg-card);
+}
+.grid-cell.header {
+    background-color: var(--primary-blue);
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    padding: 10px 5px;
+}
+.grid-cell.time-label {
+    background-color: #f9f9f9;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.grid-cell.slot {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.grid-cell.slot:hover {
+    background-color: #f0f4ff;
+}
+
+/* Session Item */
+.session-item {
+    background-color: var(--primary-blue);
+    color: white;
+    font-size: 0.75rem;
+    padding: 4px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal-content {
+    background-color: var(--bg-card);
+    padding: 30px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    position: relative;
+}
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #777;
+}
+.modal-content h2 {
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+}
+
+/* Formularios base (ya definidos antes, adaptados) */
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+.form-group input {
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid var(--accent-lavender);
+    border-radius: 4px;
+}
+.btn-primary {
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: bold;
+}

@@ -4,170 +4,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Control de Horas DualOrganizer</title>
-  <link rel="stylesheet" href="styles/dashboard.css">
+  <title>Dashboard - Registro de Sesiones</title>
+  <link rel="stylesheet" href="./styles/styles.css">
 </head>
 
 <body>
+  <!-- Navbar superior -->
+  <nav class="navbar">
+    <div class="logo-container">
+      <img src="global/DOLFNBB.png" alt="Logo DualOrganizer" class="logo">
+      <h1>DualOrganizer</h1>
+    </div>
+    <button id="btnExportCSV" class="btn-export">Exportar CSV</button>
+  </nav>
 
-  <div class="app-container">
-
-    <!-- BLOQUE 1: Resumen de Perfil & KPIs (Top Banner) -->
-    <header class="top-banner" id="top-banner">
-
-      <!-- Zona Izquierda: Perfil -->
-      <div class="profile-identity">
-        <div class="avatar-wrapper">
-          <img src="assets/avatar.jpg" alt="Carlos Mendoza" class="user-avatar" id="user-avatar">
-          <span class="status-badge" id="user-status-badge">Mentor Activo</span>
-        </div>
-        <div class="user-info">
-          <h1 class="user-name" id="user-name">Carlos Mendoza</h1>
-          <span class="user-role" id="user-role">Mentor de Desarrollo Web & Dual</span>
-        </div>
-      </div>
-
-      <!-- Zona Derecha: Toggle & KPIs -->
-      <div class="banner-metrics-container">
-
-        <!-- Toggle Semanal / Mensual -->
-        <div class="range-toggle-wrapper">
-          <button type="button" class="toggle-btn active" id="toggle-weekly">Semanal</button>
-          <button type="button" class="toggle-btn" id="toggle-monthly">Mensual</button>
-        </div>
-
-        <!-- KPIs -->
-        <div class="kpis-row">
-          <div class="kpi-card hours-card">
-            <span class="kpi-label">Horas Acreditadas</span>
-            <div class="kpi-value-group">
-              <span class="kpi-value-main" id="kpi-hours-value">32.0 / 40 hrs</span>
-            </div>
-            <div class="progress-bar-container">
-              <div class="progress-bar-fill" id="kpi-hours-progress" style="width: 80%;"></div>
-            </div>
-          </div>
-
-          <div class="kpi-card">
-            <span class="kpi-label">Sesiones</span>
-            <div class="kpi-value-group">
-              <span class="kpi-value-main">8</span>
-              <span class="kpi-value-sub">Citas</span>
-            </div>
-          </div>
-
-          <div class="kpi-card alert-card">
-            <span class="kpi-label">Evidencias</span>
-            <div class="alert-badge-text" id="kpi-pending-count">
-              ⚠️ 3 Pendientes
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-    </header>
-
-
-    <!-- BLOQUE 2: Calendario Expandible (Main View) -->
-    <main class="calendar-block">
-
-      <!-- Barra de Control -->
-      <div class="calendar-control-bar">
-        <div class="date-navigator">
-          <button type="button" class="nav-btn" id="prev-date">&lt;</button>
-          <h2 class="current-date-title" id="current-date-title">Septiembre 2026</h2>
-          <button type="button" class="nav-btn" id="next-date">&gt;</button>
-          <button type="button" class="today-btn" id="today-btn">Hoy</button>
-        </div>
-
-        <div class="calendar-actions-right">
-          <button type="button" class="expand-switch-btn" id="expand-switch-btn">
-            <span>⇱</span> <span>Expandir cuadrícula</span>
-          </button>
-          <button type="button" class="btn-primary-action" id="schedule-session-btn">
-            <span>+</span> <span>Agendar Sesión</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Lienzo del Calendario Dinámico -->
-      <div class="calendar-matrix-wrapper" id="calendar-matrix-wrapper"></div>
-
-    </main>
-
-  </div>
-
-
-  <!-- MODAL: Agendar Sesión -->
-  <div class="modal-overlay" id="schedule-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 class="modal-title">Agendar Nueva Sesión</h3>
-        <button type="button" class="modal-close-btn" id="close-schedule-modal">&times;</button>
-      </div>
-
-      <form id="schedule-form">
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="form-label" for="field-title">Materia / Tema</label>
-            <input type="text" id="field-title" class="form-control" placeholder="ej. Desarrollo Web Frontend" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="field-mentor">Mentor / Alumno Asignado</label>
-            <select id="field-mentor" class="form-control" required>
-              <option value="Ana Martínez (Alumno)">Ana Martínez (Alumno)</option>
-              <option value="Carlos Mendoza (Mentor)">Carlos Mendoza (Mentor)</option>
-              <option value="Lic. Fernando Ruiz">Lic. Fernando Ruiz (Asesor Dual)</option>
-            </select>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="field-date">Fecha</label>
-              <input type="date" id="field-date" class="form-control" value="2026-09-08" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="field-time">Hora</label>
-              <input type="time" id="field-time" class="form-control" value="10:00" required>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="field-duration">Duración (Horas)</label>
-              <select id="field-duration" class="form-control" required>
-                <option value="1.0">1.0 hr</option>
-                <option value="1.5" selected>1.5 hrs</option>
-                <option value="2.0">2.0 hrs</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="field-evidence">Evidencia Requerida</label>
-              <select id="field-evidence" class="form-control" required>
-                <option value="minuta">Minuta de reunión</option>
-                <option value="firma">Firma digital</option>
-                <option value="reporte">Reporte semanal</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="field-notes">Notas adicionales</label>
-            <textarea id="field-notes" class="form-control" rows="2" placeholder="Detalles u objetivos..."></textarea>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" id="cancel-schedule-btn">Cancelar</button>
-          <button type="submit" class="btn-primary-action">Guardar Sesión</button>
-        </div>
-      </form>
+  <!-- Calendario colapsable -->
+  <div class="calendar-wrapper" id="calendarWrapper">
+    <div class="calendar-header">
+      <h3>Agendas / Calendario</h3>
+      <button id="btnToggleCalendar" class="btn-toggle-calendar">Ocultar</button>
+    </div>
+    <div class="calendar-content" id="calendarContent">
+      <input type="date" id="dateFilter" title="Filtrar sesiones por fecha">
     </div>
   </div>
 
-  <script src="js/dashboard.js"></script>
+  <div class="main-container">
+    <!-- Top info: Total de horas -->
+    <div class="top-kpi-bar">
+      <h2>Horas Acumuladas: <span id="kpiTotalHours">0</span></h2>
+    </div>
+
+    <!-- Calendario Semanal Principal -->
+    <main class="calendar-main">
+      <div class="calendar-header-controls">
+        <button id="btnPrevWeek" class="btn-nav">&lt; Ant</button>
+        <h3 id="currentWeekLabel">Semana actual</h3>
+        <button id="btnNextWeek" class="btn-nav">Sig &gt;</button>
+      </div>
+
+      <!-- Cuadrícula del Calendario Semanal -->
+      <div class="weekly-calendar-grid" id="weeklyCalendarGrid">
+        <!-- Generado dinámicamente -->
+      </div>
+    </main>
+
+    <!-- Modal para Registrar Sesión al hacer clic en el calendario -->
+    <div id="sessionModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span class="close-btn" id="closeModalBtn">&times;</span>
+        <h2>Agendar Sesión</h2>
+        <form id="sessionForm">
+          <!-- Fecha seleccionada (solo lectura o pre-llenada) -->
+          <div class="form-group">
+            <label for="date">Fecha:</label>
+            <input type="date" id="date" required readonly>
+          </div>
+          <div class="form-group">
+            <label for="time">Hora de inicio:</label>
+            <input type="time" id="time" required>
+          </div>
+          <div class="form-group">
+            <label for="studentName">Alumno:</label>
+            <input type="text" id="studentName" required>
+          </div>
+          <div class="form-group">
+            <label for="subject">Materia:</label>
+            <input type="text" id="subject" required>
+          </div>
+          <div class="form-group">
+            <label for="hours">Duración (Horas):</label>
+            <input type="number" id="hours" step="0.5" required>
+          </div>
+          <button type="submit" class="btn-primary">Guardar Sesión</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Guardado temporalmente (Oculto) 
+    <div style="display: none;" id="hiddenLegacyContent">
+      <div class="kpi-card">
+        <h3>Total Sesiones</h3>
+        <p id="kpiTotalSessions">0</p>
+      </div>
+      <table id="sessionsTable">
+        <tbody id="sessionsTableBody"></tbody>
+      </table>
+    </div>
+
+  </div>-->
+
+    <script src="js/dashboard.js"></script>
 </body>
 
 </html>
