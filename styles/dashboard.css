@@ -47,25 +47,7 @@ body {
     color: var(--text-dark);
 }
 
-/* Navbar */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--bg-card);
-    padding: 10px 20px;
-    border-bottom: 2px solid var(--accent-lavender);
-}
-
-.logo-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.logo {
-    height: 40px;
-}
+/* Estilos específicos del Dashboard (Navbar removida a navbar.css) */
 
 .btn-export {
     background-color: var(--primary-blue);

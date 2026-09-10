@@ -3,14 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles/navBarStyles.css">
+    <link rel="stylesheet" href="styles/navbar.css">
     <link rel="stylesheet" href="styles/hub.css">
     <title>DualOrganizer</title>
 </head>
 <body>
-    <nav class="navBar">
-        <a href="hub.html"><img src="global/DOLFNBU.png" alt="Dual Orbits Lab logo"></a>
-        <a href="login.html" class="link">Login</a>
+    <!-- Navbar global -->
+    <nav class="navbar-global">
+      <!-- Zona Izquierda: Logo + Nombre -->
+      <a href="hub.html" class="navbar-brand">
+        <img src="global/DOLFNBB.png" alt="Logo DualOrganizer" class="navbar-logo">
+        <span class="navbar-title">DualOrganizer</span>
+      </a>
+  
+      <!-- Zona Centro: Links de Navegación -->
+      <ul class="navbar-nav">
+        <li><a href="hub.html" class="nav-link active">Hub</a></li>
+        <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="admin.html" class="nav-link">Administración</a></li>
+      </ul>
+  
+      <!-- Zona Derecha: Acciones -->
+      <div class="navbar-actions">
+        <a href="profile.html" class="btn-profile" title="Mi Perfil">👤</a>
+      </div>
     </nav>
 </body>
 </html>

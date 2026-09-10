@@ -5,17 +5,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Registro de Sesiones</title>
-  <link rel="stylesheet" href="./styles/styles.css">
+  <link rel="stylesheet" href="./styles/navbar.css">
+  <link rel="stylesheet" href="./styles/dashboard.css">
 </head>
 
 <body>
-  <!-- Navbar superior -->
-  <nav class="navbar">
-    <div class="logo-container">
-      <img src="global/DOLFNBB.png" alt="Logo DualOrganizer" class="logo">
-      <h1>DualOrganizer</h1>
+  <!-- Navbar global -->
+  <nav class="navbar-global">
+    <!-- Zona Izquierda: Logo + Nombre -->
+    <a href="hub.html" class="navbar-brand">
+      <img src="global/DOLFNBB.png" alt="Logo DualOrganizer" class="navbar-logo">
+      <span class="navbar-title">DualOrganizer</span>
+    </a>
+
+    <!-- Zona Centro: Links de Navegación -->
+    <ul class="navbar-nav">
+      <li><a href="hub.html" class="nav-link">Hub</a></li>
+      <li><a href="dashboard.html" class="nav-link active">Dashboard</a></li>
+      <li><a href="admin.html" class="nav-link">Administración</a></li>
+    </ul>
+
+    <!-- Zona Derecha: Acciones -->
+    <div class="navbar-actions">
+      <button id="btnExportCSV" class="btn-export">Exportar CSV</button>
+      <a href="profile.html" class="btn-profile" title="Mi Perfil">👤</a>
     </div>
-    <button id="btnExportCSV" class="btn-export">Exportar CSV</button>
   </nav>
 
   <!-- Calendario colapsable -->
