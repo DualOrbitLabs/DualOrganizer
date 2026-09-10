@@ -1,0 +1,878 @@
+/* ==========================================================================
+   DualOrganizer - Estilos del Perfil del Tutor (Design Refiner)
+   Paleta: Escala neutra Slate / Zinc profesional y sobria
+   Enfoque: Cero clichés de IA, alta densidad de información, bordes finos de 1px,
+            paddings compactos y micro-animación sutil en la barra flotante.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Design Tokens (CSS Custom Properties)
+   -------------------------------------------------------------------------- */
+:root {
+    /* Escala Slate / Zinc Neutra */
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --slate-950: #020617;
+
+    /* Superficies y Fondos */
+    --bg-page: var(--slate-50);
+    --bg-card: #ffffff;
+    --bg-header: var(--slate-900);
+    --bg-subtle: var(--slate-100);
+    --bg-muted: var(--slate-200);
+
+    /* Bordes Nítidos */
+    --border-subtle: var(--slate-200);
+    --border-default: var(--slate-300);
+    --border-dark: var(--slate-700);
+    --border-focus: var(--slate-900);
+
+    /* Tipografía */
+    --text-primary: var(--slate-900);
+    --text-secondary: var(--slate-700);
+    --text-muted: var(--slate-500);
+    --text-inverse: var(--slate-50);
+
+    /* Identidad DualOrganizer (Navy Institucional sobrio, sin violetas) */
+    --brand-navy: #192a88;
+    --brand-navy-hover: #13216e;
+    --brand-navy-subtle: rgba(25, 42, 136, 0.08);
+
+    /* Estados Funcionales */
+    --status-success: #059669;
+    --status-warning: #d97706;
+    --status-danger: #dc2626;
+
+    /* Micro-interacciones Rápidas y Discretas */
+    --ease-out-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-fast: 150ms ease;
+    --transition-floating: 200ms cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Radios y Sombras Finitas */
+    --radius-xs: 3px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+
+    --shadow-subtle: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+    --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+    --shadow-dock: 0 10px 24px -4px rgba(15, 23, 42, 0.28), 0 4px 8px -2px rgba(15, 23, 42, 0.16);
+}
+
+/* --------------------------------------------------------------------------
+   Reset y Base
+   -------------------------------------------------------------------------- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    margin: 0;
+    font-family: 'Avenir', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Tipografía tabular para métricas, códigos y números */
+.tabular-nums,
+.stat-value,
+.stat-item,
+.form-control[type="tel"],
+.form-control[type="number"],
+.badge-role,
+.locked-input {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Contenedor Principal Compacto */
+.profile-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: clamp(14px, 2.5vw, 20px);
+    padding-bottom: 84px;
+    /* Espacio de reserva para la barra flotante */
+}
+
+/* ==========================================================================
+   1. Resumen Superior (Header del Perfil)
+   - Sin gradientes inflados: fondo sólido técnico slate-900 con borde de 1px
+   - Densidad de información útil y proporciones compactas
+   ========================================================================== */
+.profile-header {
+    background-color: var(--bg-header);
+    border: 1px solid var(--slate-800);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    color: var(--text-inverse);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: center;
+    box-shadow: var(--shadow-subtle);
+    margin-bottom: 16px;
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1.5px solid var(--slate-700);
+    background-color: var(--slate-800);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-inverse);
+    user-select: none;
+}
+
+.avatar-initials {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.profile-info {
+    flex-grow: 1;
+    min-width: 260px;
+}
+
+.profile-info h1 {
+    margin: 0 0 6px 0;
+    font-size: clamp(1.25rem, 2vw, 1.45rem);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.badge-role {
+    display: inline-block;
+    background-color: var(--slate-800);
+    color: var(--slate-300);
+    border: 1px solid var(--slate-700);
+    padding: 2px 8px;
+    border-radius: var(--radius-xs);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+}
+
+/* Quick Stats (Métricas de Desempeño) */
+.quick-stats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    min-width: 116px;
+}
+
+.stat-label {
+    font-size: 0.685rem;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+/* Barra de Progreso Fina */
+.progress-container {
+    background-color: rgba(255, 255, 255, 0.12);
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-color: var(--status-success);
+    height: 100%;
+    transition: width var(--transition-fast);
+}
+
+/* Botones Rápidos en Header */
+.header-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.btn-header {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.btn-header svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+.btn-register {
+    background-color: var(--brand-navy);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.btn-register:hover {
+    background-color: var(--brand-navy-hover);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-report {
+    background-color: transparent;
+    border: 1px solid var(--slate-700);
+    color: var(--slate-300);
+}
+
+.btn-report:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: var(--slate-600);
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   2. Pestañas de Navegación (Tabs)
+   - Bordes precisos, sin píldoras moradas ni indicadores inflados
+   ========================================================================== */
+.tabs-nav {
+    display: flex;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 14px;
+    gap: 2px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+    font-family: inherit;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.tab-btn.active,
+.tab-btn[aria-selected="true"] {
+    color: var(--brand-navy);
+    font-weight: 600;
+    border-bottom-color: var(--brand-navy);
+}
+
+/* Contenido de Cada Tab */
+.tab-content {
+    display: none;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-card);
+}
+
+.tab-content.active,
+.tab-content:not([hidden]) {
+    display: block;
+}
+
+.tab-content[hidden] {
+    display: none;
+}
+
+.tab-section-title {
+    color: var(--text-primary);
+    font-size: 0.825rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 0;
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.section-spacer {
+    margin-top: 20px;
+}
+
+/* ==========================================================================
+   3. Formularios y Controles Compactos
+   ========================================================================== */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 16px;
+    margin-bottom: 14px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-label,
+.form-group label {
+    font-weight: 600;
+    font-size: 0.775rem;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.form-control {
+    padding: 6px 10px;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    background-color: #ffffff;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control:hover:not(:disabled):not([readonly]) {
+    border-color: var(--slate-400);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--brand-navy);
+    box-shadow: 0 0 0 2px var(--brand-navy-subtle);
+}
+
+/* Campos Bloqueados / Solo Lectura (Coordinación) */
+.form-control.locked,
+.form-control.locked-input,
+.form-control[readonly] {
+    background-color: var(--slate-100);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    border-color: var(--border-subtle);
+}
+
+.locked-wrapper {
+    position: relative;
+}
+
+.locked-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate-400);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.help-text {
+    font-size: 0.725rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 64px;
+}
+
+/* Checkboxes Accesibles */
+.checkbox-group {
+    display: flex;
+    gap: 18px;
+    margin-top: 4px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+}
+
+.checkbox-label input[type="checkbox"] {
+    accent-color: var(--slate-900);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    margin: 0;
+}
+
+/* Fila de Ajustes con Toggle Switch */
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.toggle-row:last-child {
+    border-bottom: none;
+}
+
+.toggle-info strong {
+    display: block;
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1px;
+}
+
+.toggle-info span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Toggle Switch Técnico Compacto (No inflado) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--slate-300);
+    transition: background-color var(--transition-fast);
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    transition: transform var(--transition-fast);
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+}
+
+input:checked+.slider {
+    background-color: var(--slate-900);
+}
+
+input:checked+.slider:before {
+    transform: translateX(16px);
+}
+
+/* ==========================================================================
+   4. Componente Tag-Input / Chips (Materias)
+   - Bordes precisos de 1px, fondo neutro, compactación estricta
+   ========================================================================== */
+.tag-input-container,
+.chips-component {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background-color: #ffffff;
+    min-height: 34px;
+    cursor: text;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.tag-input-container:hover,
+.chips-component:hover {
+    border-color: var(--slate-400);
+}
+
+.tag-input-container.focused,
+.chips-component.focused,
+.tag-input-container:focus-within {
+    border-color: var(--brand-navy);
+    box-shadow: 0 0 0 2px var(--brand-navy-subtle);
+}
+
+.tag-list,
+.chips-list {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.tag-chip,
+.chip-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: var(--slate-100);
+    color: var(--slate-800);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius-xs);
+    padding: 2px 6px;
+    font-size: 0.775rem;
+    font-weight: 500;
+    line-height: 1.2;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tag-chip:hover,
+.chip-item:hover {
+    background-color: var(--slate-200);
+}
+
+.tag-remove,
+.chip-remove {
+    background: none;
+    border: none;
+    color: var(--slate-500);
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 0 1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.tag-remove:hover,
+.chip-remove:hover {
+    color: var(--status-danger);
+    background-color: rgba(220, 38, 38, 0.08);
+}
+
+.tag-input-field,
+.chip-input {
+    flex: 1 1 140px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.825rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    padding: 2px 4px;
+    min-width: 120px;
+}
+
+.tag-input-field::placeholder,
+.chip-input::placeholder {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.chip-feedback {
+    font-size: 0.725rem;
+    color: var(--status-danger);
+    margin-top: 2px;
+    display: block;
+    min-height: 16px;
+}
+
+/* ==========================================================================
+   5. Barra Flotante de Acciones (Dirty-State Management)
+   - Micro-animación sutil: entrada con deslizamiento y escala suave (200ms)
+   - Estilo dock sobrio centrado abajo, borde fino, padding compacto
+   ========================================================================== */
+.unsaved-changes-bar,
+.profile-actions-bar {
+    position: fixed;
+    bottom: 14px;
+    left: 50%;
+    transform: translate(-50%, 14px) scale(0.98);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 1000;
+
+    max-width: 620px;
+    width: calc(100% - 28px);
+    background-color: var(--slate-900);
+    border: 1px solid var(--slate-700);
+    border-radius: var(--radius-md);
+    padding: 7px 14px;
+    box-shadow: var(--shadow-dock);
+
+    transition: transform var(--transition-floating),
+        opacity 180ms ease,
+        visibility 200ms ease;
+    will-change: transform, opacity;
+}
+
+/* Estado visible al detectar cambios modificados */
+.unsaved-changes-bar.visible,
+.profile-actions-bar.visible {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.unsaved-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.unsaved-message,
+.dirty-state-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--slate-200);
+}
+
+/* Micro-indicador pulsante sutil */
+.unsaved-indicator,
+.dirty-badge-dot {
+    width: 7px;
+    height: 7px;
+    background-color: var(--status-warning);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25);
+    animation: indicatorPulse 2.2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes indicatorPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.18);
+        opacity: 0.7;
+    }
+}
+
+.unsaved-actions,
+.actions-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-unsaved,
+.btn-form {
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.775rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    font-family: inherit;
+    transition: background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.btn-unsaved:active,
+.btn-form:active {
+    transform: translateY(1px);
+}
+
+.btn-discard {
+    background-color: transparent;
+    border-color: var(--slate-700);
+    color: var(--slate-300);
+}
+
+.btn-discard:hover:not(:disabled) {
+    background-color: var(--slate-800);
+    border-color: var(--slate-600);
+    color: #ffffff;
+}
+
+.btn-save {
+    background-color: var(--brand-navy);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+}
+
+.btn-save:hover:not(:disabled) {
+    background-color: var(--brand-navy-hover);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-unsaved:disabled,
+.btn-form:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   6. Notificación Toast Accesible
+   ========================================================================== */
+.toast-notification,
+.toast-feedback {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background-color: var(--slate-900);
+    color: #ffffff;
+    border: 1px solid var(--slate-700);
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-dock);
+    z-index: 1100;
+    transform: translateY(14px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform var(--transition-fast),
+        opacity var(--transition-fast),
+        visibility var(--transition-fast);
+}
+
+.toast-notification.visible,
+.toast-feedback.visible {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.toast-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    background-color: var(--status-success);
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   7. Adaptación Responsiva Compacta
+   ========================================================================== */
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .header-actions {
+        width: 100%;
+        margin-left: 0;
+        flex-direction: row;
+    }
+
+    .header-actions .btn-header {
+        flex: 1;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tabs-nav {
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        padding: 6px 10px;
+    }
+
+    .unsaved-changes-bar,
+    .profile-actions-bar {
+        width: calc(100% - 20px);
+        bottom: 10px;
+        padding: 8px 12px;
+    }
+
+    .unsaved-content {
+        justify-content: space-between;
+    }
+}

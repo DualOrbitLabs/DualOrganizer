@@ -1,14 +1,60 @@
 /* ==========================================================================
-   Estilos globales de Navbar compartida
-   Inspirado en diseño Ruul (limpio, claro)
+   DualOrganizer - Estilos Globales de Navbar Compartida (Art Director UI)
+   Paleta: Escala neutra Slate / Zinc profesional y sobria
+   Enfoque: Cero lavanda/morados, iconos vectoriales SVG limpios,
+            bordes finos de 1px, paddings compactos y micro-interacciones (150ms).
    ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   1. Declaración de Fuentes Locales (Avenir)
+   -------------------------------------------------------------------------- */
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Regular/Avenir Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Medium/Avenir Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Heavy/Avenir Heavy.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Black/Avenir Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   2. Variables de Diseño
+   -------------------------------------------------------------------------- */
 :root {
-    --nav-primary-blue: #192A88;
-    --nav-accent-lavender: #DCDEF7;
-    --nav-bg-card: #FFFFFF;
-    --nav-text-dark: #000000;
-    --nav-hover-bg: #F0F2FF;
+    --nav-primary-blue: #192a88;
+    --nav-primary-hover: #13216e;
+    --nav-border: #e2e8f0;
+    --nav-bg: #ffffff;
+    --nav-text-dark: #0f172a;
+    --nav-text-muted: #64748b;
+    --nav-hover-bg: #f1f5f9;
+    --nav-active-bg: #e2e8f0;
+    --nav-focus-ring: rgba(25, 42, 136, 0.12);
+
+    --nav-transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Contenedor Principal de la Navbar */
@@ -16,11 +62,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--nav-bg-card);
-    padding: 10px 40px;
-    border-bottom: 2px solid var(--nav-accent-lavender);
-    font-family: 'Avenir', sans-serif;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    background-color: var(--nav-bg);
+    padding: 8px 24px;
+    border-bottom: 1px solid var(--nav-border);
+    font-family: 'Avenir', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -30,88 +76,147 @@
 .navbar-brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     text-decoration: none;
     cursor: pointer;
+    color: var(--nav-text-dark);
 }
 
 .navbar-logo {
-    height: 35px;
-    transition: transform 0.2s ease;
+    height: 32px;
+    width: auto;
+    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-brand:hover .navbar-logo {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .navbar-title {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--nav-text-dark);
+    letter-spacing: -0.015em;
 }
 
 /* Zona Central: Links de Navegación */
 .navbar-nav {
     display: flex;
     list-style: none;
-    gap: 10px;
+    gap: 4px;
     margin: 0;
     padding: 0;
 }
 
 .nav-link {
     text-decoration: none;
-    color: var(--nav-text-dark);
-    font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 20px;
-    transition: all 0.2s ease;
+    color: var(--nav-text-muted);
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    transition: var(--nav-transition);
 }
 
 .nav-link:hover {
     background-color: var(--nav-hover-bg);
-    color: var(--nav-primary-blue);
+    color: var(--nav-text-dark);
 }
 
-.nav-link.active {
-    background-color: var(--nav-accent-lavender);
+.nav-link.active,
+.nav-link[aria-current="page"] {
+    background-color: var(--nav-hover-bg);
     color: var(--nav-primary-blue);
-    font-weight: 700;
+    font-weight: 600;
+    border-color: var(--nav-border);
 }
 
-/* Zona Derecha: Acciones (Perfil, etc.) */
+/* Zona Derecha: Acciones */
 .navbar-actions {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 8px;
 }
 
+/* Botón de Perfil con Icono SVG Vectorial */
 .btn-profile {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     background-color: var(--nav-hover-bg);
-    border-radius: 50%;
+    border-radius: 4px;
     text-decoration: none;
-    font-size: 1.2rem;
-    color: var(--nav-primary-blue);
-    transition: all 0.2s ease;
-    border: 2px solid transparent;
+    color: var(--nav-text-muted);
+    transition: var(--nav-transition);
+    border: 1px solid var(--nav-border);
+}
+
+.btn-profile svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+    transition: color 150ms ease;
 }
 
 .btn-profile:hover {
-    background-color: var(--nav-accent-lavender);
-    transform: scale(1.05);
-    border: 2px solid var(--nav-primary-blue);
+    background-color: var(--nav-active-bg);
+    border-color: var(--nav-primary-blue);
+    color: var(--nav-primary-blue);
+    transform: translateY(-1px);
 }
 
-/* Responsive básico para pantallas pequeñas */
+.btn-profile.active {
+    background-color: var(--nav-hover-bg);
+    border-color: var(--nav-primary-blue);
+    color: var(--nav-primary-blue);
+    box-shadow: 0 0 0 2px var(--nav-focus-ring);
+}
+
+/* Botón de exportación en Navbar */
+.btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--nav-primary-blue);
+    color: #ffffff;
+    border: 1px solid transparent;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.775rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--nav-transition);
+}
+
+.btn-export svg {
+    width: 13px;
+    height: 13px;
+    stroke-width: 2;
+}
+
+.btn-export:hover {
+    background-color: var(--nav-primary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-export:active {
+    transform: translateY(0);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .navbar-global {
-        padding: 10px 20px;
+        padding: 8px 16px;
         flex-direction: column;
-        gap: 15px;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .navbar-actions {
+        align-self: flex-end;
+        margin-top: -34px;
     }
 }

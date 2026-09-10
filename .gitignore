@@ -1,2 +1,6 @@
 *.json
 /node_modules
+
+# Reglas e instrucciones locales de IA
+AGENTS.md
+GEMINI.md

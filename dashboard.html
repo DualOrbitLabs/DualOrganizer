@@ -4,111 +4,174 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Registro de Sesiones</title>
+  <title>Dashboard - Registro de Sesiones | DualOrganizer</title>
   <link rel="stylesheet" href="./styles/navbar.css">
   <link rel="stylesheet" href="./styles/dashboard.css">
 </head>
 
 <body>
-  <!-- Navbar global -->
-  <nav class="navbar-global">
-    <!-- Zona Izquierda: Logo + Nombre -->
-    <a href="hub.html" class="navbar-brand">
-      <img src="global/DOLFNBB.png" alt="Logo DualOrganizer" class="navbar-logo">
-      <span class="navbar-title">DualOrganizer</span>
-    </a>
+  <!-- Navbar Global Semántica -->
+  <header>
+    <nav class="navbar-global" aria-label="Navegación principal">
+      <!-- Zona Izquierda: Logo + Nombre -->
+      <a href="hub.html" class="navbar-brand">
+        <img src="global/DOLFNBB.png" alt="Logo DualOrganizer" class="navbar-logo">
+        <span class="navbar-title">DualOrganizer</span>
+      </a>
 
-    <!-- Zona Centro: Links de Navegación -->
-    <ul class="navbar-nav">
-      <li><a href="hub.html" class="nav-link">Hub</a></li>
-      <li><a href="dashboard.html" class="nav-link active">Dashboard</a></li>
-      <li><a href="admin.html" class="nav-link">Administración</a></li>
-    </ul>
+      <!-- Zona Centro: Links de Navegación -->
+      <ul class="navbar-nav">
+        <li><a href="hub.html" class="nav-link">Hub</a></li>
+        <li><a href="dashboard.html" class="nav-link active" aria-current="page">Dashboard</a></li>
+        <li><a href="admin.html" class="nav-link">Administración</a></li>
+      </ul>
 
-    <!-- Zona Derecha: Acciones -->
-    <div class="navbar-actions">
-      <button id="btnExportCSV" class="btn-export">Exportar CSV</button>
-      <a href="profile.html" class="btn-profile" title="Mi Perfil">👤</a>
-    </div>
-  </nav>
+      <!-- Zona Derecha: Acciones -->
+      <div class="navbar-actions">
+        <button type="button" id="btnExportCSV" class="btn-export" title="Exportar sesiones a CSV">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Exportar CSV</span>
+        </button>
+        <a href="profile.html" class="btn-profile" title="Mi Perfil" aria-label="Mi Perfil">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+      </div>
+    </nav>
+  </header>
 
-  <!-- Calendario colapsable -->
-  <div class="calendar-wrapper" id="calendarWrapper">
+  <!-- Filtro Rápido de Agenda Colapsable -->
+  <aside class="calendar-wrapper" id="calendarWrapper" aria-label="Filtro de agenda">
     <div class="calendar-header">
-      <h3>Agendas / Calendario</h3>
-      <button id="btnToggleCalendar" class="btn-toggle-calendar">Ocultar</button>
+      <h3>Filtro Rápido de Agenda</h3>
+      <button type="button" id="btnToggleCalendar" class="btn-toggle-calendar">Ocultar</button>
     </div>
     <div class="calendar-content" id="calendarContent">
-      <input type="date" id="dateFilter" title="Filtrar sesiones por fecha">
+      <label for="dateFilter" class="filter-label">Saltar a fecha:</label>
+      <input type="date" id="dateFilter" class="date-filter-input" title="Filtrar sesiones por fecha">
+    </div>
+  </aside>
+
+  <!-- Contenedor Principal Dashboard -->
+  <div class="dashboard-shell">
+    <!-- Tira de Métricas KPI con Tipografía Tabular y Escala Neutra -->
+    <section class="kpi-strip" aria-label="Métricas clave de tutoría">
+      <article class="kpi-card">
+        <span class="kpi-label">Horas Acumuladas</span>
+        <div class="kpi-value-row">
+          <span class="kpi-value tabular-nums" id="kpiTotalHours">0</span>
+          <span class="badge-semantic green">Meta: 80h</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <span class="kpi-label">Sesiones Totales</span>
+        <div class="kpi-value-row">
+          <span class="kpi-value tabular-nums" id="kpiTotalSessions">0</span>
+          <span class="badge-semantic blue">Registradas</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <span class="kpi-label">Promedio Semanal</span>
+        <div class="kpi-value-row">
+          <span class="kpi-value tabular-nums" id="kpiWeeklyAvg">0.0</span>
+          <span class="kpi-unit">hrs / sem</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- Calendario Semanal Principal -->
+    <main class="calendar-main" aria-label="Cuadrícula semanal de sesiones">
+      <div class="calendar-header-controls">
+        <div class="calendar-title-group">
+          <h2 id="currentWeekLabel" class="current-week-heading tabular-nums">Semana actual</h2>
+        </div>
+
+        <div class="calendar-nav-actions">
+          <button type="button" id="btnPrevWeek" class="btn-nav" title="Semana anterior" aria-label="Semana anterior">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            <span>Ant</span>
+          </button>
+          <button type="button" id="btnToday" class="btn-nav btn-today" title="Ir a la semana actual">Hoy</button>
+          <button type="button" id="btnNextWeek" class="btn-nav" title="Semana siguiente" aria-label="Semana siguiente">
+            <span>Sig</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cuadrícula del Calendario Semanal con CSS Grid Fraccional -->
+      <div class="weekly-calendar-grid" id="weeklyCalendarGrid" role="grid" aria-label="Calendario interactivo de tutorías">
+        <!-- Generado dinámicamente mediante delegación de eventos en JS -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Accesible para Registrar Sesión -->
+  <div id="sessionModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Agendar Sesión</h2>
+        <button type="button" class="close-btn" id="closeModalBtn" aria-label="Cerrar ventana emergente">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="sessionForm" autocomplete="off">
+        <div class="form-group">
+          <label for="date">Fecha:</label>
+          <input type="date" id="date" class="form-control tabular-nums" required readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="time">Hora de inicio:</label>
+          <input type="time" id="time" class="form-control tabular-nums" required>
+        </div>
+
+        <div class="form-group">
+          <label for="studentName">Alumno:</label>
+          <input type="text" id="studentName" class="form-control" placeholder="Nombre completo del alumno" required>
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Materia:</label>
+          <input type="text" id="subject" class="form-control" placeholder="Ej. Cálculo Diferencial" required>
+        </div>
+
+        <div class="form-group">
+          <label for="hours">Duración (Horas):</label>
+          <input type="number" id="hours" class="form-control tabular-nums" min="0.5" max="8" step="0.5" value="1.0" required>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-cancel" id="btnCancelModal">Cancelar</button>
+          <button type="submit" class="btn-primary">Guardar Sesión</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <div class="main-container">
-    <!-- Top info: Total de horas -->
-    <div class="top-kpi-bar">
-      <h2>Horas Acumuladas: <span id="kpiTotalHours">0</span></h2>
-    </div>
+  <!-- Toast Accesible de Notificaciones -->
+  <div id="dashboardToast" class="dashboard-toast" role="status" aria-live="polite" aria-hidden="true">
+    <span class="toast-indicator"></span>
+    <span id="dashboardToastMsg"></span>
+  </div>
 
-    <!-- Calendario Semanal Principal -->
-    <main class="calendar-main">
-      <div class="calendar-header-controls">
-        <button id="btnPrevWeek" class="btn-nav">&lt; Ant</button>
-        <h3 id="currentWeekLabel">Semana actual</h3>
-        <button id="btnNextWeek" class="btn-nav">Sig &gt;</button>
-      </div>
-
-      <!-- Cuadrícula del Calendario Semanal -->
-      <div class="weekly-calendar-grid" id="weeklyCalendarGrid">
-        <!-- Generado dinámicamente -->
-      </div>
-    </main>
-
-    <!-- Modal para Registrar Sesión al hacer clic en el calendario -->
-    <div id="sessionModal" class="modal" style="display: none;">
-      <div class="modal-content">
-        <span class="close-btn" id="closeModalBtn">&times;</span>
-        <h2>Agendar Sesión</h2>
-        <form id="sessionForm">
-          <!-- Fecha seleccionada (solo lectura o pre-llenada) -->
-          <div class="form-group">
-            <label for="date">Fecha:</label>
-            <input type="date" id="date" required readonly>
-          </div>
-          <div class="form-group">
-            <label for="time">Hora de inicio:</label>
-            <input type="time" id="time" required>
-          </div>
-          <div class="form-group">
-            <label for="studentName">Alumno:</label>
-            <input type="text" id="studentName" required>
-          </div>
-          <div class="form-group">
-            <label for="subject">Materia:</label>
-            <input type="text" id="subject" required>
-          </div>
-          <div class="form-group">
-            <label for="hours">Duración (Horas):</label>
-            <input type="number" id="hours" step="0.5" required>
-          </div>
-          <button type="submit" class="btn-primary">Guardar Sesión</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Guardado temporalmente (Oculto) 
-    <div style="display: none;" id="hiddenLegacyContent">
-      <div class="kpi-card">
-        <h3>Total Sesiones</h3>
-        <p id="kpiTotalSessions">0</p>
-      </div>
-      <table id="sessionsTable">
-        <tbody id="sessionsTableBody"></tbody>
-      </table>
-    </div>
-
-  </div>-->
-
-    <script src="js/dashboard.js"></script>
+  <script src="js/dashboard.js"></script>
 </body>
 
 </html>
