@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administración - DualOrganizer</title>
+  <title>Panel de Administración - DualOrganizer</title>
   <link rel="stylesheet" href="./styles/navbar.css">
-  <link rel="stylesheet" href="./styles/hub.css">
+  <link rel="stylesheet" href="./styles/admin.css">
 </head>
 
 <body>
@@ -34,28 +34,283 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </a>
+        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </a>
       </div>
     </nav>
   </header>
 
-  <main class="hub-container">
-    <header class="hub-hero">
-      <span class="hub-badge">Coordinación Académica</span>
-      <h1>Panel de Administración</h1>
-      <p>Módulo de supervisión, validación de constancias y auditoría de tutorías en desarrollo.</p>
+  <!-- Contenedor Principal del Panel de Administración -->
+  <main class="admin-container" id="adminApp">
+    
+    <!-- Encabezado de la Vista de Administración & KPIs Rápidos -->
+    <header class="admin-header">
+      <div class="admin-header__content">
+        <span class="admin-badge">Coordinación & Auditoría</span>
+        <h1 class="admin-title">Panel de Administración</h1>
+        <p class="admin-subtitle">Supervisión integral de tutores, gestión de bitácora institucional y exportación de registros de asesorías.</p>
+      </div>
+
+      <div class="admin-kpis" role="region" aria-label="Métricas generales">
+        <div class="kpi-card">
+          <span class="kpi-card__label">Mentores Registrados</span>
+          <span class="kpi-card__value" id="kpiTotalMembers">6</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-card__label">Horas en Bitácora</span>
+          <span class="kpi-card__value" id="kpiTotalHours">25.0</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-card__label">Sesiones Totales</span>
+          <span class="kpi-card__value" id="kpiTotalSessions">12</span>
+        </div>
+      </div>
     </header>
 
-    <div class="hub-card" style="max-width: 600px;">
-      <div class="hub-card-body">
-        <h2>Próximas Funcionalidades</h2>
-        <ul style="margin: 8px 0 0 16px; padding: 0; color: var(--hub-text-muted); font-size: 0.825rem; line-height: 1.6;">
-          <li>Aprobación masiva de horas de tutores institucionales.</li>
-          <li>Gestión de matrículas bloqueadas y asignación de materias.</li>
-          <li>Generación de actas semestrales en PDF con firma electrónica.</li>
-        </ul>
+    <!-- Sistema de Pestañas Accesibles (Tabs) -->
+    <nav class="admin-tabs" role="tablist" aria-label="Secciones de administración">
+      <button type="button" 
+              class="admin-tab-btn is-active" 
+              role="tab" 
+              id="tab-btn-members" 
+              aria-selected="true" 
+              aria-controls="panel-members" 
+              data-tab-target="members">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Directorio de Mentores / Equipo
+      </button>
+
+      <button type="button" 
+              class="admin-tab-btn" 
+              role="tab" 
+              id="tab-btn-records" 
+              aria-selected="false" 
+              aria-controls="panel-records" 
+              data-tab-target="records">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        Bitácora de Sesiones y Horas
+      </button>
+    </nav>
+
+    <!-- SECCIÓN 1: Directorio de Mentores / Equipo -->
+    <section class="admin-panel is-active" id="panel-members" role="tabpanel" aria-labelledby="tab-btn-members">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Equipo Docente y Tutores</h2>
+          <p class="panel-desc">Monitoreo de horas acumuladas, materias impartidas y estado de cada tutor institucional.</p>
+        </div>
       </div>
-    </div>
+
+      <!-- Cuadrícula de tarjetas de mentores -->
+      <div class="members-grid" id="membersGrid" role="list" aria-label="Directorio de tutores">
+        <!-- Renderizado dinámicamente con JavaScript -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: Gestor de Datos (Bitácora de Sesiones) -->
+    <section class="admin-panel" id="panel-records" role="tabpanel" aria-labelledby="tab-btn-records">
+      
+      <!-- Barra de herramientas (Toolbar) -->
+      <div class="toolbar" role="search" aria-label="Filtros de sesiones">
+        <div class="toolbar-search">
+          <svg class="toolbar-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="search" 
+                 id="recordSearchInput" 
+                 class="toolbar-search__input" 
+                 placeholder="Buscar por matrícula, tutor, materia o fecha..." 
+                 aria-label="Buscar sesiones">
+        </div>
+
+        <div class="toolbar-filters">
+          <div class="toolbar-filter-item">
+            <label for="memberFilterSelect" class="sr-only">Filtrar por Tutor</label>
+            <select id="memberFilterSelect" class="form-select" aria-label="Filtrar por tutor">
+              <option value="ALL">Todos los tutores</option>
+              <!-- Opciones dinámicas -->
+            </select>
+          </div>
+
+          <button type="button" id="btnExportCSV" class="btn btn--outline-action" data-action="export-csv">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Exportar a CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Resumen de conteo y filtros activos -->
+      <div class="table-meta">
+        <span id="recordsCounterText" class="table-meta__count">Mostrando 0 registros</span>
+        <span class="table-meta__hint">Haz clic en los encabezados para ordenar</span>
+      </div>
+
+      <!-- Tabla Semántica Responsiva -->
+      <div class="table-responsive" tabindex="0" role="region" aria-label="Tabla de sesiones de tutoría">
+        <table class="data-table" id="recordsTable">
+          <thead>
+            <tr>
+              <th scope="col" class="sortable" data-sort="matricula" aria-sort="none">
+                <span class="th-content">
+                  Matrícula
+                  <span class="sort-indicator" aria-hidden="true"></span>
+                </span>
+              </th>
+              <th scope="col" class="sortable" data-sort="tutorName" aria-sort="none">
+                <span class="th-content">
+                  Tutor
+                  <span class="sort-indicator" aria-hidden="true"></span>
+                </span>
+              </th>
+              <th scope="col" class="sortable" data-sort="subject" aria-sort="none">
+                <span class="th-content">
+                  Materia
+                  <span class="sort-indicator" aria-hidden="true"></span>
+                </span>
+              </th>
+              <th scope="col" class="sortable" data-sort="date" aria-sort="descending">
+                <span class="th-content">
+                  Fecha
+                  <span class="sort-indicator" aria-hidden="true"></span>
+                </span>
+              </th>
+              <th scope="col" class="sortable text-right" data-sort="hours" aria-sort="none">
+                <span class="th-content th-content--right">
+                  Horas
+                  <span class="sort-indicator" aria-hidden="true"></span>
+                </span>
+              </th>
+              <th scope="col" class="sortable" data-sort="status" aria-sort="none">
+                <span class="th-content">
+                  Estado
+                  <span class="sort-indicator" aria-hidden="true"></span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="recordsTableBody">
+            <!-- Filas inyectadas dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
   </main>
+
+  <!-- Modal Nativo (<dialog>) para Ver Ficha Detallada del Mentor -->
+  <dialog class="admin-dialog" id="memberModal" aria-labelledby="dialogMemberName">
+    <div class="admin-dialog__surface">
+      <header class="admin-dialog__header">
+        <div class="admin-dialog__profile-summary">
+          <div class="admin-dialog__avatar" id="dialogMemberAvatar" aria-hidden="true">
+            <span class="avatar-initials" id="dialogMemberInitials">--</span>
+          </div>
+          <div>
+            <div class="dialog-badge-group">
+              <span class="role-badge" id="dialogMemberRole">Tutor</span>
+              <span class="status-badge" id="dialogMemberStatus">Activo</span>
+            </div>
+            <h2 class="admin-dialog__name" id="dialogMemberName">Nombre del Mentor</h2>
+            <span class="admin-dialog__id" id="dialogMemberId">TUT-000</span>
+          </div>
+        </div>
+        <button type="button" class="admin-dialog__close" id="dialogCloseBtn" aria-label="Cerrar modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+
+      <div class="admin-dialog__body">
+        <!-- Métricas de progreso -->
+        <section class="dialog-section">
+          <h3 class="dialog-section__title">Cumplimiento de Horas</h3>
+          <div class="dialog-stat-box">
+            <div class="dialog-stat-box__numbers">
+              <span class="dialog-stat-box__current" id="dialogMemberHours">0</span>
+              <span class="dialog-stat-box__total">/ <span id="dialogMemberTarget">80</span> hrs acumuladas</span>
+            </div>
+            <div class="progress-bar-track" role="progressbar" id="dialogProgressTrack" aria-valuemin="0" aria-valuemax="80" aria-valuenow="0">
+              <div class="progress-bar-fill" id="dialogProgressBar" style="width: 0%;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Información Académica y de Contacto -->
+        <section class="dialog-section">
+          <h3 class="dialog-section__title">Datos Académicos y de Contacto</h3>
+          <dl class="dialog-meta-grid">
+            <div>
+              <dt>Semestre</dt>
+              <dd id="dialogMemberSemester">-</dd>
+            </div>
+            <div>
+              <dt>Correo Institucional</dt>
+              <dd id="dialogMemberEmail">-</dd>
+            </div>
+            <div>
+              <dt>Teléfono</dt>
+              <dd id="dialogMemberPhone">-</dd>
+            </div>
+          </dl>
+        </section>
+
+        <!-- Materias Asignadas -->
+        <section class="dialog-section">
+          <h3 class="dialog-section__title">Materias Asignadas</h3>
+          <div class="dialog-chips" id="dialogMemberSubjects" role="list">
+            <!-- Chips renderizados dinámicamente -->
+          </div>
+        </section>
+
+        <!-- Descripción / Bio -->
+        <section class="dialog-section">
+          <h3 class="dialog-section__title">Perfil y Enfoque Pedagógico</h3>
+          <p class="dialog-bio" id="dialogMemberBio">-</p>
+        </section>
+      </div>
+
+      <footer class="admin-dialog__footer">
+        <button type="button" class="btn btn--secondary" id="dialogCloseFooterBtn">Cerrar Ficha</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- Notificación Flotante Accesible (Toast) -->
+  <div id="adminToast" class="admin-toast" role="status" aria-live="polite" aria-hidden="true">
+    <span class="admin-toast__icon" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </span>
+    <span class="admin-toast__msg" id="adminToastMsg">Acción completada</span>
+  </div>
+
+  <!-- Lógica en JavaScript ES6+ Puro -->
+  <script src="./js/admin.js"></script>
 </body>
 
 </html>

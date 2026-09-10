@@ -29,7 +29,8 @@
       <!-- Zona Derecha: Acciones -->
       <div class="navbar-actions">
         <button type="button" id="btnExportCSV" class="btn-export" title="Exportar sesiones a CSV">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -37,9 +38,18 @@
           <span>Exportar CSV</span>
         </button>
         <a href="profile.html" class="btn-profile" title="Mi Perfil" aria-label="Mi Perfil">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
           </svg>
         </a>
       </div>
@@ -96,7 +106,8 @@
 
         <div class="calendar-nav-actions">
           <button type="button" id="btnPrevWeek" class="btn-nav" title="Semana anterior" aria-label="Semana anterior">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
             <span>Ant</span>
@@ -104,7 +115,8 @@
           <button type="button" id="btnToday" class="btn-nav btn-today" title="Ir a la semana actual">Hoy</button>
           <button type="button" id="btnNextWeek" class="btn-nav" title="Semana siguiente" aria-label="Semana siguiente">
             <span>Sig</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
@@ -112,19 +124,22 @@
       </div>
 
       <!-- Cuadrícula del Calendario Semanal con CSS Grid Fraccional -->
-      <div class="weekly-calendar-grid" id="weeklyCalendarGrid" role="grid" aria-label="Calendario interactivo de tutorías">
+      <div class="weekly-calendar-grid" id="weeklyCalendarGrid" role="grid"
+        aria-label="Calendario interactivo de tutorías">
         <!-- Generado dinámicamente mediante delegación de eventos en JS -->
       </div>
     </main>
   </div>
 
   <!-- Modal Accesible para Registrar Sesión -->
-  <div id="sessionModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" style="display: none;">
+  <div id="sessionModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
+    style="display: none;">
     <div class="modal-content">
       <div class="modal-header">
         <h2 id="modalTitle">Agendar Sesión</h2>
         <button type="button" class="close-btn" id="closeModalBtn" aria-label="Cerrar ventana emergente">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -154,7 +169,8 @@
 
         <div class="form-group">
           <label for="hours">Duración (Horas):</label>
-          <input type="number" id="hours" class="form-control tabular-nums" min="0.5" max="8" step="0.5" value="1.0" required>
+          <input type="number" id="hours" class="form-control tabular-nums" min="0.5" max="8" step="0.5" value="1.0"
+            required>
         </div>
 
         <div class="modal-actions">

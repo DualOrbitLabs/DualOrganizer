@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso al Sistema - DualOrganizer</title>
+  <link rel="stylesheet" href="./styles/login.css">
+</head>
+
+<body>
+  <!-- Contenedor Principal de Autenticación -->
+  <div class="login-wrapper">
+
+    <!-- Encabezado Institucional -->
+    <header class="login-header">
+      <a href="hub.html" class="login-brand" aria-label="Ir al portal principal de DualOrganizer">
+        <img src="global/DOLFNBB.png" alt="Logo de DualOrganizer" class="login-logo">
+        <span class="login-title">DualOrganizer</span>
+      </a>
+      <p class="login-subtitle">
+        Plataforma para registro de asesorías, bitácoras de tutoría y acreditación académica.
+      </p>
+    </header>
+
+    <!-- Tarjeta Principal de Login -->
+    <main class="login-card" role="region" aria-label="Formulario de inicio de sesión">
+      
+      <!-- Selector de Rol (Tabs WAI-ARIA) -->
+      <div class="role-tabs" role="tablist" aria-label="Perfil de usuario">
+        <button type="button" 
+                class="role-tab-btn" 
+                role="tab" 
+                id="roleTabTutor"
+                aria-selected="true" 
+                tabindex="0"
+                data-role="TUTOR">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Tutor Académico</span>
+        </button>
+        <button type="button" 
+                class="role-tab-btn" 
+                role="tab" 
+                id="roleTabAdmin"
+                aria-selected="false" 
+                tabindex="-1"
+                data-role="ADMIN">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V7l7-4 7 4v14"></path>
+            <path d="M9 10h1"></path>
+            <path d="M9 14h1"></path>
+            <path d="M14 10h1"></path>
+            <path d="M14 14h1"></path>
+          </svg>
+          <span>Coordinación / Admin</span>
+        </button>
+      </div>
+
+      <!-- Alerta de Validación Dinámica y Accesible -->
+      <div id="loginAlert" class="login-alert danger" role="alert" aria-live="assertive" hidden></div>
+
+      <!-- Formulario de Credenciales -->
+      <form id="loginForm" class="login-form" novalidate autocomplete="on">
+        
+        <!-- Identificador (Correo / Matrícula) -->
+        <div class="form-group">
+          <label for="identifierInput" id="identifierLabel" class="form-label">
+            Correo Institucional o Matrícula
+          </label>
+          <div class="input-wrapper">
+            <input type="text" 
+                   id="identifierInput" 
+                   name="username" 
+                   class="form-control tabular-nums" 
+                   placeholder="juan.perez@institucion.edu o TUT-2023-0891" 
+                   required 
+                   autocomplete="username">
+          </div>
+          <span class="help-text" id="identifierHelp">
+            Ingresa tu correo oficial universitario o tu ID de tutor.
+          </span>
+        </div>
+
+        <!-- Contraseña con Toggle de Visibilidad -->
+        <div class="form-group">
+          <div class="form-label">
+            <label for="passwordInput">Contraseña de acceso</label>
+            <a href="#recuperar" id="btnForgotPassword" class="forgot-link">¿Olvidaste tu contraseña?</a>
+          </div>
+          <div class="input-wrapper">
+            <input type="password" 
+                   id="passwordInput" 
+                   name="password" 
+                   class="form-control input-with-toggle" 
+                   placeholder="••••••••••••" 
+                   required 
+                   autocomplete="current-password">
+            <button type="button" 
+                    id="btnTogglePassword" 
+                    class="btn-toggle-password" 
+                    aria-label="Mostrar contraseña" 
+                    aria-pressed="false">
+              <!-- Icono SVG Ojo abierto -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recordar Dispositivo -->
+        <label class="checkbox-row">
+          <input type="checkbox" id="rememberMeCheckbox" name="remember">
+          <span class="checkbox-label">Mantener la sesión iniciada en este equipo</span>
+        </label>
+
+        <!-- Botón de Envío -->
+        <button type="submit" id="btnSubmitLogin" class="btn-submit">
+          <span>Ingresar a la Plataforma</span>
+        </button>
+
+      </form>
+
+      <!-- Accesos Rápidos de Prueba (QA & Evaluación Docente) -->
+      <section class="demo-access-box" aria-label="Accesos rápidos para evaluación">
+        <span class="demo-title">Credenciales de Prueba (1-Click)</span>
+        <div class="demo-buttons-grid">
+          <button type="button" id="btnDemoTutor" class="btn-demo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>Demo Tutor (Juan Pérez)</span>
+          </button>
+          <button type="button" id="btnDemoAdmin" class="btn-demo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>Demo Admin (Coordinación)</span>
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Modal Nativo (<dialog>) para Recuperación de Contraseña -->
+    <dialog id="forgotDialog" class="login-dialog" aria-labelledby="forgotTitle">
+      <div class="dialog-content">
+        <header class="dialog-header">
+          <h3 id="forgotTitle">Recuperar Acceso Institucional</h3>
+          <button type="button" id="btnCloseDialog" class="btn-close-dialog" aria-label="Cerrar modal">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </header>
+
+        <p style="font-size: 0.85rem; color: var(--slate-600); margin: 0;">
+          Introduce tu correo universitario para recibir un enlace seguro de restablecimiento de contraseña.
+        </p>
+
+        <div id="forgotAlert" class="login-alert" role="alert" aria-live="assertive" hidden></div>
+
+        <form id="forgotForm">
+          <div class="form-group">
+            <label for="forgotEmailInput" class="form-label">Correo Institucional</label>
+            <input type="email" id="forgotEmailInput" class="form-control" placeholder="tu.nombre@institucion.edu" required>
+          </div>
+
+          <div class="dialog-actions">
+            <button type="button" id="btnCancelForgot" class="btn-demo" style="padding: 7px 14px;">Cancelar</button>
+            <button type="submit" class="btn-submit" style="width: auto; padding: 7px 16px;">Enviar enlace</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+  </div>
+
+  <!-- Pie de Página Institucional -->
+  <footer class="login-footer">
+    <p>© 2026 DualOrganizer. Sistema Institucional de Gestión de Tutorías Académicas.</p>
+    <div class="footer-links">
+      <a href="hub.html" class="footer-link">Portal Hub</a>
+      <span>•</span>
+      <a href="dashboard.html" class="footer-link">Dashboard</a>
+      <span>•</span>
+      <a href="admin.html" class="footer-link">Administración</a>
+    </div>
+  </footer>
+
+  <script src="./js/login.js"></script>
+</body>
+
+</html>

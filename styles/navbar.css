@@ -175,6 +175,40 @@
     box-shadow: 0 0 0 2px var(--nav-focus-ring);
 }
 
+/* Botón de Salir / Logout */
+.btn-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: var(--nav-hover-bg);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--nav-text-muted);
+    transition: var(--nav-transition);
+    border: 1px solid var(--nav-border);
+}
+
+.btn-logout svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2;
+    transition: color 150ms ease;
+}
+
+.btn-logout:hover {
+    background-color: #fef2f2;
+    border-color: #fca5a5;
+    color: #dc2626;
+    transform: translateY(-1px);
+}
+
+.btn-logout:focus-visible {
+    outline: 2px solid #dc2626;
+    outline-offset: 1px;
+}
+
 /* Botón de exportación en Navbar */
 .btn-export {
     display: inline-flex;
