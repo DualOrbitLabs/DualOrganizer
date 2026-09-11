@@ -25,30 +25,22 @@
 
     <!-- Tarjeta Principal de Login -->
     <main class="login-card" role="region" aria-label="Formulario de inicio de sesión">
-      
+
       <!-- Selector de Rol (Tabs WAI-ARIA) -->
       <div class="role-tabs" role="tablist" aria-label="Perfil de usuario">
-        <button type="button" 
-                class="role-tab-btn" 
-                role="tab" 
-                id="roleTabTutor"
-                aria-selected="true" 
-                tabindex="0"
-                data-role="TUTOR">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <button type="button" class="role-tab-btn" role="tab" id="roleTabTutor" aria-selected="true" tabindex="0"
+          data-role="TUTOR">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
           <span>Tutor Académico</span>
         </button>
-        <button type="button" 
-                class="role-tab-btn" 
-                role="tab" 
-                id="roleTabAdmin"
-                aria-selected="false" 
-                tabindex="-1"
-                data-role="ADMIN">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <button type="button" class="role-tab-btn" role="tab" id="roleTabAdmin" aria-selected="false" tabindex="-1"
+          data-role="ADMIN">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3 21h18"></path>
             <path d="M5 21V7l7-4 7 4v14"></path>
             <path d="M9 10h1"></path>
@@ -65,22 +57,16 @@
 
       <!-- Formulario de Credenciales -->
       <form id="loginForm" class="login-form" novalidate autocomplete="on">
-        
+
         <!-- Identificador (Correo / Matrícula) -->
         <div class="form-group">
           <label for="identifierInput" id="identifierLabel" class="form-label">
             Correo Institucional o Matrícula
           </label>
           <div class="input-wrapper">
-            <input type="text" 
-                   id="identifierInput" 
-                   name="username" 
-                   class="form-control tabular-nums" 
-                   placeholder="juan.perez@institucion.edu o TUT-2023-0891" 
-                   required 
-                   minlength="5"
-                   maxlength="100"
-                   autocomplete="username">
+            <input type="text" id="identifierInput" name="username" class="form-control tabular-nums"
+              placeholder="juan.perez@institucion.edu o TUT-2023-0891" required minlength="5" maxlength="100"
+              autocomplete="username">
           </div>
           <span class="help-text" id="identifierHelp">
             Ingresa tu correo oficial universitario o tu ID de tutor.
@@ -94,22 +80,13 @@
             <a href="#recuperar" id="btnForgotPassword" class="forgot-link">¿Olvidaste tu contraseña?</a>
           </div>
           <div class="input-wrapper">
-            <input type="password" 
-                   id="passwordInput" 
-                   name="password" 
-                   class="form-control input-with-toggle" 
-                   placeholder="••••••••••••" 
-                   required 
-                   minlength="6"
-                   maxlength="128"
-                   autocomplete="current-password">
-            <button type="button" 
-                    id="btnTogglePassword" 
-                    class="btn-toggle-password" 
-                    aria-label="Mostrar contraseña" 
-                    aria-pressed="false">
+            <input type="password" id="passwordInput" name="password" class="form-control input-with-toggle"
+              placeholder="••••••••••••" required minlength="6" maxlength="128" autocomplete="current-password">
+            <button type="button" id="btnTogglePassword" class="btn-toggle-password" aria-label="Mostrar contraseña"
+              aria-pressed="false">
               <!-- Icono SVG Ojo abierto -->
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
               </svg>
@@ -140,7 +117,8 @@
         <header class="dialog-header">
           <h3 id="forgotTitle">Recuperar Acceso Institucional</h3>
           <button type="button" id="btnCloseDialog" class="btn-close-dialog" aria-label="Cerrar modal">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -156,7 +134,8 @@
         <form id="forgotForm">
           <div class="form-group">
             <label for="forgotEmailInput" class="form-label">Correo Institucional</label>
-            <input type="email" id="forgotEmailInput" class="form-control" placeholder="tu.nombre@institucion.edu" required maxlength="100">
+            <input type="email" id="forgotEmailInput" class="form-control" placeholder="tu.nombre@institucion.edu"
+              required maxlength="100">
           </div>
 
           <div class="dialog-actions">
@@ -173,11 +152,6 @@
   <footer class="login-footer">
     <p>© 2026 DualOrganizer. Sistema Institucional de Gestión de Tutorías Académicas.</p>
     <div class="footer-links">
-      <a href="hub.html" class="footer-link">Portal Hub</a>
-      <span>•</span>
-      <a href="dashboard.html" class="footer-link">Dashboard</a>
-      <span>•</span>
-      <a href="admin.html" class="footer-link">Administración</a>
     </div>
   </footer>
 
