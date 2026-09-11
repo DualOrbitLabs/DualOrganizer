@@ -15,7 +15,6 @@
     <nav class="navbar-global" aria-label="Navegación principal">
       <!-- Zona Izquierda: Logo + Nombre -->
       <a href="hub.html" class="navbar-brand">
-        <img src="global/DOLFNBB.png" alt="Logo DualOrganizer" class="navbar-logo">
         <span class="navbar-title">DualOrganizer</span>
       </a>
 
@@ -44,7 +43,7 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </a>
-        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
+        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión" onclick="sessionStorage.removeItem('dualorganizer_session');">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -56,20 +55,17 @@
     </nav>
   </header>
 
-  <!-- Filtro Rápido de Agenda Colapsable -->
-  <aside class="calendar-wrapper" id="calendarWrapper" aria-label="Filtro de agenda">
-    <div class="calendar-header">
-      <h3>Filtro Rápido de Agenda</h3>
-      <button type="button" id="btnToggleCalendar" class="btn-toggle-calendar">Ocultar</button>
-    </div>
-    <div class="calendar-content" id="calendarContent">
-      <label for="dateFilter" class="filter-label">Saltar a fecha:</label>
-      <input type="date" id="dateFilter" class="date-filter-input" title="Filtrar sesiones por fecha">
-    </div>
-  </aside>
-
   <!-- Contenedor Principal Dashboard -->
   <div class="dashboard-shell">
+    <!-- Tira de Identificación de Capítulo Activo -->
+    <div class="active-chapter-bar" id="activeChapterBar">
+      <div class="active-chapter-info">
+        <span class="active-chapter-pill" id="activeChapterCode">ING-2026</span>
+        <span class="active-chapter-name" id="activeChapterName">Facultad de Ingeniería</span>
+      </div>
+      <a href="hub.html" class="switch-chapter-link">Cambiar capítulo &rarr;</a>
+    </div>
+
     <!-- Tira de Métricas KPI con Tipografía Tabular y Escala Neutra -->
     <section class="kpi-strip" aria-label="Métricas clave de tutoría">
       <article class="kpi-card">
@@ -131,13 +127,12 @@
     </main>
   </div>
 
-  <!-- Modal Accesible para Registrar Sesión -->
-  <div id="sessionModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
-    style="display: none;">
+  <!-- Modal Nativo (<dialog>) Accesible para Registrar Sesión -->
+  <dialog id="sessionModal" class="modal-dialog" aria-labelledby="modalTitle">
     <div class="modal-content">
       <div class="modal-header">
         <h2 id="modalTitle">Agendar Sesión</h2>
-        <button type="button" class="close-btn" id="closeModalBtn" aria-label="Cerrar ventana emergente">
+        <button type="button" class="close-btn" id="closeModalBtn" aria-label="Cerrar modal">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -159,12 +154,18 @@
 
         <div class="form-group">
           <label for="studentName">Alumno:</label>
-          <input type="text" id="studentName" class="form-control" placeholder="Nombre completo del alumno" required>
+          <input type="text" id="studentName" class="form-control" 
+                 placeholder="Nombre completo del alumno" 
+                 required minlength="3" maxlength="80" 
+                 pattern="^[A-Za-zÀ-ÿ\u00f1\u00d1\s\.\-]+$"
+                 title="Solo letras, espacios, puntos o guiones. Entre 3 y 80 caracteres.">
         </div>
 
         <div class="form-group">
           <label for="subject">Materia:</label>
-          <input type="text" id="subject" class="form-control" placeholder="Ej. Cálculo Diferencial" required>
+          <input type="text" id="subject" class="form-control" 
+                 placeholder="Ej. Cálculo Diferencial" 
+                 required minlength="2" maxlength="60">
         </div>
 
         <div class="form-group">
@@ -173,13 +174,20 @@
             required>
         </div>
 
+        <div class="form-group">
+          <label for="evidenceFile">Evidencia adjunta (Opcional):</label>
+          <input type="file" id="evidenceFile" class="form-control" accept="image/jpeg,image/png,application/pdf">
+          <span class="form-hint" style="font-size: 0.775rem; color: var(--slate-500); margin-top: 2px;">Formatos soportados: JPG, PNG, PDF. Máximo 5 MB.</span>
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn-modal-cancel" id="btnCancelModal">Cancelar</button>
+          <button type="button" class="btn-modal-cancel" id="btnDeleteModal" style="display: none; background-color: #fef2f2; color: #dc2626; border-color: #fca5a5;">Eliminar Sesión</button>
           <button type="submit" class="btn-primary">Guardar Sesión</button>
         </div>
       </form>
     </div>
-  </div>
+  </dialog>
 
   <!-- Toast Accesible de Notificaciones -->
   <div id="dashboardToast" class="dashboard-toast" role="status" aria-live="polite" aria-hidden="true">

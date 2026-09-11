@@ -8,116 +8,169 @@ document.addEventListener('DOMContentLoaded', () => {
   'use strict';
 
   // --------------------------------------------------------------------------
-  // 1. Mock Data Robusto (Mentores y Sesiones)
+  // 1. Guardia de Autorización en Cliente (RBAC)
   // --------------------------------------------------------------------------
-  const MOCK_MEMBERS = [
+  const enforceAdminAuthorization = () => {
+    const sessionStr = sessionStorage.getItem('dualorganizer_session');
+    if (!sessionStr) {
+      window.location.replace('login.html');
+      return null;
+    }
+    try {
+      const session = JSON.parse(sessionStr);
+      if (!session || typeof session !== 'object' || session.role !== 'ADMIN') {
+        console.warn('[Seguridad] Intento de acceso sin privilegios de ADMIN:', session?.role);
+        window.location.replace('dashboard.html');
+        return null;
+      }
+      return session;
+    } catch (e) {
+      console.error('[Seguridad] Sesión corrupta detectada:', e);
+      sessionStorage.removeItem('dualorganizer_session');
+      window.location.replace('login.html');
+      return null;
+    }
+  };
+
+  const currentAdmin = enforceAdminAuthorization();
+  if (!currentAdmin) return;
+
+  // --------------------------------------------------------------------------
+  // 2. Datos Institucionales por Defecto y Sincronización
+  // --------------------------------------------------------------------------
+  const INITIAL_MEMBERS = [
     {
       id: 'TUT-2023-0891',
       name: 'Juan Pérez',
-      role: 'Tutor Líder',
+      initials: 'JP',
+      role: 'Tutor Académico',
+      status: 'Activo',
+      totalHours: 45.0,
+      targetHours: 80,
       semester: 'Sexto Semestre',
       email: 'juan.perez@institucion.edu',
       phone: '555-123-4567',
-      status: 'Activo',
-      totalHours: 54.0,
-      targetHours: 80,
-      subjects: ['Cálculo Diferencial', 'Álgebra', 'Física Mecánica'],
-      initials: 'JP',
-      bio: 'Enfoque estructurado en resolución analítica paso a paso para asignaturas de tronco común de ingeniería.'
+      subjects: ['Cálculo Diferencial', 'Física Mecánica', 'Álgebra Lineal'],
+      bio: 'Apoyo enfocado en bases matemáticas analíticas y resolución paso a paso.'
     },
     {
-      id: 'TUT-2023-0412',
-      name: 'María Rodríguez',
-      role: 'Tutora Académica',
-      semester: 'Séptimo Semestre',
-      email: 'maria.rodriguez@institucion.edu',
-      phone: '555-987-6543',
+      id: 'TUT-2024-0102',
+      name: 'Sofía Torres',
+      initials: 'ST',
+      role: 'Tutora Titular',
       status: 'Activo',
-      totalHours: 68.5,
+      totalHours: 62.5,
       targetHours: 80,
-      subjects: ['Química Orgánica', 'Bioquímica', 'Biología Celular'],
-      initials: 'MR',
-      bio: 'Especialista en tutorías de laboratorio y métodos experimentales para ciencias químicas y de la salud.'
-    },
-    {
-      id: 'TUT-2022-0199',
-      name: 'Carlos Morales',
-      role: 'Tutor Académico',
       semester: 'Octavo Semestre',
-      email: 'carlos.morales@institucion.edu',
-      phone: '555-456-7890',
-      status: 'Inactivo',
-      totalHours: 80.0,
-      targetHours: 80,
-      subjects: ['Estructuras de Datos', 'Programación Web', 'Bases de Datos'],
-      initials: 'CM',
-      bio: 'Meta de horas cumplida al 100%. Mentor técnico en arquitectura de software y desarrollo frontend.'
+      email: 'sofia.torres@institucion.edu',
+      phone: '555-987-6543',
+      subjects: ['Química Orgánica', 'Bioquímica Clínica'],
+      bio: 'Especialista en tutorías departamentales del área biomédica y farmacología.'
     },
     {
-      id: 'TUT-2023-0723',
-      name: 'Sofía Valenzuela',
-      role: 'Tutora Par',
-      semester: 'Quinto Semestre',
-      email: 'sofia.valenzuela@institucion.edu',
-      phone: '555-321-0987',
-      status: 'Activo',
-      totalHours: 42.0,
-      targetHours: 80,
-      subjects: ['Estadística Inferencial', 'Probabilidad', 'Álgebra Lineal'],
-      initials: 'SV',
-      bio: 'Asesorías enfocadas en análisis de datos, modelos predictivos y preparación para exámenes departamentales.'
-    },
-    {
-      id: 'TUT-2024-0054',
-      name: 'Alejandro Cruz',
+      id: 'TUT-2024-0345',
+      name: 'Diego Ramírez',
+      initials: 'DR',
       role: 'Tutor Par',
-      semester: 'Quinto Semestre',
-      email: 'alejandro.cruz@institucion.edu',
-      phone: '555-789-0123',
       status: 'Activo',
-      totalHours: 28.5,
+      totalHours: 28.0,
       targetHours: 80,
-      subjects: ['Cálculo Vectorial', 'Física Electromagnetismo'],
-      initials: 'AC',
-      bio: 'Enfoque práctico en resolución de guías de estudio y desarrollo de intuición física y espacial.'
+      semester: 'Quinto Semestre',
+      email: 'diego.ramirez@institucion.edu',
+      phone: '555-456-7890',
+      subjects: ['Programación Web', 'Estructuras de Datos'],
+      bio: 'Acompañamiento en algoritmos, estructuras de almacenamiento y buenas prácticas.'
     },
     {
-      id: 'TUT-2023-0638',
-      name: 'Elena Gómez',
+      id: 'TUT-2023-0511',
+      name: 'Mariana Castillo',
+      initials: 'MC',
       role: 'Tutora Académica',
-      semester: 'Séptimo Semestre',
-      email: 'elena.gomez@institucion.edu',
-      phone: '555-654-3210',
-      status: 'Activo',
-      totalHours: 51.0,
+      status: 'Revisión',
+      totalHours: 19.5,
       targetHours: 80,
+      semester: 'Séptimo Semestre',
+      email: 'mariana.castillo@institucion.edu',
+      phone: '555-789-0123',
       subjects: ['Termodinámica', 'Mecánica de Fluidos'],
-      initials: 'EG',
-      bio: 'Ayudante de investigación orientada al modelado de fenómenos térmicos y asesoría técnica en ingeniería.'
+      bio: 'Tutorías en ciencias aplicadas de ingeniería química.'
     }
   ];
 
-  const MOCK_RECORDS = [
-    { id: 'REC-2026-001', matricula: 'TUT-2023-0891', tutorName: 'Juan Pérez', subject: 'Cálculo Diferencial', date: '2026-09-08', hours: 2.0, status: 'Aprobada' },
-    { id: 'REC-2026-002', matricula: 'TUT-2023-0412', tutorName: 'María Rodríguez', subject: 'Química Orgánica', date: '2026-09-08', hours: 1.5, status: 'Aprobada' },
-    { id: 'REC-2026-003', matricula: 'TUT-2023-0723', tutorName: 'Sofía Valenzuela', subject: 'Estadística Inferencial', date: '2026-09-07', hours: 2.0, status: 'Pendiente' },
-    { id: 'REC-2026-004', matricula: 'TUT-2023-0891', tutorName: 'Juan Pérez', subject: 'Álgebra', date: '2026-09-06', hours: 1.0, status: 'Aprobada' },
-    { id: 'REC-2026-005', matricula: 'TUT-2024-0054', tutorName: 'Alejandro Cruz', subject: 'Cálculo Vectorial', date: '2026-09-05', hours: 2.5, status: 'Aprobada' },
-    { id: 'REC-2026-006', matricula: 'TUT-2023-0638', tutorName: 'Elena Gómez', subject: 'Termodinámica', date: '2026-09-04', hours: 3.0, status: 'Revisión' },
-    { id: 'REC-2026-007', matricula: 'TUT-2023-0412', tutorName: 'María Rodríguez', subject: 'Bioquímica', date: '2026-09-03', hours: 2.0, status: 'Aprobada' },
-    { id: 'REC-2026-008', matricula: 'TUT-2022-0199', tutorName: 'Carlos Morales', subject: 'Programación Web', date: '2026-09-02', hours: 2.0, status: 'Aprobada' },
-    { id: 'REC-2026-009', matricula: 'TUT-2023-0891', tutorName: 'Juan Pérez', subject: 'Física Mecánica', date: '2026-09-01', hours: 1.5, status: 'Aprobada' },
-    { id: 'REC-2026-010', matricula: 'TUT-2023-0723', tutorName: 'Sofía Valenzuela', subject: 'Probabilidad', date: '2026-08-30', hours: 1.0, status: 'Pendiente' },
-    { id: 'REC-2026-011', matricula: 'TUT-2024-0054', tutorName: 'Alejandro Cruz', subject: 'Física Electromagnetismo', date: '2026-08-29', hours: 2.0, status: 'Revisión' },
-    { id: 'REC-2026-012', matricula: 'TUT-2023-0638', tutorName: 'Elena Gómez', subject: 'Mecánica de Fluidos', date: '2026-08-28', hours: 2.5, status: 'Aprobada' }
+  const INITIAL_RECORDS = [
+    {
+      id: 'rec-01',
+      matricula: 'TUT-2023-0891',
+      tutorName: 'Juan Pérez',
+      subject: 'Cálculo Diferencial',
+      date: '2026-09-08',
+      hours: 2.0,
+      status: 'Aprobada'
+    },
+    {
+      id: 'rec-02',
+      matricula: 'TUT-2024-0102',
+      tutorName: 'Sofía Torres',
+      subject: 'Química Orgánica',
+      date: '2026-09-08',
+      hours: 1.5,
+      status: 'Aprobada'
+    },
+    {
+      id: 'rec-03',
+      matricula: 'TUT-2024-0345',
+      tutorName: 'Diego Ramírez',
+      subject: 'Programación Web',
+      date: '2026-09-07',
+      hours: 2.0,
+      status: 'Pendiente'
+    },
+    {
+      id: 'rec-04',
+      matricula: 'TUT-2023-0891',
+      tutorName: 'Juan Pérez',
+      subject: 'Física Mecánica',
+      date: '2026-09-05',
+      hours: 1.5,
+      status: 'Aprobada'
+    }
   ];
 
+  const loadMergedRecords = () => {
+    const list = [...INITIAL_RECORDS];
+    try {
+      const localSessionsRaw = localStorage.getItem('dualorganizer_sessions_v1');
+      if (localSessionsRaw) {
+        const localSessions = JSON.parse(localSessionsRaw);
+        if (Array.isArray(localSessions)) {
+          localSessions.forEach(s => {
+            const exists = list.some(r => r.date === s.date && r.subject === s.subject);
+            if (!exists) {
+              list.unshift({
+                id: s.id || `local-${Date.now()}`,
+                matricula: 'TUT-2023-0891',
+                tutorName: 'Juan Pérez',
+                subject: s.subject || 'Tutoría General',
+                date: s.date || new Date().toISOString().slice(0, 10),
+                hours: parseFloat(s.hours) || 1.0,
+                status: 'Pendiente'
+              });
+            }
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Error sincronizando sesiones locales en admin:', err);
+    }
+    return list;
+  };
+
   // --------------------------------------------------------------------------
-  // 2. Estado Global de la Aplicación
+  // 3. Estado Global de la Aplicación
   // --------------------------------------------------------------------------
   const state = {
-    records: [...MOCK_RECORDS],
-    members: [...MOCK_MEMBERS],
+    records: loadMergedRecords(),
+    members: [...INITIAL_MEMBERS],
     filterMember: 'ALL',
     searchQuery: '',
     sortKey: 'date',
@@ -215,11 +268,13 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // --------------------------------------------------------------------------
-  // 5. Renderizado: Directorio de Mentores (Cards Grid)
+  // 5. Renderizado Seguro: Directorio de Mentores (Cards Grid)
   // --------------------------------------------------------------------------
   const renderMembers = () => {
     if (!elements.membersGrid) return;
     elements.membersGrid.innerHTML = '';
+
+    const fragment = document.createDocumentFragment();
 
     state.members.forEach((member) => {
       const percentage = Math.min(100, Math.round((member.totalHours / member.targetHours) * 100));
@@ -227,62 +282,113 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = 'member-card';
       card.setAttribute('role', 'listitem');
 
-      // Mostrar chips (máximo 2 visibles + contador del resto)
+      const innerWrapper = document.createElement('div');
+
+      // Header de tarjeta
+      const cardHeader = document.createElement('header');
+      cardHeader.className = 'member-card__header';
+
+      const avatarDiv = document.createElement('div');
+      avatarDiv.className = 'member-card__avatar';
+      avatarDiv.setAttribute('aria-hidden', 'true');
+
+      const avatarInitials = document.createElement('span');
+      avatarInitials.className = 'avatar-initials';
+      avatarInitials.textContent = member.initials || getInitials(member.name);
+      avatarDiv.appendChild(avatarInitials);
+
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'member-card__info';
+
+      const h3Name = document.createElement('h3');
+      h3Name.className = 'member-card__name';
+      h3Name.title = member.name;
+      h3Name.textContent = member.name;
+
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'member-card__meta';
+
+      const roleBadge = document.createElement('span');
+      roleBadge.className = 'role-badge';
+      roleBadge.textContent = member.role;
+
+      const statusBadge = document.createElement('span');
+      statusBadge.className = `status-badge ${getStatusBadgeClass(member.status)}`;
+      statusBadge.textContent = member.status;
+
+      metaDiv.append(roleBadge, statusBadge);
+      infoDiv.append(h3Name, metaDiv);
+      cardHeader.append(avatarDiv, infoDiv);
+
+      // Progreso
+      const progressDiv = document.createElement('div');
+      progressDiv.className = 'member-card__progress';
+
+      const progressHeader = document.createElement('div');
+      progressHeader.className = 'progress-header';
+
+      const progressLabel = document.createElement('span');
+      progressLabel.className = 'progress-header__label';
+      progressLabel.textContent = 'Horas acumuladas';
+
+      const progressVal = document.createElement('span');
+      progressVal.className = 'progress-header__val tabular-nums';
+      progressVal.textContent = `${Number(member.totalHours).toFixed(1)} / ${member.targetHours}h (${percentage}%)`;
+
+      progressHeader.append(progressLabel, progressVal);
+
+      const progressTrack = document.createElement('div');
+      progressTrack.className = 'progress-bar-track';
+      progressTrack.setAttribute('role', 'progressbar');
+      progressTrack.setAttribute('aria-valuenow', String(member.totalHours));
+      progressTrack.setAttribute('aria-valuemin', '0');
+      progressTrack.setAttribute('aria-valuemax', String(member.targetHours));
+
+      const progressFill = document.createElement('div');
+      progressFill.className = 'progress-bar-fill';
+      progressFill.style.width = `${percentage}%`;
+      progressTrack.appendChild(progressFill);
+
+      progressDiv.append(progressHeader, progressTrack);
+
+      // Chips de materias
+      const subjectsDiv = document.createElement('div');
+      subjectsDiv.className = 'member-card__subjects';
+      subjectsDiv.setAttribute('aria-label', 'Materias impartidas');
+
       const visibleSubjects = member.subjects.slice(0, 2);
       const remainingCount = member.subjects.length - 2;
 
-      let subjectsHtml = visibleSubjects
-        .map(sub => `<span class="subject-chip">${sub}</span>`)
-        .join('');
+      visibleSubjects.forEach(sub => {
+        const chip = document.createElement('span');
+        chip.className = 'subject-chip';
+        chip.textContent = sub;
+        subjectsDiv.appendChild(chip);
+      });
 
       if (remainingCount > 0) {
-        subjectsHtml += `<span class="subject-chip subject-chip--more">+${remainingCount} más</span>`;
+        const moreChip = document.createElement('span');
+        moreChip.className = 'subject-chip subject-chip--more';
+        moreChip.textContent = `+${remainingCount} más`;
+        subjectsDiv.appendChild(moreChip);
       }
 
-      const initials = member.initials || getInitials(member.name);
+      innerWrapper.append(cardHeader, progressDiv, subjectsDiv);
 
-      card.innerHTML = `
-        <div>
-          <header class="member-card__header">
-            <div class="member-card__avatar" aria-hidden="true">
-              <span class="avatar-initials">${initials}</span>
-            </div>
-            <div class="member-card__info">
-              <h3 class="member-card__name" title="${member.name}">${member.name}</h3>
-              <div class="member-card__meta">
-                <span class="role-badge">${member.role}</span>
-                <span class="status-badge ${getStatusBadgeClass(member.status)}">${member.status}</span>
-              </div>
-            </div>
-          </header>
+      // Botón ver detalle
+      const btnView = document.createElement('button');
+      btnView.type = 'button';
+      btnView.className = 'btn btn--secondary btn--full';
+      btnView.setAttribute('data-action', 'view-member');
+      btnView.setAttribute('data-member-id', member.id);
+      btnView.textContent = 'Ver Detalle';
 
-          <div class="member-card__progress">
-            <div class="progress-header">
-              <span class="progress-header__label">Horas acumuladas</span>
-              <span class="progress-header__val">${member.totalHours.toFixed(1)} / ${member.targetHours}h (${percentage}%)</span>
-            </div>
-            <div class="progress-bar-track" role="progressbar" aria-valuenow="${member.totalHours}" aria-valuemin="0" aria-valuemax="${member.targetHours}">
-              <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
-            </div>
-          </div>
-
-          <div class="member-card__subjects" aria-label="Materias impartidas">
-            ${subjectsHtml}
-          </div>
-        </div>
-
-        <button type="button" 
-                class="btn btn--secondary btn--full" 
-                data-action="view-member" 
-                data-member-id="${member.id}">
-          Ver Detalle
-        </button>
-      `;
-
-      elements.membersGrid.appendChild(card);
+      card.append(innerWrapper, btnView);
+      fragment.appendChild(card);
     });
 
-    // Actualizar KPI total de miembros
+    elements.membersGrid.appendChild(fragment);
+
     if (elements.kpiTotalMembers) {
       elements.kpiTotalMembers.textContent = state.members.length;
     }
@@ -293,9 +399,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // --------------------------------------------------------------------------
   const populateMemberFilter = () => {
     if (!elements.memberFilterSelect) return;
-    
-    // Guardar opción 'ALL'
-    elements.memberFilterSelect.innerHTML = '<option value="ALL">Todos los tutores</option>';
+
+    elements.memberFilterSelect.innerHTML = '';
+
+    const allOption = document.createElement('option');
+    allOption.value = 'ALL';
+    allOption.textContent = 'Todos los tutores';
+    elements.memberFilterSelect.appendChild(allOption);
 
     state.members.forEach((member) => {
       const option = document.createElement('option');
@@ -308,17 +418,15 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // --------------------------------------------------------------------------
-  // 7. Filtrado, Ordenamiento y Renderizado: Gestor de Datos (Tabla)
+  // 7. Filtrado, Ordenamiento y Renderizado Seguro: Bitácora de Sesiones (Tabla)
   // --------------------------------------------------------------------------
   const getProcessedRecords = () => {
     let result = [...state.records];
 
-    // Filtro por tutor
     if (state.filterMember !== 'ALL') {
       result = result.filter(rec => rec.matricula === state.filterMember);
     }
 
-    // Búsqueda en tiempo real (insensible a mayúsculas y acentos normalizados)
     if (state.searchQuery.trim() !== '') {
       const query = state.searchQuery.toLowerCase().trim();
       result = result.filter(rec => {
@@ -332,7 +440,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Ordenamiento dinámico
     result.sort((a, b) => {
       let valA = a[state.sortKey];
       let valB = b[state.sortKey];
@@ -368,55 +475,88 @@ document.addEventListener('DOMContentLoaded', () => {
     const records = getProcessedRecords();
     elements.recordsTableBody.innerHTML = '';
 
-    // Actualizar indicador de orden en las columnas
     updateSortIndicators();
 
-    // Actualizar contador
     if (elements.recordsCounterText) {
       elements.recordsCounterText.textContent = `Mostrando ${records.length} de ${state.records.length} sesiones`;
     }
 
-    // Actualizar KPIs de horas en Header
     if (elements.kpiTotalSessions) {
       elements.kpiTotalSessions.textContent = state.records.length;
     }
     if (elements.kpiTotalHours) {
-      const totalHours = state.records.reduce((acc, curr) => acc + curr.hours, 0);
+      const totalHours = state.records.reduce((acc, curr) => acc + (Number(curr.hours) || 0), 0);
       elements.kpiTotalHours.textContent = totalHours.toFixed(1);
     }
 
     if (records.length === 0) {
       const emptyRow = document.createElement('tr');
-      emptyRow.innerHTML = `
-        <td colspan="6" class="table-empty">
-          No se encontraron sesiones registradas con los criterios seleccionados.
-        </td>
-      `;
+      const emptyTd = document.createElement('td');
+      emptyTd.colSpan = 6;
+      emptyTd.className = 'table-empty';
+      emptyTd.textContent = 'No se encontraron sesiones registradas con los criterios seleccionados.';
+      emptyRow.appendChild(emptyTd);
       elements.recordsTableBody.appendChild(emptyRow);
       return;
     }
 
+    const fragment = document.createDocumentFragment();
+
     records.forEach((rec) => {
       const row = document.createElement('tr');
-      row.innerHTML = `
-        <td class="table-matricula">${rec.matricula}</td>
-        <td><strong>${rec.tutorName}</strong></td>
-        <td>${rec.subject}</td>
-        <td><time datetime="${rec.date}">${rec.date}</time></td>
-        <td class="text-right"><strong>${rec.hours.toFixed(1)}h</strong></td>
-        <td>
-          <span class="status-badge ${getStatusBadgeClass(rec.status)}">
-            ${rec.status}
-          </span>
-        </td>
-      `;
-      elements.recordsTableBody.appendChild(row);
+
+      const tdMatricula = document.createElement('td');
+      tdMatricula.className = 'table-matricula tabular-nums';
+      tdMatricula.textContent = rec.matricula;
+
+      const tdTutor = document.createElement('td');
+      const strongTutor = document.createElement('strong');
+      strongTutor.textContent = rec.tutorName;
+      tdTutor.appendChild(strongTutor);
+
+      const tdSubject = document.createElement('td');
+      tdSubject.textContent = rec.subject;
+
+      const tdDate = document.createElement('td');
+      const timeEl = document.createElement('time');
+      timeEl.setAttribute('datetime', rec.date);
+      timeEl.className = 'tabular-nums';
+      timeEl.textContent = rec.date;
+      tdDate.appendChild(timeEl);
+
+      const tdHours = document.createElement('td');
+      tdHours.className = 'text-right tabular-nums';
+      const strongHours = document.createElement('strong');
+      strongHours.textContent = `${Number(rec.hours).toFixed(1)}h`;
+      tdHours.appendChild(strongHours);
+
+      const tdStatus = document.createElement('td');
+      const statusSpan = document.createElement('span');
+      statusSpan.className = `status-badge ${getStatusBadgeClass(rec.status)}`;
+      statusSpan.textContent = rec.status;
+      tdStatus.appendChild(statusSpan);
+
+      row.append(tdMatricula, tdTutor, tdSubject, tdDate, tdHours, tdStatus);
+      fragment.appendChild(row);
     });
+
+    elements.recordsTableBody.appendChild(fragment);
   };
 
   // --------------------------------------------------------------------------
-  // 8. Exportar a CSV con BOM UTF-8 (\uFEFF) para Excel
+  // 8. Exportar a CSV Seguro (Con BOM UTF-8 y Mitigación de Formula Injection)
   // --------------------------------------------------------------------------
+  const sanitizeCSVCell = (val) => {
+    if (val === null || val === undefined) return '""';
+    let str = String(val).trim();
+
+    if (/^[=+\-@\t\r]/.test(str)) {
+      str = `'${str}`;
+    }
+
+    return `"${str.replace(/"/g, '""')}"`;
+  };
+
   const exportToCSV = () => {
     const recordsToExport = getProcessedRecords();
 
@@ -425,39 +565,35 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Encabezados estándar del CSV
     const headers = ['Matrícula', 'Tutor', 'Materia', 'Fecha', 'Horas', 'Estado'];
-
-    // Escapar celdas para cumplir el estándar RFC 4180
-    const formatCell = (val) => {
-      if (val === null || val === undefined) return '""';
-      const stringVal = String(val).replace(/"/g, '""');
-      return `"${stringVal}"`;
-    };
+    const headerRow = headers.map(sanitizeCSVCell).join(',');
 
     const rows = recordsToExport.map(rec => [
-      formatCell(rec.matricula),
-      formatCell(rec.tutorName),
-      formatCell(rec.subject),
-      formatCell(rec.date),
-      formatCell(rec.hours.toFixed(1)),
-      formatCell(rec.status)
+      sanitizeCSVCell(rec.matricula),
+      sanitizeCSVCell(rec.tutorName),
+      sanitizeCSVCell(rec.subject),
+      sanitizeCSVCell(rec.date),
+      sanitizeCSVCell(Number(rec.hours).toFixed(1)),
+      sanitizeCSVCell(rec.status)
     ].join(','));
 
-    // Incluir BOM UTF-8 (\uFEFF) para forzar a Excel a decodificar tildes y caracteres en español correctamente
-    const csvContent = '\uFEFF' + [headers.map(formatCell).join(','), ...rows].join('\r\n');
-
+    const csvContent = '\uFEFF' + [headerRow, ...rows].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    const objectUrl = window.URL.createObjectURL(blob);
 
-    const link = document.createElement('a');
+    const downloadLink = document.createElement('a');
     const timestamp = new Date().toISOString().slice(0, 10);
-    link.href = url;
-    link.setAttribute('download', `dualorganizer_sesiones_${timestamp}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadLink.href = objectUrl;
+    downloadLink.setAttribute('download', `dualorganizer_sesiones_${timestamp}.csv`);
+    downloadLink.style.display = 'none';
+    document.body.appendChild(downloadLink);
+
+    downloadLink.click();
+
+    setTimeout(() => {
+      document.body.removeChild(downloadLink);
+      window.URL.revokeObjectURL(objectUrl);
+    }, 1500);
 
     showToast(`Exportadas ${recordsToExport.length} sesiones a CSV con éxito`);
   };
@@ -478,25 +614,29 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.dialogMemberName.textContent = member.name;
     elements.dialogMemberId.textContent = member.id;
 
-    elements.dialogMemberHours.textContent = member.totalHours.toFixed(1);
+    elements.dialogMemberHours.textContent = Number(member.totalHours).toFixed(1);
     elements.dialogMemberTarget.textContent = member.targetHours;
 
     const percentage = Math.min(100, Math.round((member.totalHours / member.targetHours) * 100));
-    elements.dialogProgressTrack.setAttribute('aria-valuenow', member.totalHours);
+    elements.dialogProgressTrack.setAttribute('aria-valuenow', String(member.totalHours));
     elements.dialogProgressBar.style.width = `${percentage}%`;
 
     elements.dialogMemberSemester.textContent = member.semester;
     elements.dialogMemberEmail.textContent = member.email;
     elements.dialogMemberPhone.textContent = member.phone;
 
-    // Render chips de materias en modal
-    elements.dialogMemberSubjects.innerHTML = member.subjects
-      .map(sub => `<span class="subject-chip" role="listitem">${sub}</span>`)
-      .join('');
+    // Render seguro de chips de materias
+    elements.dialogMemberSubjects.innerHTML = '';
+    member.subjects.forEach(sub => {
+      const chip = document.createElement('span');
+      chip.className = 'subject-chip';
+      chip.setAttribute('role', 'listitem');
+      chip.textContent = sub;
+      elements.dialogMemberSubjects.appendChild(chip);
+    });
 
     elements.dialogMemberBio.textContent = member.bio;
 
-    // Abrir modal nativo
     elements.memberModal.showModal();
   };
 

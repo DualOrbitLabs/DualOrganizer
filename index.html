@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DualOrganizer - Plataforma de Gestión Académica y Tutorías</title>
+  <link rel="stylesheet" href="styles/navbar.css">
+  <link rel="stylesheet" href="styles/index.css">
+</head>
+
+<body>
+  <header>
+    <nav class="navbar-global" aria-label="Navegación pública">
+      <!-- Zona Izquierda: Logo -->
+      <a href="index.html" class="navbar-brand">
+        <span class="navbar-title">DualOrganizer</span>
+      </a>
+
+      <!-- Zona Derecha: Acciones públicas -->
+      <div class="navbar-actions" style="margin-left: auto;">
+        <a href="login.html" class="btn-export" style="text-decoration: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+          </svg>
+          <span>Iniciar sesión</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="landing-main">
+
+    <!-- Hero Section -->
+    <section class="hero-section" aria-label="Introducción a DualOrganizer">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        <span>Plataforma Institucional de Tutorías</span>
+      </div>
+      <h1 class="hero-title">Centraliza, monitorea y acredita tus horas de tutoría en un solo lugar.</h1>
+      <p class="hero-subtitle">
+        Simplifica el registro semanal de sesiones, coordina disponibilidades docentes con prevención de solapamientos y
+        genera bitácoras auditables sin fricciones.
+      </p>
+      <div class="hero-actions">
+        <a href="login.html" class="btn-primary-action">
+          <span>Ingresar a la plataforma</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+        <a href="#plataforma" class="btn-secondary-action">Explorar la plataforma</a>
+      </div>
+    </section>
+
+    <!-- Grid de Características -->
+    <section id="caracteristicas" class="features-section" aria-label="Características principales">
+      <div class="section-container">
+        <header class="section-header">
+          <span class="section-label">Capacidades del Sistema</span>
+          <h2 class="section-title">Diseñado para la precisión académica y la acreditación formal</h2>
+          <p class="section-subtitle">Elimina las hojas de cálculo desorganizadas con un flujo de trabajo validado en
+            tiempo real.</p>
+        </header>
+
+        <div class="features-grid">
+          <!-- Tarjeta 1 -->
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <h3 class="feature-title">Control Semanal & Prevención de Conflictos</h3>
+            <p class="feature-desc">Cuadrícula interactiva que valida automáticamente que la hora final sea posterior al
+              inicio y bloquea solapamientos entre asesorías.</p>
+          </article>
+
+          <!-- Tarjeta 2 -->
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title">Ficha de Tutor & Chips de Materias</h3>
+            <p class="feature-desc">Catálogo de materias dinámicas con prevención estricta de duplicados, franjas
+              horarias preferidas y control riguroso de cambios sin guardar.</p>
+          </article>
+
+          <!-- Tarjeta 3 -->
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <h3 class="feature-title">Auditoría y Exportación CSV</h3>
+            <p class="feature-desc">Descarga constancias y reportes estructurados con codificación UTF-8 BOM, listos
+              para acreditación por departamentos de coordinación.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Showcase de la Plataforma (#plataforma) -->
+    <section id="plataforma" class="platform-section" aria-label="Demostración de la plataforma">
+      <div class="section-container">
+        <header class="section-header">
+          <span class="section-label">En Acción</span>
+          <h2 class="section-title">El Calendario Inteligente de Tutorías</h2>
+          <p class="section-subtitle">Visualiza la disponibilidad en tiempo real con cifras numéricas tabulares y cero
+            recargas lentas.</p>
+        </header>
+
+        <div class="platform-showcase">
+          <div class="showcase-topbar">
+            <div class="showcase-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <span>DualOrganizer // Vista de Cuadrícula Semanal</span>
+            <span class="showcase-badge tabular-nums">Semana Activa: 45.0 / 80 hrs</span>
+          </div>
+
+          <div class="showcase-body">
+            <!-- KPIs en miniatura -->
+            <div class="showcase-kpis">
+              <div class="mini-kpi">
+                <span class="mini-kpi-label">Horas Acumuladas</span>
+                <div class="mini-kpi-val tabular-nums">45.0 hrs</div>
+              </div>
+              <div class="mini-kpi">
+                <span class="mini-kpi-label">Sesiones Completadas</span>
+                <div class="mini-kpi-val tabular-nums">32</div>
+              </div>
+              <div class="mini-kpi">
+                <span class="mini-kpi-label">Materias Impartidas</span>
+                <div class="mini-kpi-val tabular-nums">3</div>
+              </div>
+              <div class="mini-kpi">
+                <span class="mini-kpi-label">Estado de Auditoría</span>
+                <div class="mini-kpi-val"
+                  style="color: var(--color-success); font-size: 0.95rem; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>Sin conflictos</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Previsualización de Cuadrícula -->
+            <div class="mini-calendar-preview">
+              <div class="mini-calendar-header">
+                <div>Horario</div>
+                <div>Lunes</div>
+                <div>Martes</div>
+                <div>Miércoles</div>
+                <div>Jueves</div>
+                <div>Viernes</div>
+              </div>
+
+              <!-- Fila 1 -->
+              <div class="mini-calendar-row">
+                <div class="mini-time tabular-nums">10:00</div>
+                <div class="mini-slot"></div>
+                <div class="mini-slot">
+                  <div class="mini-session">
+                    <span class="mini-session-title">Cálculo Diferencial</span>
+                    <span class="mini-session-sub tabular-nums">10:00 - 11:30 (1.5h)</span>
+                  </div>
+                </div>
+                <div class="mini-slot"></div>
+                <div class="mini-slot"></div>
+                <div class="mini-slot"></div>
+              </div>
+
+              <!-- Fila 2 -->
+              <div class="mini-calendar-row">
+                <div class="mini-time tabular-nums">14:00</div>
+                <div class="mini-slot"></div>
+                <div class="mini-slot"></div>
+                <div class="mini-slot"></div>
+                <div class="mini-slot">
+                  <div class="mini-session success">
+                    <span class="mini-session-title">Física Mecánica</span>
+                    <span class="mini-session-sub tabular-nums">14:00 - 16:00 (2.0h)</span>
+                  </div>
+                </div>
+                <div class="mini-slot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Flujo de Acreditación (#flujo) -->
+    <section id="flujo" class="workflow-section" aria-label="Flujo de trabajo de acreditación">
+      <div class="section-container">
+        <header class="section-header">
+          <span class="section-label">Flujo Institucional</span>
+          <h2 class="section-title">Acreditación académica en 3 pasos sencillos</h2>
+          <p class="section-subtitle">Un proceso claro para tutores docentes y coordinadores de departamento.</p>
+        </header>
+
+        <div class="workflow-grid">
+          <div class="step-card">
+            <span class="step-number tabular-nums">01</span>
+            <h3>Agenda en un Clic</h3>
+            <p>Selecciona un bloque de tiempo en tu cuadrícula semanal. El sistema valida rangos de 30 minutos a 4 horas
+              dentro del horario institucional.</p>
+          </div>
+
+          <div class="step-card">
+            <span class="step-number tabular-nums">02</span>
+            <h3>Imparte y Registra</h3>
+            <p>Asocia materias activas desde tus chips predefinidos y vincula los nombres de tus alumnos asesorados.</p>
+          </div>
+
+          <div class="step-card">
+            <span class="step-number tabular-nums">03</span>
+            <h3>Valida y Exporta</h3>
+            <p>Monitorea tu barra de progreso hacia la meta institucional de 80 horas y genera reportes en CSV en un
+              instante.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Banner Call-to-Action -->
+    <section class="cta-section" aria-label="Llamado a la acción">
+      <div class="cta-container">
+        <h2 class="cta-title">¿Listo para optimizar la gestión de tutorías en tu institución?</h2>
+        <p class="cta-subtitle">
+          Accede con tus credenciales universitarias o prueba el entorno interactivo de demostración.
+        </p>
+        <div class="cta-actions">
+          <a href="login.html" class="btn-cta-primary">Iniciar sesión ahora</a>
+          <a href="hub.html" class="btn-cta-secondary">Ver mis capítulos</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Institucional -->
+  <footer class="landing-footer">
+    <div class="footer-nav">
+    </div>
+    <p>© 2026 DualOrbitLabs. Sistema Institucional de Gestión y Acreditación de Tutorías Académicas.</p>
+  </footer>
+</body>
+
+</html>

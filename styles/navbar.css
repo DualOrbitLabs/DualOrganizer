@@ -240,17 +240,96 @@
     transform: translateY(0);
 }
 
-/* Responsive */
+/* ==========================================================================
+   Responsive — Mobile First
+   Reference device: 390 × 844 px (iPhone 14 / Pixel 7)
+   ========================================================================== */
+
+/* ≤ 768px — Tablet portrait / Large phone landscape */
 @media (max-width: 768px) {
     .navbar-global {
-        padding: 8px 16px;
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
+        padding: 0 16px;
+        height: 52px;
+        flex-wrap: nowrap;
+    }
+
+    /* Nav links: scroll horizontal en vez de apilar */
+    .navbar-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-shrink: 1;
+        min-width: 0;
+    }
+
+    .navbar-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-link {
+        white-space: nowrap;
+        padding: 6px 10px;
+        font-size: 0.8rem;
     }
 
     .navbar-actions {
-        align-self: flex-end;
-        margin-top: -34px;
+        flex-shrink: 0;
+        margin-left: auto;
+        gap: 6px;
+    }
+}
+
+/* ≤ 640px — Teléfono portrait */
+@media (max-width: 640px) {
+    .navbar-global {
+        padding: 0 14px;
+        height: 50px;
+    }
+
+    .nav-link {
+        padding: 5px 8px;
+        font-size: 0.775rem;
+    }
+
+    /* Touch targets en botones de acción */
+    .btn-profile,
+    .btn-logout {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ≤ 480px — Teléfono estándar portrait */
+@media (max-width: 480px) {
+    .navbar-global {
+        padding: 0 12px;
+        height: 48px;
+    }
+
+    .navbar-logo {
+        height: 26px;
+    }
+
+    .navbar-title {
+        font-size: 0.95rem;
+    }
+
+    /* En pantallas muy pequeñas, ocultar los nav links del centro —
+       solo logo + acciones */
+    .navbar-nav {
+        display: none;
+    }
+
+    /* Touch targets mínimos WCAG 2.5.5 = 44px */
+    .btn-profile,
+    .btn-logout {
+        width: 44px;
+        height: 44px;
+    }
+
+    .btn-export {
+        padding: 8px 12px;
+        min-height: 44px;
+        font-size: 0.8rem;
     }
 }

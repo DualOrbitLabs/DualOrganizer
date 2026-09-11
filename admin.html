@@ -15,7 +15,6 @@
     <nav class="navbar-global" aria-label="Navegación principal">
       <!-- Zona Izquierda: Logo + Nombre -->
       <a href="hub.html" class="navbar-brand">
-        <img src="global/DOLFNBB.png" alt="Logo DualOrganizer" class="navbar-logo">
         <span class="navbar-title">DualOrganizer</span>
       </a>
 
@@ -34,7 +33,7 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </a>
-        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
+        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión" onclick="sessionStorage.removeItem('dualorganizer_session');">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>

@@ -14,7 +14,6 @@
   <header>
     <nav class="navbar-global" aria-label="Navegación principal">
       <a href="hub.html" class="navbar-brand">
-        <img src="global/DOLFNBB.png" alt="Logo DualOrganizer" class="navbar-logo">
         <span class="navbar-title">DualOrganizer</span>
       </a>
 
@@ -31,7 +30,7 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </a>
-        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
+        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión" onclick="sessionStorage.removeItem('dualorganizer_session');">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
@@ -122,11 +121,15 @@
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label" for="inputFullName">Nombre y Apellidos</label>
-            <input type="text" id="inputFullName" name="fullName" class="form-control" value="Juan Pérez" required>
+            <input type="text" id="inputFullName" name="fullName" class="form-control" value="Juan Pérez" 
+                   required minlength="3" maxlength="80" pattern="^[A-Za-zÀ-ÿ\u00f1\u00d1\s\.\-]+$"
+                   title="Solo letras, espacios, puntos o guiones. Entre 3 y 80 caracteres.">
           </div>
           <div class="form-group">
             <label class="form-label" for="inputPhone">Teléfono / WhatsApp</label>
-            <input type="tel" id="inputPhone" name="phone" class="form-control tabular-nums" value="555-123-4567" required>
+            <input type="tel" id="inputPhone" name="phone" class="form-control tabular-nums" value="555-123-4567" 
+                   required minlength="7" maxlength="20" pattern="^[0-9\+\-\s\(\)]+$"
+                   title="Formato de teléfono válido (solo números, signos +, - o paréntesis).">
           </div>
         </div>
 
@@ -171,7 +174,7 @@
               </div>
 
               <input type="text" id="tagInput" class="tag-input-field"
-                placeholder="Escribe una materia (ej. Probabilidad) y presiona Enter..." autocomplete="off">
+                placeholder="Escribe una materia (ej. Probabilidad) y presiona Enter..." autocomplete="off" maxlength="40">
             </div>
 
             <!-- Input oculto para serialización en formulario -->
@@ -180,7 +183,7 @@
 
           <div class="form-group full-width">
             <label class="form-label" for="textareaDescription">Breve descripción / Enfoque pedagógico</label>
-            <textarea id="textareaDescription" name="description" class="form-control" rows="3">Apoyo en resolución de problemas de cálculo diferencial y álgebra básica. Trato de ir paso a paso enfocándome en las bases matemáticas.</textarea>
+            <textarea id="textareaDescription" name="description" class="form-control" rows="3" maxlength="300">Apoyo en resolución de problemas de cálculo diferencial y álgebra básica. Trato de ir paso a paso enfocándome en las bases matemáticas.</textarea>
           </div>
         </div>
       </section>
@@ -204,7 +207,7 @@
           <div class="form-group">
             <label class="form-label" for="inputTimeSlots">Franjas horarias preferidas</label>
             <input type="text" id="inputTimeSlots" name="timeSlots" class="form-control tabular-nums"
-              placeholder="Ej. 14:00 - 18:00" value="14:00 - 18:00">
+              placeholder="Ej. 14:00 - 18:00" value="14:00 - 18:00" maxlength="50">
             <span class="help-text">Horario en formato de 24 horas.</span>
           </div>
         </div>
@@ -226,7 +229,7 @@
         <div class="form-group section-spacer">
           <label class="form-label" for="inputMeetingUrl">Link de sala recurrente (Google Meet / Zoom)</label>
           <input type="url" id="inputMeetingUrl" name="meetingUrl" class="form-control"
-            value="https://meet.google.com/abc-defg-hij" placeholder="https://meet.google.com/...">
+            value="https://meet.google.com/abc-defg-hij" placeholder="https://meet.google.com/..." maxlength="200">
         </div>
       </section>
 

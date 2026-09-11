@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hub - DualOrganizer</title>
+  <title>Hub de Capítulos - DualOrganizer</title>
   <link rel="stylesheet" href="styles/navbar.css">
   <link rel="stylesheet" href="styles/hub.css">
 </head>
@@ -15,13 +15,12 @@
     <nav class="navbar-global" aria-label="Navegación principal">
       <!-- Zona Izquierda: Logo + Nombre -->
       <a href="hub.html" class="navbar-brand">
-        <img src="global/DOLFNBB.png" alt="Logo DualOrganizer" class="navbar-logo">
         <span class="navbar-title">DualOrganizer</span>
       </a>
 
-      <!-- Zona Centro: Links de Navegación -->
+      <!-- Zona Centro: Enlaces de navegación -->
       <ul class="navbar-nav">
-        <li><a href="hub.html" class="nav-link active" aria-current="page">Hub</a></li>
+        <li><a href="hub.html" class="nav-link active" aria-current="page">Mis Capítulos</a></li>
         <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
         <li><a href="admin.html" class="nav-link">Administración</a></li>
       </ul>
@@ -35,7 +34,8 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </a>
-        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
+        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión"
+          onclick="sessionStorage.removeItem('dualorganizer_session');">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -50,86 +50,111 @@
   <!-- Portal Central de Navegación -->
   <main class="hub-container">
     <header class="hub-hero">
-      <span class="hub-badge">Plataforma Institucional</span>
-      <h1>Bienvenido a DualOrganizer</h1>
-      <p>Gestión académica, registro de horas de tutoría y administración centralizada.</p>
+      <span class="hub-badge">Tus Espacios de Trabajo</span>
+      <h1 id="welcomeTitle">Bienvenido</h1>
+      <p>Selecciona un capítulo activo para gestionar asesorías o crea un nuevo espacio institucional.</p>
     </header>
 
-    <div class="hub-grid">
-      <!-- Tarjeta 1: Dashboard de Tutorías -->
-      <a href="dashboard.html" class="hub-card">
-        <div class="hub-card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
-        </div>
-        <div class="hub-card-body">
-          <h2>Dashboard de Tutorías</h2>
-          <p>Consulta tu cuadrícula semanal, agenda sesiones presenciales o virtuales y exporta reportes en CSV.</p>
-        </div>
-        <div class="hub-card-footer">
-          <span>Abrir cuadrícula</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
-        </div>
-      </a>
-
-      <!-- Tarjeta 2: Ficha del Tutor / Perfil -->
-      <a href="profile.html" class="hub-card">
-        <div class="hub-card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-        </div>
-        <div class="hub-card-body">
-          <h2>Ficha de Tutor</h2>
-          <p>Configura materias activas, franjas horarias de disponibilidad y canales de atención.</p>
-        </div>
-        <div class="hub-card-footer">
-          <span>Gestionar perfil</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
-        </div>
-      </a>
-
-      <!-- Tarjeta 3: Administración Central -->
-      <a href="admin.html" class="hub-card">
-        <div class="hub-card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-            </path>
-          </svg>
-        </div>
-        <div class="hub-card-body">
-          <h2>Administración</h2>
-          <p>Monitoreo institucional de tutores, aprobación de horas y configuración general.</p>
-        </div>
-        <div class="hub-card-footer">
-          <span>Abrir panel</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
-        </div>
-      </a>
+    <!-- Cuadrícula Dinámica de Capítulos -->
+    <div class="hub-grid" id="hubGrid" role="region" aria-label="Lista de capítulos y espacios activos">
+      <!-- Inyectado dinámicamente mediante js/hub.js -->
     </div>
   </main>
+
+  <!-- Modal Nativo: Crear Nuevo Capítulo (<dialog>) -->
+  <dialog class="hub-dialog" id="createChapterDialog" aria-labelledby="createDialogTitle">
+    <div class="dialog-surface">
+      <header class="dialog-header">
+        <h2 class="dialog-title" id="createDialogTitle">Crear Nuevo Capítulo</h2>
+        <button type="button" class="dialog-close-btn" data-action="close-create-dialog"
+          aria-label="Cerrar modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+
+      <form id="createChapterForm" class="dialog-form" autocomplete="off">
+        <div class="form-group">
+          <label for="newChapterName" class="form-label">Nombre del Capítulo o Facultad</label>
+          <input type="text" id="newChapterName" class="form-control" placeholder="Ej. Facultad de Ciencias Químicas"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="newChapterInstitution" class="form-label">Institución o Universidad</label>
+          <input type="text" id="newChapterInstitution" class="form-control" placeholder="Ej. Universidad Nacional"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="newChapterDepartment" class="form-label">Departamento o Carrera</label>
+          <input type="text" id="newChapterDepartment" class="form-control" placeholder="Ej. Ingeniería Bioquímica">
+        </div>
+
+        <div class="form-group">
+          <label for="newChapterDescription" class="form-label">Descripción del espacio</label>
+          <textarea id="newChapterDescription" class="form-control" rows="2"
+            placeholder="Propósito del programa de acompañamiento estudiantil..."></textarea>
+        </div>
+
+        <footer class="dialog-footer">
+          <button type="button" class="btn btn-secondary" data-action="close-create-dialog">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Crear Capítulo</button>
+        </footer>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal Nativo: Unirse a un Capítulo (<dialog>) -->
+  <dialog class="hub-dialog" id="joinChapterDialog" aria-labelledby="joinDialogTitle">
+    <div class="dialog-surface">
+      <header class="dialog-header">
+        <h2 class="dialog-title" id="joinDialogTitle">Unirse a un Capítulo Existente</h2>
+        <button type="button" class="dialog-close-btn" data-action="close-join-dialog" aria-label="Cerrar modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+
+      <form id="joinChapterForm" class="dialog-form" autocomplete="off">
+        <div class="form-group">
+          <label for="joinCodeInput" class="form-label">Código de Invitación</label>
+          <input type="text" id="joinCodeInput" class="form-control uppercase tabular-nums"
+            placeholder="EJ. ING-2026 O CIE-2026" required autocomplete="off">
+          <span class="form-hint">Prueba con códigos demo disponibles como <strong>ING-2026</strong>,
+            <strong>CIE-2026</strong> o <strong>MED-2026</strong>.</span>
+        </div>
+
+        <!-- Previsualización Dinámica del Capítulo Encontrado -->
+        <div class="chapter-preview-box is-hidden" id="chapterPreviewBox" aria-live="polite">
+          <span class="preview-title" id="previewTitle"></span>
+          <span class="preview-meta" id="previewMeta"></span>
+        </div>
+
+        <footer class="dialog-footer">
+          <button type="button" class="btn btn-secondary" data-action="close-join-dialog">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitJoin" disabled>Unirse al Capítulo</button>
+        </footer>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Notificación Toast Accesible -->
+  <div id="hubToast" class="hub-toast" role="status" aria-live="polite">
+    <span class="hub-toast-icon" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </span>
+    <span id="hubToastMsg">Acción completada</span>
+  </div>
+
+  <script src="js/hub.js"></script>
 </body>
 
 </html>

@@ -834,8 +834,11 @@ input:checked+.slider:before {
 }
 
 /* ==========================================================================
-   7. Adaptación Responsiva Compacta
+   7. Adaptación Responsiva Compacta — Mobile First
+   Dispositivo de referencia: 390 × 844 px
    ========================================================================== */
+
+/* ≤ 768px — Tablet portrait */
 @media (max-width: 768px) {
     .profile-header {
         flex-direction: column;
@@ -874,5 +877,202 @@ input:checked+.slider:before {
 
     .unsaved-content {
         justify-content: space-between;
+    }
+}
+
+/* ≤ 640px — Teléfono portrait */
+@media (max-width: 640px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    .profile-container {
+        padding: 10px 12px 96px;
+    }
+
+    /* Header del perfil: apilado */
+    .profile-header {
+        padding: 14px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .profile-avatar-wrapper {
+        width: 58px;
+        height: 58px;
+    }
+
+    .profile-info h1 {
+        font-size: clamp(1.1rem, 5vw, 1.3rem);
+    }
+
+    /* Quick stats: 2 columnas */
+    .quick-stats {
+        gap: 6px;
+    }
+
+    .stat-item {
+        padding: 7px 10px;
+    }
+
+    .stat-value {
+        font-size: 1rem;
+    }
+
+    /* Header actions: apilados */
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .header-actions .btn-header {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+
+    /* Tabs: scroll horizontal */
+    .tabs-nav {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+    }
+
+    .tabs-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab-btn {
+        white-space: nowrap;
+        padding: 8px 14px;
+        font-size: 0.825rem;
+        flex-shrink: 0;
+        min-height: 40px;
+    }
+
+    /* Form grid: 1 columna */
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    /* Inputs táctiles */
+    .form-control {
+        min-height: 44px;
+        font-size: 1rem;
+        padding: 10px 12px;
+    }
+
+    select.form-control {
+        min-height: 44px;
+    }
+
+    /* Checkbox más grandes */
+    .checkbox-label {
+        min-height: 44px;
+        align-items: center;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Tag input */
+    .tag-input-container {
+        padding: 8px;
+    }
+
+    .tag-input-field {
+        font-size: 0.95rem;
+        min-height: 36px;
+    }
+
+    /* Barra flotante: full-width, más grande */
+    .unsaved-changes-bar,
+    .profile-actions-bar {
+        width: calc(100% - 16px);
+        bottom: 8px;
+        left: 50%;
+        transform: translate(-50%, 14px) scale(0.98);
+        padding: 10px 14px;
+        border-radius: 8px;
+    }
+
+    .unsaved-changes-bar.visible,
+    .profile-actions-bar.visible {
+        transform: translate(-50%, 0) scale(1);
+    }
+
+    .unsaved-content {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .unsaved-actions {
+        flex-shrink: 0;
+        gap: 6px;
+    }
+
+    .btn-unsaved {
+        min-height: 36px;
+        padding: 6px 12px;
+    }
+
+    /* Toast: posición relativa a barra flotante */
+    .toast-notification,
+    .toast-feedback {
+        left: 12px;
+        right: 12px;
+        bottom: 80px;
+        width: auto;
+    }
+}
+
+/* ≤ 480px — Teléfono estándar portrait */
+@media (max-width: 480px) {
+    .profile-container {
+        padding: 8px 10px 96px;
+    }
+
+    .profile-header {
+        padding: 12px;
+    }
+
+    .profile-avatar-wrapper {
+        width: 52px;
+        height: 52px;
+    }
+
+    .profile-info h1 {
+        font-size: clamp(1.05rem, 4.5vw, 1.2rem);
+    }
+
+    .badge-role {
+        font-size: 0.7rem;
+        padding: 1px 6px;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+    }
+
+    .tab-section-title {
+        font-size: 0.9rem;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+    }
+
+    .tag-chip {
+        font-size: 0.78rem;
+        padding: 3px 6px;
     }
 }

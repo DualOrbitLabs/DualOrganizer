@@ -14,7 +14,7 @@
 
     <!-- Encabezado Institucional -->
     <header class="login-header">
-      <a href="hub.html" class="login-brand" aria-label="Ir al portal principal de DualOrganizer">
+      <a href="index.html" class="login-brand" aria-label="Ir al portal principal de DualOrganizer">
         <img src="global/DOLFNBB.png" alt="Logo de DualOrganizer" class="login-logo">
         <span class="login-title">DualOrganizer</span>
       </a>
@@ -78,6 +78,8 @@
                    class="form-control tabular-nums" 
                    placeholder="juan.perez@institucion.edu o TUT-2023-0891" 
                    required 
+                   minlength="5"
+                   maxlength="100"
                    autocomplete="username">
           </div>
           <span class="help-text" id="identifierHelp">
@@ -98,6 +100,8 @@
                    class="form-control input-with-toggle" 
                    placeholder="••••••••••••" 
                    required 
+                   minlength="6"
+                   maxlength="128"
                    autocomplete="current-password">
             <button type="button" 
                     id="btnTogglePassword" 
@@ -126,24 +130,7 @@
 
       </form>
 
-      <!-- Accesos Rápidos de Prueba (QA & Evaluación Docente) -->
-      <section class="demo-access-box" aria-label="Accesos rápidos para evaluación">
-        <span class="demo-title">Credenciales de Prueba (1-Click)</span>
-        <div class="demo-buttons-grid">
-          <button type="button" id="btnDemoTutor" class="btn-demo">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-            </svg>
-            <span>Demo Tutor (Juan Pérez)</span>
-          </button>
-          <button type="button" id="btnDemoAdmin" class="btn-demo">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-            </svg>
-            <span>Demo Admin (Coordinación)</span>
-          </button>
-        </div>
-      </section>
+
 
     </main>
 
@@ -169,7 +156,7 @@
         <form id="forgotForm">
           <div class="form-group">
             <label for="forgotEmailInput" class="form-label">Correo Institucional</label>
-            <input type="email" id="forgotEmailInput" class="form-control" placeholder="tu.nombre@institucion.edu" required>
+            <input type="email" id="forgotEmailInput" class="form-control" placeholder="tu.nombre@institucion.edu" required maxlength="100">
           </div>
 
           <div class="dialog-actions">

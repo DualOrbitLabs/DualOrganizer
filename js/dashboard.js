@@ -6,6 +6,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
 
+    // Validación de sesión
+    const sessionStr = sessionStorage.getItem('dualorganizer_session');
+    if (!sessionStr) {
+        window.location.href = 'login.html';
+        return;
+    }
+
     // --------------------------------------------------------------------------
     // 1. Estado y Datos Iniciales
     // --------------------------------------------------------------------------
@@ -44,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, '&#039;');
     }
 
-    // Cargar desde localStorage o inicializar con datos demo de tutoría
     const loadInitialData = () => {
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
@@ -55,44 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('Error al leer de localStorage:', err);
         }
 
-        const today = new Date();
-        const startOfWeek = getStartOfWeek(today);
-
-        const formatDateHelper = (offsetDays) => {
-            const d = new Date(startOfWeek);
-            d.setDate(startOfWeek.getDate() + offsetDays);
-            return formatDate(d);
-        };
-
-        return [
-            {
-                id: 'demo-1',
-                studentName: 'Ana Sofía Garza',
-                subject: 'Cálculo Diferencial',
-                hours: 1.5,
-                date: formatDateHelper(0), // Lunes
-                time: '10:00',
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 'demo-2',
-                studentName: 'Carlos Mendoza',
-                subject: 'Física Mecánica',
-                hours: 2.0,
-                date: formatDateHelper(2), // Miércoles
-                time: '14:00',
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 'demo-3',
-                studentName: 'Mariana Ruiz',
-                subject: 'Álgebra Lineal',
-                hours: 1.0,
-                date: formatDateHelper(4), // Viernes
-                time: '12:00',
-                createdAt: new Date().toISOString()
-            }
-        ];
+        return [];
     };
 
     let sessionsData = loadInitialData();
@@ -120,21 +89,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const kpiTotalSessions = document.getElementById('kpiTotalSessions');
     const kpiWeeklyAvg = document.getElementById('kpiWeeklyAvg');
 
-    // Filtro colapsable
-    const calendarWrapper = document.getElementById('calendarWrapper');
-    const btnToggleCalendar = document.getElementById('btnToggleCalendar');
-    const dateFilter = document.getElementById('dateFilter');
+    // Filtro colapsable (Eliminado)
 
     // Modal
     const sessionModal = document.getElementById('sessionModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const btnCancelModal = document.getElementById('btnCancelModal');
+    const btnDeleteModal = document.getElementById('btnDeleteModal');
     const sessionForm = document.getElementById('sessionForm');
     const modalDateInput = document.getElementById('date');
     const modalTimeInput = document.getElementById('time');
     const studentNameInput = document.getElementById('studentName');
     const subjectInput = document.getElementById('subject');
     const hoursInput = document.getElementById('hours');
+    const evidenceFileInput = document.getElementById('evidenceFile');
 
     // Toast
     const toastEl = document.getElementById('dashboardToast');
@@ -262,11 +230,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionItem.dataset.id = session.id;
                     sessionItem.title = `${session.subject} - Alumno: ${session.studentName} (${session.hours} hrs)`;
 
+                    const evidenceBadge = session.evidence 
+                        ? `<span class="badge-semantic green" title="Evidencia adjunta">
+                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                               <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                             </svg>
+                           </span>` 
+                        : '';
+
                     sessionItem.innerHTML = `
                         <span class="session-title">${escapeHTML(session.subject)}</span>
                         <div class="session-meta">
                             <span class="session-student">${escapeHTML(session.studentName)}</span>
-                            <span class="badge-semantic blue">${session.hours}h</span>
+                            <div style="display:flex; gap: 4px;">
+                                ${evidenceBadge}
+                                <span class="badge-semantic blue">${session.hours}h</span>
+                            </div>
                         </div>
                     `;
 
@@ -289,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
                 const sessionId = sessionEl.dataset.id;
                 const session = sessionsData.find(s => s.id === sessionId);
-                if (session) {
+                if (session && sessionModal) {
                     modalDateInput.value = session.date;
                     modalTimeInput.value = session.time;
                     studentNameInput.value = session.studentName;
@@ -297,7 +276,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     hoursInput.value = session.hours;
 
                     sessionForm.dataset.editingId = session.id;
-                    sessionModal.style.display = 'flex';
+                    if (btnDeleteModal) btnDeleteModal.style.display = 'block';
+                    sessionModal.showModal();
+                    setTimeout(() => studentNameInput?.focus(), 50);
                 }
                 return;
             }
@@ -309,6 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const time = slot.dataset.time;
                 if (date && time) {
                     delete sessionForm.dataset.editingId;
+                    if (btnDeleteModal) btnDeleteModal.style.display = 'none';
                     openModal(date, time);
                 }
             }
@@ -340,26 +322,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --------------------------------------------------------------------------
-    // 7. Filtro / Cajón Superior Colapsable
+    // 7. Funciones Defensivas de Tiempo y Validación de Ficheros
     // --------------------------------------------------------------------------
-    if (btnToggleCalendar && calendarWrapper) {
-        btnToggleCalendar.addEventListener('click', () => {
-            const isCollapsed = calendarWrapper.classList.toggle('collapsed');
-            btnToggleCalendar.textContent = isCollapsed ? 'Mostrar' : 'Ocultar';
+    const FILE_CONSTRAINTS = {
+        MAX_BYTES: 5 * 1024 * 1024, // 5 MB
+        ALLOWED_MIME_TYPES: ['image/jpeg', 'image/png', 'application/pdf']
+    };
+
+    function validateUploadedFile(file) {
+        if (!file) return { valid: true };
+
+        if (file.size > FILE_CONSTRAINTS.MAX_BYTES) {
+            const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+            return {
+                valid: false,
+                error: `El archivo (${sizeInMB} MB) excede el tamaño máximo permitido de 5 MB.`
+            };
+        }
+
+        if (!FILE_CONSTRAINTS.ALLOWED_MIME_TYPES.includes(file.type)) {
+            return {
+                valid: false,
+                error: 'Formato no permitido. Solo se aceptan archivos PDF e imágenes JPG o PNG.'
+            };
+        }
+
+        const sanitizedName = file.name.replace(/[^a-zA-Z0-9_.\-]/g, '_');
+        return { valid: true, sanitizedName };
+    }
+
+    function timeToMinutes(timeStr) {
+        if (!timeStr) return 0;
+        const [h, m] = timeStr.split(':').map(Number);
+        return (h || 0) * 60 + (m || 0);
+    }
+
+    function hasTimeOverlapConflict(candidate, existingSessions) {
+        const candStart = timeToMinutes(candidate.time);
+        const candEnd = candStart + Math.round(candidate.hours * 60);
+
+        return existingSessions.some((s) => {
+            if (candidate.id && s.id === candidate.id) return false;
+            if (s.date !== candidate.date) return false;
+
+            const sStart = timeToMinutes(s.time);
+            const sEnd = sStart + Math.round((Number(s.hours) || 1) * 60);
+
+            return candStart < sEnd && candEnd > sStart;
         });
     }
 
-    if (dateFilter) {
-        dateFilter.addEventListener('change', () => {
-            if (dateFilter.value) {
-                currentDate = new Date(dateFilter.value + 'T00:00:00');
-                renderWeeklyCalendar();
-            }
-        });
-    }
-
     // --------------------------------------------------------------------------
-    // 8. Gestión del Modal de Registro
+    // 8. Gestión del Modal Nativo (<dialog>) de Registro
     // --------------------------------------------------------------------------
     function openModal(date, time) {
         if (!sessionModal) return;
@@ -368,14 +382,15 @@ document.addEventListener('DOMContentLoaded', () => {
         modalDateInput.value = date;
         modalTimeInput.value = time;
         hoursInput.value = '1.0';
+        if (evidenceFileInput) evidenceFileInput.value = '';
 
-        sessionModal.style.display = 'flex';
+        sessionModal.showModal();
         setTimeout(() => studentNameInput?.focus(), 50);
     }
 
     function closeModal() {
-        if (sessionModal) {
-            sessionModal.style.display = 'none';
+        if (sessionModal && sessionModal.open) {
+            sessionModal.close();
             delete sessionForm.dataset.editingId;
         }
     }
@@ -383,66 +398,154 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
     if (btnCancelModal) btnCancelModal.addEventListener('click', closeModal);
 
-    window.addEventListener('click', (e) => {
-        if (e.target === sessionModal) {
-            closeModal();
-        }
-    });
+    if (btnDeleteModal) {
+        btnDeleteModal.addEventListener('click', () => {
+            const editingId = sessionForm.dataset.editingId;
+            if (editingId) {
+                if (confirm('¿Estás seguro de que deseas cancelar esta sesión?')) {
+                    sessionsData = sessionsData.filter(s => s.id !== editingId);
+                    showToast('Sesión cancelada con éxito');
+                    saveSessions();
+                    closeModal();
+                    updateKPIs();
+                    renderWeeklyCalendar();
+                }
+            }
+        });
+    }
 
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && sessionModal && sessionModal.style.display === 'flex') {
-            closeModal();
-        }
-    });
+    // Cierre al hacer clic fuera del diálogo (en ::backdrop)
+    if (sessionModal) {
+        sessionModal.addEventListener('click', (e) => {
+            const rect = sessionModal.getBoundingClientRect();
+            const isInDialog = (
+                rect.top <= e.clientY &&
+                e.clientY <= rect.top + rect.height &&
+                rect.left <= e.clientX &&
+                e.clientX <= rect.left + rect.width
+            );
+            if (!isInDialog) {
+                closeModal();
+            }
+        });
+    }
+
+    let isSessionSubmitting = false;
 
     if (sessionForm) {
         sessionForm.addEventListener('submit', (e) => {
             e.preventDefault();
+
+            if (isSessionSubmitting) return;
 
             if (!sessionForm.checkValidity()) {
                 sessionForm.reportValidity();
                 return;
             }
 
+            const rawStudentName = studentNameInput.value.trim();
+            const rawSubject = subjectInput.value.trim();
+            const rawHours = parseFloat(hoursInput.value) || 1.0;
+            const rawDate = modalDateInput.value;
+            const rawTime = modalTimeInput.value;
             const editingId = sessionForm.dataset.editingId;
 
-            if (editingId) {
-                // Actualizar sesión existente
-                const idx = sessionsData.findIndex(s => s.id === editingId);
-                if (idx !== -1) {
-                    sessionsData[idx].studentName = studentNameInput.value.trim();
-                    sessionsData[idx].subject = subjectInput.value.trim();
-                    sessionsData[idx].hours = parseFloat(hoursInput.value) || 1.0;
-                    sessionsData[idx].date = modalDateInput.value;
-                    sessionsData[idx].time = modalTimeInput.value;
-                    showToast('Sesión actualizada con éxito');
-                }
-            } else {
-                // Crear nueva sesión
-                const newSession = {
-                    id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 's-' + Date.now(),
-                    studentName: studentNameInput.value.trim(),
-                    subject: subjectInput.value.trim(),
-                    hours: parseFloat(hoursInput.value) || 1.0,
-                    date: modalDateInput.value,
-                    time: modalTimeInput.value,
-                    createdAt: new Date().toISOString()
-                };
-
-                sessionsData.push(newSession);
-                showToast('Sesión registrada con éxito');
+            // Validación 1: Límites de texto
+            if (rawStudentName.length < 3 || rawStudentName.length > 80) {
+                showToast('El nombre del alumno debe contener entre 3 y 80 caracteres.', 'warning');
+                studentNameInput.focus();
+                return;
             }
 
-            saveSessions();
-            closeModal();
+            if (rawSubject.length < 2 || rawSubject.length > 60) {
+                showToast('La materia debe contener entre 2 y 60 caracteres.', 'warning');
+                subjectInput.focus();
+                return;
+            }
 
-            updateKPIs();
-            renderWeeklyCalendar();
+            // Validación 2: Archivo de evidencia seguro
+            let evidenceFileName = null;
+            if (evidenceFileInput && evidenceFileInput.files.length > 0) {
+                const fileCheck = validateUploadedFile(evidenceFileInput.files[0]);
+                if (!fileCheck.valid) {
+                    showToast(fileCheck.error, 'warning');
+                    return;
+                }
+                evidenceFileName = fileCheck.sanitizedName;
+            }
+
+            // Validación 3: Solapamiento horario
+            const candidateSession = {
+                id: editingId || null,
+                date: rawDate,
+                time: rawTime,
+                hours: rawHours
+            };
+
+            if (hasTimeOverlapConflict(candidateSession, sessionsData)) {
+                showToast('Conflicto horario: Ya tienes una sesión agendada que se solapa en esa franja.', 'warning');
+                return;
+            }
+
+            const submitBtn = sessionForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Guardar Sesión';
+
+            try {
+                isSessionSubmitting = true;
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.setAttribute('aria-busy', 'true');
+                }
+
+                if (editingId) {
+                    const idx = sessionsData.findIndex(s => s.id === editingId);
+                    if (idx !== -1) {
+                        sessionsData[idx].studentName = rawStudentName;
+                        sessionsData[idx].subject = rawSubject;
+                        sessionsData[idx].hours = rawHours;
+                        sessionsData[idx].date = rawDate;
+                        sessionsData[idx].time = rawTime;
+                        if (evidenceFileName) {
+                            sessionsData[idx].evidence = evidenceFileName;
+                        }
+                        showToast('Sesión actualizada con éxito');
+                    }
+                } else {
+                    const newSession = {
+                        id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 's-' + Date.now(),
+                        studentName: rawStudentName,
+                        subject: rawSubject,
+                        hours: rawHours,
+                        date: rawDate,
+                        time: rawTime,
+                        evidence: evidenceFileName || null,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    sessionsData.push(newSession);
+                    showToast('Sesión registrada con éxito');
+                }
+
+                saveSessions();
+                closeModal();
+                updateKPIs();
+                renderWeeklyCalendar();
+            } catch (err) {
+                console.error('Error al guardar sesión:', err);
+                showToast('Ocurrió un error al guardar la sesión.', 'warning');
+            } finally {
+                isSessionSubmitting = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.removeAttribute('aria-busy');
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            }
         });
     }
 
     // --------------------------------------------------------------------------
-    // 9. Módulo de Exportación CSV
+    // 9. Módulo de Exportación CSV Seguro (Formula Injection Mitigation + Async Revoke)
     // --------------------------------------------------------------------------
     if (btnExportCSV) {
         btnExportCSV.addEventListener('click', () => {
@@ -452,16 +555,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const headers = ['ID', 'Alumno', 'Materia', 'Horas', 'Fecha', 'Hora', 'Creado'];
-            const escapeCSV = (field) => `"${String(field).replace(/"/g, '""')}"`;
+            const escapeCSV = (field) => {
+                if (field === null || field === undefined) return '""';
+                let str = String(field).trim();
+                if (/^[=+\-@\t\r]/.test(str)) {
+                    str = `'${str}`;
+                }
+                return `"${str.replace(/"/g, '""')}"`;
+            };
 
-            const csvRows = [headers.join(',')];
+            const csvRows = [headers.map(escapeCSV).join(',')];
 
             sessionsData.forEach(s => {
                 const row = [
                     escapeCSV(s.id),
                     escapeCSV(s.studentName),
                     escapeCSV(s.subject),
-                    s.hours,
+                    escapeCSV(s.hours),
                     escapeCSV(s.date),
                     escapeCSV(s.time),
                     escapeCSV(s.createdAt)
@@ -476,18 +586,38 @@ document.addEventListener('DOMContentLoaded', () => {
             const a = document.createElement('a');
             a.setAttribute('href', url);
             a.setAttribute('download', `reporte_sesiones_${formatDate(new Date())}.csv`);
+            a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
 
-            window.URL.revokeObjectURL(url);
-            showToast('Reporte CSV descargado');
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 1500);
+
+            showToast('Reporte CSV descargado con éxito');
         });
     }
 
     // --------------------------------------------------------------------------
-    // 10. Inicialización
+    // 10. Inicialización y Carga de Capítulo Activo
     // --------------------------------------------------------------------------
+    const initActiveChapter = () => {
+        try {
+            const activeChapterStr = sessionStorage.getItem('dualorganizer_active_chapter');
+            if (activeChapterStr) {
+                const chapter = JSON.parse(activeChapterStr);
+                const codeEl = document.getElementById('activeChapterCode');
+                const nameEl = document.getElementById('activeChapterName');
+                if (codeEl && chapter.code) codeEl.textContent = chapter.code;
+                if (nameEl && chapter.name) nameEl.textContent = chapter.name;
+            }
+        } catch (e) {
+            console.warn('Error al leer capítulo activo:', e);
+        }
+    };
+
+    initActiveChapter();
     updateKPIs();
     renderWeeklyCalendar();
 });

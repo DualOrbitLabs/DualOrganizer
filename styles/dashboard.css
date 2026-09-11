@@ -154,6 +154,58 @@ body {
     gap: 16px;
 }
 
+/* Tira de Identificación de Capítulo Activo */
+.active-chapter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    box-shadow: var(--shadow-soft);
+}
+
+.active-chapter-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.active-chapter-pill {
+    font-size: 0.725rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--slate-700);
+    background-color: var(--slate-100);
+    border: 1px solid var(--slate-300);
+    padding: 2px 7px;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.03em;
+}
+
+.active-chapter-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slate-900);
+}
+
+.switch-chapter-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--brand-navy);
+    text-decoration: none;
+    transition: color 150ms ease;
+}
+
+.switch-chapter-link:hover {
+    color: var(--brand-navy-hover);
+    text-decoration: underline;
+}
+
 /* --------------------------------------------------------------------------
    5. Barra / Cajón de Filtro Superior Colapsable
    -------------------------------------------------------------------------- */
@@ -576,8 +628,22 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   11. Modal Accesible de Registro de Sesiones
+   11. Modal Nativo (<dialog>) Accesible de Registro de Sesiones
    -------------------------------------------------------------------------- */
+dialog.modal-dialog {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: auto;
+    max-width: 90vw;
+}
+
+dialog.modal-dialog::backdrop {
+    background-color: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    animation: modalFadeIn 150ms var(--ease-standard);
+}
+
 .modal {
     position: fixed;
     top: 0;
@@ -785,20 +851,55 @@ body {
     display: inline-block;
 }
 
-/* --------------------------------------------------------------------------
-   13. Adaptación Responsiva
-   -------------------------------------------------------------------------- */
+/* ==========================================================================
+   13. Adaptación Responsiva — Mobile First
+   Dispositivo de referencia: 390 × 844 px
+   ========================================================================== */
+
+/* ≤ 900px — Tablet landscape: dar más espacio mínimo a columnas del calendario */
 @media (max-width: 900px) {
     .weekly-calendar-grid {
-        grid-template-columns: 46px repeat(7, minmax(110px, 1fr));
+        grid-template-columns: 46px repeat(7, minmax(90px, 1fr));
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dashboard-shell {
+        padding: clamp(10px, 1.5vw, 16px);
+        gap: 12px;
     }
 }
 
-@media (max-width: 600px) {
-    .kpi-strip {
-        grid-template-columns: 1fr;
+/* ≤ 768px — Tablet portrait */
+@media (max-width: 768px) {
+    .dashboard-shell {
+        padding: 12px;
+        gap: 10px;
     }
 
+    /* Barra de capítulo activo */
+    .active-chapter-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 10px 14px;
+    }
+
+    .active-chapter-info {
+        flex-wrap: wrap;
+    }
+
+    /* KPIs: 2 columnas */
+    .kpi-strip {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .kpi-card {
+        padding: 10px 14px;
+    }
+
+    /* Controles del calendario */
     .calendar-header-controls {
         flex-direction: column;
         align-items: flex-start;
@@ -807,5 +908,207 @@ body {
     .calendar-nav-actions {
         width: 100%;
         justify-content: space-between;
+    }
+
+    /* Barra de filtro */
+    .calendar-content {
+        flex-direction: column;
+        align-items: flex-start;
+        max-height: 240px;
+        padding: 10px 16px;
+        gap: 8px;
+    }
+
+    /* Modal más ancho */
+    .modal-content {
+        padding: 16px 18px;
+    }
+}
+
+/* ≤ 640px — Teléfono portrait */
+@media (max-width: 640px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    .dashboard-shell {
+        padding: 8px 12px 80px;
+        gap: 8px;
+    }
+
+    /* Barra de capítulo */
+    .active-chapter-pill {
+        font-size: 0.7rem;
+    }
+
+    .active-chapter-name {
+        font-size: 0.825rem;
+    }
+
+    /* KPIs: 2 columnas, compacto */
+    .kpi-strip {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .kpi-value {
+        font-size: clamp(1.2rem, 6vw, 1.5rem);
+    }
+
+    .kpi-label {
+        font-size: 0.7rem;
+    }
+
+    /* Calendario principal */
+    .calendar-main {
+        padding: 10px 8px;
+        gap: 8px;
+        border-radius: 6px;
+    }
+
+    .current-week-heading {
+        font-size: 0.9rem;
+    }
+
+    /* Cuadrícula semanal: scroll horizontal siempre */
+    .weekly-calendar-grid {
+        grid-template-columns: 40px repeat(7, minmax(80px, 1fr));
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--slate-300) transparent;
+        max-height: calc(100vh - 300px);
+    }
+
+    .weekly-calendar-grid::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .weekly-calendar-grid::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .weekly-calendar-grid::-webkit-scrollbar-thumb {
+        background: var(--slate-300);
+        border-radius: 2px;
+    }
+
+    /* Celdas más compactas en móvil */
+    .grid-cell.slot {
+        min-height: 48px;
+        padding: 2px;
+    }
+
+    .grid-cell.header {
+        padding: 6px 2px;
+    }
+
+    .grid-cell.header .day-name {
+        font-size: 0.7rem;
+    }
+
+    .grid-cell.header .day-date {
+        font-size: 0.7rem;
+    }
+
+    /* Botones de navegación táctiles */
+    .btn-nav,
+    .btn-today {
+        min-height: 36px;
+        padding: 6px 10px;
+    }
+
+    /* Barra de filtro: comprimida */
+    .calendar-header {
+        padding: 6px 12px;
+    }
+
+    .btn-toggle-calendar {
+        min-height: 36px;
+        padding: 6px 10px;
+    }
+
+    /* Modal: ancho completo, desliza desde abajo */
+    .modal {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 12px 12px 0 0;
+        padding: 20px 16px;
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        animation: modalSlideUp 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .btn-modal-cancel,
+    .btn-primary {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    /* Inputs del modal más altos para touch */
+    .form-control {
+        min-height: 44px;
+        font-size: 1rem;
+        padding: 10px;
+    }
+
+    /* Toast */
+    .dashboard-toast {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        width: auto;
+    }
+}
+
+/* ≤ 480px — Teléfono estándar portrait */
+@media (max-width: 480px) {
+    /* KPIs a 2 columnas apretadas */
+    .kpi-strip {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .kpi-card {
+        padding: 8px 10px;
+    }
+
+    .kpi-value {
+        font-size: clamp(1.1rem, 5.5vw, 1.35rem);
+    }
+
+    /* Calendario */
+    .weekly-calendar-grid {
+        grid-template-columns: 38px repeat(7, minmax(72px, 1fr));
+    }
+
+    /* Sesiones compactas */
+    .session-item {
+        font-size: 0.7rem;
+        padding: 2px 3px;
+    }
+
+    .session-meta {
+        display: none;
     }
 }

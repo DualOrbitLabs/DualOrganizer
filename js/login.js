@@ -145,19 +145,35 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
+  // Constantes de Validación Defensiva (RFC 5322 & Políticas Institucionales)
+  // --------------------------------------------------------------------------
+  const EMAIL_STRICT_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+  const INSTITUTIONAL_ID_REGEX = /^[A-Za-z0-9_\-\.]{3,30}$/;
+
+  // --------------------------------------------------------------------------
   // 6. Procesamiento del Formulario de Inicio de Sesión
   // --------------------------------------------------------------------------
+  let isLoginSubmitting = false;
+
   if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       clearAlert();
 
+      if (isLoginSubmitting) return;
+
       const identifier = identifierInput.value.trim();
       const password = passwordInput.value;
 
-      // Validación 1: Campos requeridos
+      // Validación 1: Campos requeridos y límites de longitud
       if (!identifier) {
         showAlert('Por favor ingresa tu correo institucional o matrícula.');
+        identifierInput.focus();
+        return;
+      }
+
+      if (identifier.length < 5 || identifier.length > 100) {
+        showAlert('El identificador debe contener entre 5 y 100 caracteres.');
         identifierInput.focus();
         return;
       }
@@ -168,49 +184,70 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Validación 2: Longitud mínima de contraseña
-      if (password.length < 6) {
-        showAlert('La contraseña debe contener al menos 6 caracteres.');
+      // Validación 2: Longitud de contraseña
+      if (password.length < 6 || password.length > 128) {
+        showAlert('La contraseña debe contener entre 6 y 128 caracteres.');
         passwordInput.focus();
         return;
       }
 
-      // Validación 3: Formato de identificador (si contiene @ debe ser correo válido)
+      // Validación 3: Formato estricto de identificador
       if (identifier.includes('@')) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(identifier)) {
-          showAlert('Por favor proporciona un formato de correo electrónico válido.');
+        if (!EMAIL_STRICT_REGEX.test(identifier)) {
+          showAlert('Por favor proporciona un formato de correo electrónico institucional válido.');
+          identifierInput.focus();
+          return;
+        }
+      } else {
+        if (!INSTITUTIONAL_ID_REGEX.test(identifier)) {
+          showAlert('El formato de matrícula o identificador contiene caracteres no permitidos.');
           identifierInput.focus();
           return;
         }
       }
 
-      // Estado de carga en botón
+      // Estado de carga y bloqueo de doble submit
+      isLoginSubmitting = true;
       btnSubmitLogin.disabled = true;
+      btnSubmitLogin.setAttribute('aria-busy', 'true');
       const originalBtnText = btnSubmitLogin.innerHTML;
       btnSubmitLogin.innerHTML = '<span>Verificando credenciales...</span>';
 
-      // Simulación de autenticación institucional
-      setTimeout(() => {
-        // Almacenar sesión en sessionStorage
-        const sessionData = {
-          role: currentRole,
-          identifier: identifier,
-          name: currentRole === 'ADMIN' ? 'Coordinador General' : 'Juan Pérez',
-          loginTime: new Date().toISOString()
-        };
-        sessionStorage.setItem('dualorganizer_session', JSON.stringify(sessionData));
-
-        showAlert('¡Credenciales válidas! Redirigiendo a tu espacio...', 'success');
-
+      try {
+        // Simulación de autenticación institucional
         setTimeout(() => {
-          if (currentRole === 'ADMIN') {
-            window.location.href = 'admin.html';
-          } else {
-            window.location.href = 'dashboard.html';
+          try {
+            // Almacenar sesión en sessionStorage
+            const sessionData = {
+              role: currentRole,
+              identifier: identifier.toLowerCase(),
+              name: currentRole === 'ADMIN' ? 'Coordinador General' : 'Juan Pérez',
+              loginTime: new Date().toISOString()
+            };
+            sessionStorage.setItem('dualorganizer_session', JSON.stringify(sessionData));
+
+            showAlert('¡Credenciales válidas! Redirigiendo a tu espacio...', 'success');
+
+            setTimeout(() => {
+              window.location.href = 'hub.html';
+            }, 600);
+          } catch (storageErr) {
+            console.error('Error al persistir sesión:', storageErr);
+            showAlert('Error al procesar la sesión en el navegador. Revisa el almacenamiento local.');
+            isLoginSubmitting = false;
+            btnSubmitLogin.disabled = false;
+            btnSubmitLogin.removeAttribute('aria-busy');
+            btnSubmitLogin.innerHTML = originalBtnText;
           }
-        }, 600);
-      }, 700);
+        }, 700);
+      } catch (err) {
+        console.error('Error en proceso de login:', err);
+        showAlert('Ocurrió un error inesperado. Inténtalo nuevamente.');
+        isLoginSubmitting = false;
+        btnSubmitLogin.disabled = false;
+        btnSubmitLogin.removeAttribute('aria-busy');
+        btnSubmitLogin.innerHTML = originalBtnText;
+      }
     });
   }
 
@@ -245,22 +282,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  let isForgotSubmitting = false;
   if (forgotForm && forgotDialog) {
     forgotForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      if (isForgotSubmitting) return;
+
       const email = document.getElementById('forgotEmailInput').value.trim();
-      if (!email || !email.includes('@')) {
+      if (!email || !EMAIL_STRICT_REGEX.test(email) || email.length > 100) {
         forgotAlert.className = 'login-alert danger';
-        forgotAlert.textContent = 'Por favor ingresa un correo electrónico válido.';
+        forgotAlert.textContent = 'Por favor ingresa un correo electrónico institucional válido (máx. 100 caracteres).';
         forgotAlert.removeAttribute('hidden');
         return;
       }
+
+      isForgotSubmitting = true;
+      const submitBtn = forgotForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
 
       forgotAlert.className = 'login-alert success';
       forgotAlert.textContent = `Hemos enviado un enlace de restablecimiento a ${email}. Revisa tu bandeja institucional.`;
       forgotAlert.removeAttribute('hidden');
 
       setTimeout(() => {
+        isForgotSubmitting = false;
+        if (submitBtn) submitBtn.disabled = false;
         forgotDialog.close();
       }, 2500);
     });

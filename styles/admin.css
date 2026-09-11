@@ -1010,8 +1010,11 @@ th[aria-sort="descending"] .sort-indicator {
 }
 
 /* --------------------------------------------------------------------------
-   12. Responsividad Adaptativa
+   12. Responsividad Adaptativa — Mobile First
+   Dispositivo de referencia: 390 × 844 px
    -------------------------------------------------------------------------- */
+
+/* ≤ 768px — Tablet portrait */
 @media (max-width: 768px) {
   .admin-header {
     flex-direction: column;
@@ -1044,3 +1047,226 @@ th[aria-sort="descending"] .sort-indicator {
     width: 100%;
   }
 }
+
+/* ≤ 640px — Teléfono portrait */
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .admin-container {
+    padding: 10px 12px 80px;
+  }
+
+  /* Header: compacto */
+  .admin-header {
+    padding: 16px;
+    border-radius: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .admin-title {
+    font-size: clamp(1.2rem, 5.5vw, 1.5rem);
+  }
+
+  .admin-subtitle {
+    font-size: 0.8rem;
+  }
+
+  /* KPIs: 2 columnas */
+  .admin-kpis {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .kpi-card {
+    min-width: 0;
+    padding: 8px 12px;
+  }
+
+  .kpi-card__value {
+    font-size: 1.1rem;
+  }
+
+  /* Tabs: scroll horizontal */
+  .admin-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-tab-btn {
+    padding: 8px 12px;
+    font-size: 0.825rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-height: 40px;
+  }
+
+  /* Directorio de tutores: 1 columna */
+  .members-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .member-card {
+    padding: 14px;
+  }
+
+  /* Toolbar de búsqueda y filtros */
+  .toolbar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .toolbar-search {
+    flex: none;
+    width: 100%;
+  }
+
+  .toolbar-search__input {
+    width: 100%;
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .toolbar-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .form-select {
+    width: 100%;
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .btn--outline-action {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  /* Tabla: scroll horizontal con scrollbar visible */
+  .table-responsive {
+    border-radius: 6px;
+  }
+
+  .data-table thead th,
+  .data-table td {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .data-table thead th {
+    font-size: 0.7rem;
+  }
+
+  /* Botones de acción táctiles */
+  .btn {
+    min-height: 44px;
+    padding: 8px 14px;
+  }
+
+  /* Dialog: bottom-sheet en móvil */
+  .admin-dialog {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .admin-dialog__surface {
+    padding: 20px 16px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .admin-dialog__footer {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .admin-dialog__footer .btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  /* Dialog meta grid: 1 columna */
+  .dialog-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Toast */
+  .admin-toast {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    font-size: 0.8rem;
+  }
+}
+
+/* ≤ 480px — Teléfono estándar portrait */
+@media (max-width: 480px) {
+  .admin-container {
+    padding: 8px 10px 80px;
+  }
+
+  .admin-header {
+    padding: 12px;
+  }
+
+  .admin-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .kpi-card {
+    padding: 7px 10px;
+  }
+
+  .kpi-card__value {
+    font-size: 1rem;
+  }
+
+  .member-card {
+    padding: 12px;
+  }
+
+  .member-card__avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .member-card__name {
+    font-size: 0.875rem;
+  }
+
+  /* Tabla condensada */
+  .data-table thead th,
+  .data-table td {
+    padding: 6px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+

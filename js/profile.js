@@ -7,6 +7,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
 
+    // Validación de sesión
+    const sessionStr = sessionStorage.getItem('dualorganizer_session');
+    if (!sessionStr) {
+        window.location.href = 'login.html';
+        return;
+    }
+
     // --------------------------------------------------------------------------
     // Sistema Compartido de Notificaciones Toast Accesible
     // --------------------------------------------------------------------------
@@ -27,6 +34,83 @@ document.addEventListener('DOMContentLoaded', () => {
             toast.setAttribute('aria-hidden', 'true');
         }, 3000);
     };
+
+    // --------------------------------------------------------------------------
+    // Carga e Hidratación de Sesión del Usuario
+    // --------------------------------------------------------------------------
+    const STORAGE_SESSION_KEY = 'dualorganizer_session';
+    const sessionRaw = sessionStorage.getItem(STORAGE_SESSION_KEY);
+    if (sessionRaw) {
+        try {
+            const userSession = JSON.parse(sessionRaw);
+            const profileDisplayName = document.getElementById('profileDisplayName');
+            const avatarInitials = document.querySelector('.avatar-initials');
+            const profileAvatar = document.querySelector('.profile-avatar');
+            const badgeRole = document.querySelector('.badge-role');
+            const inputFullName = document.getElementById('inputFullName');
+            const inputEmail = document.getElementById('inputEmail');
+
+            if (userSession.name) {
+                if (profileDisplayName) profileDisplayName.textContent = userSession.name;
+                if (inputFullName) inputFullName.value = userSession.name;
+
+                // Generar iniciales dinámicas
+                const nameParts = userSession.name.trim().split(/\s+/);
+                const initials = nameParts.length === 1
+                    ? nameParts[0].substring(0, 2).toUpperCase()
+                    : (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
+
+                if (avatarInitials) avatarInitials.textContent = initials;
+                if (profileAvatar) profileAvatar.setAttribute('aria-label', `Avatar de ${userSession.name}`);
+            }
+
+            if (userSession.identifier && inputEmail) {
+                inputEmail.value = userSession.identifier;
+            }
+
+            if (userSession.role === 'ADMIN') {
+                if (badgeRole) badgeRole.textContent = 'Coordinación Académica';
+                const studentIdInput = document.getElementById('inputStudentId');
+                if (studentIdInput) studentIdInput.value = 'ADM-2026-0001';
+            }
+
+            // Hidratar perfil extendido si existe en localStorage
+            const savedProfileRaw = localStorage.getItem('dualorganizer_profile_v1');
+            if (savedProfileRaw) {
+                try {
+                    const savedProfile = JSON.parse(savedProfileRaw);
+                    if (savedProfile.phone) {
+                        const inputPhone = document.getElementById('inputPhone');
+                        if (inputPhone) inputPhone.value = savedProfile.phone;
+                    }
+                    if (savedProfile.semester) {
+                        const selectSemester = document.getElementById('selectSemester');
+                        if (selectSemester) selectSemester.value = savedProfile.semester;
+                    }
+                    if (savedProfile.description) {
+                        const textareaDesc = document.getElementById('textareaDescription');
+                        if (textareaDesc) textareaDesc.value = savedProfile.description;
+                    }
+                    if (savedProfile.timeSlots) {
+                        const inputTime = document.getElementById('inputTimeSlots');
+                        if (inputTime) inputTime.value = savedProfile.timeSlots;
+                    }
+                    if (savedProfile.meetingUrl) {
+                        const inputUrl = document.getElementById('inputMeetingUrl');
+                        if (inputUrl) inputUrl.value = savedProfile.meetingUrl;
+                    }
+                    if (savedProfile.materias) {
+                        const hiddenMat = document.getElementById('materiasHidden') || document.getElementById('hiddenMaterias');
+                        if (hiddenMat) hiddenMat.value = savedProfile.materias;
+                    }
+                } catch (e) {
+                    console.warn('Error al leer perfil persistido:', e);
+                }
+            }
+        } catch (err) {
+            console.warn('Error al procesar la sesión en profile.js:', err);
+        }
+    }
 
     // ==========================================================================
     // 1. Tag-Input Dinámico para Materias
@@ -100,17 +184,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
+        const MAX_TAGS = 12;
+        const MAX_TAG_LENGTH = 40;
+
         const addTag = (text) => {
-            const cleaned = text.trim().replace(/,+$/, '').trim();
+            const cleaned = text.trim().replace(/,+$/, '').replace(/[^A-Za-zÀ-ÿ0-9\s\.\-]/g, '').trim();
             if (!cleaned) return false;
 
-            const exists = tags.some(t => t.toLowerCase() === cleaned.toLowerCase());
+            if (tags.length >= MAX_TAGS) {
+                showToast('Se ha alcanzado el límite máximo de 12 materias.');
+                inputField.value = '';
+                return false;
+            }
+
+            const truncated = cleaned.slice(0, MAX_TAG_LENGTH);
+            const exists = tags.some(t => t.toLowerCase() === truncated.toLowerCase());
             if (exists) {
                 inputField.value = '';
                 return false;
             }
 
-            tags.push(cleaned);
+            tags.push(truncated);
             render();
             syncState(true);
             inputField.value = '';
@@ -320,6 +414,26 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Cambios descartados');
         };
 
+        const ALLOWED_URL_SCHEMES = ['https:'];
+        const ALLOWED_MEETING_HOSTNAMES = [
+            'meet.google.com',
+            'zoom.us',
+            'teams.microsoft.com',
+            'webex.com'
+        ];
+
+        const isSafeMeetingURL = (urlString) => {
+            if (!urlString || urlString.trim() === '') return true;
+            try {
+                const parsed = new URL(urlString.trim());
+                if (!ALLOWED_URL_SCHEMES.includes(parsed.protocol)) return false;
+                if (parsed.username || parsed.password) return false;
+                return ALLOWED_MEETING_HOSTNAMES.some(h => parsed.hostname === h || parsed.hostname.endsWith(`.${h}`));
+            } catch {
+                return false;
+            }
+        };
+
         const saveChanges = (e) => {
             if (e) e.preventDefault();
 
@@ -328,7 +442,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            initialSnapshot = getSnapshot();
+            const currentSnapshot = getSnapshot();
+
+            // Validación de URL de videoconferencia segura
+            if (currentSnapshot.meetingUrl && !isSafeMeetingURL(currentSnapshot.meetingUrl)) {
+                showToast('El enlace debe ser una URL segura HTTPS de Google Meet, Zoom, Teams o Webex.');
+                const meetingInput = document.getElementById('inputMeetingUrl');
+                if (meetingInput) meetingInput.focus();
+                return;
+            }
+
+            // 1. Sincronizar dualorganizer_session
+            const sessionRaw = sessionStorage.getItem(STORAGE_SESSION_KEY);
+            if (sessionRaw) {
+                try {
+                    const session = JSON.parse(sessionRaw);
+                    session.name = currentSnapshot.fullName?.trim() || session.name;
+                    sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(session));
+                } catch (err) {
+                    console.warn('Error al actualizar sesión en storage:', err);
+                }
+            }
+
+            // 2. Persistir perfil completo en localStorage
+            try {
+                localStorage.setItem('dualorganizer_profile_v1', JSON.stringify(currentSnapshot));
+            } catch (err) {
+                console.warn('Error al persistir perfil en localStorage:', err);
+            }
+
+            // 3. Actualizar elementos visuales dependientes de inmediato
+            const profileDisplayName = document.getElementById('profileDisplayName');
+            if (profileDisplayName && currentSnapshot.fullName) {
+                profileDisplayName.textContent = currentSnapshot.fullName;
+
+                const nameParts = currentSnapshot.fullName.trim().split(/\s+/);
+                const initials = nameParts.length === 1
+                    ? nameParts[0].substring(0, 2).toUpperCase()
+                    : (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
+
+                const avatarInitials = document.querySelector('.avatar-initials');
+                if (avatarInitials) avatarInitials.textContent = initials;
+            }
+
+            initialSnapshot = { ...currentSnapshot };
             isDirty = false;
             updateUI();
             showToast('Cambios guardados con éxito');

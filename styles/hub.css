@@ -1,20 +1,46 @@
 /* ==========================================================================
    DualOrganizer - Estilos del Hub Portal (Art Director UI)
    Paleta: Escala neutra Slate / Zinc, Navy institucional
+   Arquitectura: CSS3 Nativo, Flexbox/CSS Grid, clamp(), Zero-Framework
    ========================================================================== */
 
 :root {
-    --hub-bg: #f8fafc;
+    /* Escala Slate Neutra */
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --slate-950: #020617;
+
+    /* Superficies y Bordes */
+    --hub-bg: var(--slate-50);
     --hub-card-bg: #ffffff;
-    --hub-border: #e2e8f0;
-    --hub-border-hover: #cbd5e1;
-    --hub-text-dark: #0f172a;
-    --hub-text-muted: #64748b;
+    --hub-border: var(--slate-200);
+    --hub-border-hover: var(--slate-300);
+    --hub-text-dark: var(--slate-900);
+    --hub-text-muted: var(--slate-600);
+
+    /* Marca Institucional */
     --hub-navy: #192a88;
+    --hub-navy-hover: #13216e;
     --hub-navy-subtle: rgba(25, 42, 136, 0.06);
+    --status-success: #059669;
 
     --transition-micro: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.03);
+    --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+    --shadow-hover: 0 4px 12px 0 rgba(15, 23, 42, 0.08);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
 body {
@@ -22,12 +48,15 @@ body {
     color: var(--hub-text-dark);
     margin: 0;
     font-family: 'Avenir', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
 .hub-container {
     max-width: 1080px;
     margin: 0 auto;
     padding: clamp(20px, 4vw, 40px) 20px;
+    padding-bottom: 80px;
 }
 
 .hub-hero {
@@ -64,29 +93,68 @@ body {
     max-width: 600px;
 }
 
+/* --------------------------------------------------------------------------
+   Cuadrícula de Capítulos (Hub Grid)
+   -------------------------------------------------------------------------- */
 .hub-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 18px;
 }
 
 .hub-card {
     background-color: var(--hub-card-bg);
     border: 1px solid var(--hub-border);
-    border-radius: 6px;
-    padding: 20px;
+    border-radius: 8px;
+    padding: 22px;
     text-decoration: none;
     color: inherit;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     box-shadow: var(--shadow-card);
     transition: var(--transition-micro);
+    position: relative;
+    cursor: pointer;
 }
 
 .hub-card:hover {
     border-color: var(--hub-navy);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px 0 rgba(15, 23, 42, 0.08);
+    box-shadow: var(--shadow-hover);
+}
+
+.hub-card:focus-visible {
+    outline: 2px solid var(--hub-navy);
+    outline-offset: 2px;
+}
+
+.primary-card {
+    border-color: rgba(25, 42, 136, 0.25);
+    background-color: #ffffff;
+}
+
+.primary-card:hover {
+    background-color: #ffffff;
+    border-color: var(--hub-navy);
+}
+
+.action-card {
+    border-style: dashed;
+    border-width: 1.5px;
+    background-color: transparent;
+}
+
+.action-card:hover {
+    background-color: #ffffff;
+    border-color: var(--hub-navy);
+}
+
+.hub-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
 }
 
 .hub-card-icon {
@@ -99,8 +167,14 @@ body {
     align-items: center;
     justify-content: center;
     color: var(--hub-navy);
-    margin-bottom: 14px;
     transition: var(--transition-micro);
+    flex-shrink: 0;
+}
+
+.action-card .hub-card-icon {
+    background-color: var(--slate-100);
+    border-color: var(--slate-200);
+    color: var(--slate-700);
 }
 
 .hub-card:hover .hub-card-icon {
@@ -108,15 +182,58 @@ body {
     color: #ffffff;
 }
 
-.hub-card-body h2 {
-    font-size: 1.05rem;
+.action-card:hover .hub-card-icon {
+    background-color: var(--hub-navy);
+    color: #ffffff;
+}
+
+.chapter-badges {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.chapter-code-badge {
+    font-size: 0.725rem;
     font-weight: 700;
-    margin: 0 0 6px 0;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--slate-700);
+    background-color: var(--slate-100);
+    border: 1px solid var(--slate-300);
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+}
+
+.chapter-role-badge {
+    font-size: 0.725rem;
+    font-weight: 600;
+    color: #1e40af;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 2px 7px;
+    border-radius: 4px;
+}
+
+.hub-card-body h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 4px 0;
     color: var(--hub-text-dark);
 }
 
+.chapter-institution {
+    display: block;
+    font-size: 0.775rem;
+    color: var(--slate-500);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
 .hub-card-body p {
-    font-size: 0.825rem;
+    font-size: 0.85rem;
     color: var(--hub-text-muted);
     margin: 0;
     line-height: 1.45;
@@ -125,19 +242,392 @@ body {
 .hub-card-footer {
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: space-between;
     margin-top: 18px;
-    padding-top: 12px;
-    border-top: 1px solid #f1f5f9;
-    font-size: 0.8rem;
+    padding-top: 14px;
+    border-top: 1px solid var(--slate-100);
+    font-size: 0.825rem;
     font-weight: 600;
     color: var(--hub-navy);
 }
 
-.hub-card-footer svg {
-    transition: transform 150ms ease;
+.action-card .hub-card-footer {
+    color: var(--slate-700);
 }
 
-.hub-card:hover .hub-card-footer svg {
-    transform: translateX(3px);
+.hub-card:hover .hub-card-footer {
+    color: var(--hub-navy);
+}
+
+/* --------------------------------------------------------------------------
+   Modales Nativos (<dialog>) para Crear y Unirse a Capítulo
+   -------------------------------------------------------------------------- */
+.hub-dialog {
+    padding: 0;
+    border: 1px solid var(--slate-700);
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.25);
+    max-width: 500px;
+    width: calc(100% - 32px);
+    margin: auto;
+}
+
+.hub-dialog::backdrop {
+    background-color: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(2px);
+}
+
+.dialog-surface {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--slate-200);
+    padding-bottom: 12px;
+}
+
+.dialog-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--slate-900);
+}
+
+.dialog-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--slate-400);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: var(--transition-micro);
+}
+
+.dialog-close-btn:hover {
+    color: var(--slate-900);
+}
+
+.dialog-close-btn:focus-visible {
+    outline: 2px solid var(--hub-navy);
+}
+
+.dialog-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--slate-900);
+}
+
+.form-control {
+    padding: 9px 12px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--slate-900);
+    background-color: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: 6px;
+    transition: border-color var(--transition-micro), box-shadow var(--transition-micro);
+}
+
+.form-control:hover {
+    border-color: var(--slate-300);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--slate-900);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.08);
+}
+
+.form-control.uppercase {
+    text-transform: uppercase;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+}
+
+.form-hint {
+    font-size: 0.775rem;
+    color: var(--slate-500);
+    margin-top: 2px;
+}
+
+/* Vista previa de capítulo en diálogo de unión */
+.chapter-preview-box {
+    background-color: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.chapter-preview-box.is-hidden {
+    display: none;
+}
+
+.preview-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--slate-900);
+}
+
+.preview-meta {
+    font-size: 0.8rem;
+    color: var(--slate-600);
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--slate-200);
+}
+
+/* Botones */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition-micro);
+    text-decoration: none;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--hub-navy);
+    outline-offset: 2px;
+}
+
+.btn-primary {
+    background-color: var(--hub-navy);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: var(--hub-navy-hover);
+}
+
+.btn-secondary {
+    background-color: var(--slate-100);
+    border-color: var(--slate-300);
+    color: var(--slate-800);
+}
+
+.btn-secondary:hover {
+    background-color: var(--slate-200);
+    color: var(--slate-900);
+}
+
+/* --------------------------------------------------------------------------
+   Toast de Notificación
+   -------------------------------------------------------------------------- */
+.hub-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: var(--slate-900);
+    color: #ffffff;
+    border: 1px solid var(--slate-700);
+    padding: 10px 18px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.875rem;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
+    z-index: 1200;
+    transform: translateY(30px);
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition-micro);
+}
+
+.hub-toast.is-visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.hub-toast-icon {
+    color: var(--status-success);
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   Responsive — Mobile First
+   Dispositivo de referencia: 390 × 844 px
+   ========================================================================== */
+
+/* ≤ 768px — Tablet / teléfono landscape */
+@media (max-width: 768px) {
+    .hub-container {
+        padding: 16px 16px 80px;
+    }
+
+    .hub-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .hub-card {
+        padding: 18px;
+    }
+
+    .hub-dialog {
+        width: calc(100% - 24px);
+    }
+}
+
+/* ≤ 640px — Teléfono portrait */
+@media (max-width: 640px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    .hub-container {
+        padding: 12px 12px 80px;
+    }
+
+    /* Hero compacto */
+    .hub-hero {
+        margin-bottom: 18px;
+    }
+
+    .hub-hero h1 {
+        font-size: clamp(1.25rem, 6vw, 1.6rem);
+    }
+
+    .hub-hero p {
+        font-size: 0.875rem;
+    }
+
+    /* Cards a 1 columna con padding reducido */
+    .hub-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .hub-card {
+        padding: 16px;
+        border-radius: 6px;
+    }
+
+    /* Badges compactos */
+    .chapter-badges {
+        gap: 4px;
+    }
+
+    /* Hub card footer: touch-friendly */
+    .hub-card-footer {
+        font-size: 0.8rem;
+        min-height: 36px;
+        align-items: center;
+    }
+
+    /* Botones del diálogo: táctiles */
+    .btn {
+        min-height: 44px;
+        padding: 10px 16px;
+    }
+
+    /* Dialog: full-width con márgenes mínimos */
+    .hub-dialog {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        border-radius: 12px 12px 0 0;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+    }
+
+    .dialog-surface {
+        padding: 20px 16px;
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .dialog-footer {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .dialog-footer .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Inputs en formularios del diálogo */
+    .form-control {
+        min-height: 44px;
+        font-size: 1rem; /* evita zoom iOS */
+        padding: 10px 12px;
+    }
+
+    /* Toast: pantalla completa inferior */
+    .hub-toast {
+        left: 12px;
+        right: 12px;
+        bottom: 16px;
+        width: auto;
+        font-size: 0.825rem;
+    }
+}
+
+/* ≤ 480px — Teléfono estándar portrait */
+@media (max-width: 480px) {
+    .hub-badge {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+    }
+
+    .hub-card {
+        padding: 14px;
+    }
+
+    .hub-card-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    .chapter-code-badge,
+    .chapter-status-badge {
+        font-size: 0.7rem;
+        padding: 1px 6px;
+    }
 }

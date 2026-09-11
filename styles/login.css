@@ -532,3 +532,149 @@ body {
   gap: 8px;
   margin-top: 8px;
 }
+
+/* ==========================================================================
+   Responsive — Mobile First
+   Dispositivo de referencia: 390 × 844 px
+   ========================================================================== */
+
+/* ≤ 640px */
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .login-wrapper {
+    padding: 12px 0 24px;
+    justify-content: flex-start;
+    padding-top: clamp(12px, 4vh, 32px);
+  }
+
+  /* Card ocupa todo el ancho en móvil */
+  .login-card {
+    width: 100%;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    box-shadow: none;
+    padding: 20px 16px;
+  }
+
+  .login-header {
+    margin-bottom: 16px;
+  }
+
+  .login-title {
+    font-size: 1.35rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.825rem;
+  }
+
+  /* Tabs de rol: touch-friendly */
+  .role-tab-btn {
+    min-height: 40px;
+    font-size: 0.8rem;
+    padding: 8px 10px;
+  }
+
+  /* Inputs más altos para touch */
+  .form-control {
+    min-height: 44px;
+    font-size: 1rem; /* evita zoom en iOS */
+    padding: 10px 12px;
+  }
+
+  .input-with-toggle {
+    padding-right: 44px;
+  }
+
+  .btn-toggle-password {
+    padding: 10px;
+  }
+
+  /* Botón submit full-width, altura touch */
+  .btn-submit {
+    min-height: 48px;
+    font-size: 0.9rem;
+    padding: 12px 16px;
+  }
+
+  /* Demo buttons: una columna en móvil pequeño */
+  .demo-buttons-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .btn-demo {
+    min-height: 44px;
+    font-size: 0.8rem;
+  }
+
+  /* Checkbox row — más separación */
+  .checkbox-row {
+    gap: 10px;
+  }
+
+  .checkbox-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Dialog: full width */
+  .login-dialog {
+    width: calc(100% - 24px);
+    max-width: 100%;
+    margin: auto 12px;
+  }
+
+  .dialog-content {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .dialog-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .dialog-actions button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* ≤ 480px — Teléfono estándar portrait */
+@media (max-width: 480px) {
+  .login-wrapper {
+    padding: 0 0 20px;
+  }
+
+  .login-header {
+    padding: 16px 16px 0;
+  }
+
+  .login-logo {
+    height: 36px;
+  }
+
+  .login-title {
+    font-size: 1.2rem;
+  }
+
+  /* Demo buttons: columna en pantallas muy pequeñas */
+  .demo-buttons-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .login-footer {
+    padding: 14px 16px;
+  }
+
+  .footer-links {
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
