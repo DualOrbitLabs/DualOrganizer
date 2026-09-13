@@ -1,11 +1,5 @@
 import { supabase, supabaseConfigError } from './supabaseClient.js';
 
-// ==========================================================================
-// DualOrganizer - Lógica de Autenticación y Control de Acceso (Login)
-// Stack: Vanilla JavaScript ES6+ Puro (Cero frameworks)
-// Arquitectura: Validación nativa accesible, alternancia de roles,
-// alternancia de visibilidad de contraseña y gestión de sesión simulada.
-// ==========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
   'use strict';
@@ -158,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isLoginSubmitting = false;
 
   if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       clearAlert();
 
