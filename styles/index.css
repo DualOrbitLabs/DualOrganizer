@@ -1,9 +1,3 @@
-/* ==========================================================================
-   DualOrganizer - Estilos de la Landing Page Pública
-   Paleta: Escala neutra Slate / Zinc, Navy institucional sobrio
-   Arquitectura: CSS3 Nativo, Flexbox/Grid, clamp(), font-variant-numeric
-   ========================================================================== */
-
 :root {
   /* Escala Slate / Zinc */
   --slate-50: #f8fafc;
@@ -607,6 +601,7 @@ body {
 
 /* ≤ 640px */
 @media (max-width: 640px) {
+
   /* Hero */
   .hero-section {
     padding: 28px 16px 24px;

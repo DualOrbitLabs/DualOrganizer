@@ -1,9 +1,3 @@
-/* ==========================================================================
-   DualOrganizer - Estilos del Hub Portal (Art Director UI)
-   Paleta: Escala neutra Slate / Zinc, Navy institucional
-   Arquitectura: CSS3 Nativo, Flexbox/CSS Grid, clamp(), Zero-Framework
-   ========================================================================== */
-
 :root {
     /* Escala Slate Neutra */
     --slate-50: #f8fafc;
@@ -595,7 +589,8 @@ body {
     /* Inputs en formularios del diálogo */
     .form-control {
         min-height: 44px;
-        font-size: 1rem; /* evita zoom iOS */
+        font-size: 1rem;
+        /* evita zoom iOS */
         padding: 10px 12px;
     }
 

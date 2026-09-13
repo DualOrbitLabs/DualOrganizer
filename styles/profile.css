@@ -104,11 +104,7 @@ body {
     /* Espacio de reserva para la barra flotante */
 }
 
-/* ==========================================================================
-   1. Resumen Superior (Header del Perfil)
-   - Sin gradientes inflados: fondo sólido técnico slate-900 con borde de 1px
-   - Densidad de información útil y proporciones compactas
-   ========================================================================== */
+
 .profile-header {
     background-color: var(--bg-header);
     border: 1px solid var(--slate-800);

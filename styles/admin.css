@@ -45,7 +45,7 @@
    -------------------------------------------------------------------------- */
 :root {
   /* Escala Slate Neutra */
-  --slate-50:  #f8fafc;
+  --slate-50: #f8fafc;
   --slate-100: #f1f5f9;
   --slate-200: #e2e8f0;
   --slate-300: #cbd5e1;
@@ -58,45 +58,45 @@
   --slate-950: #020617;
 
   /* Superficies & Fondos */
-  --bg-page:        var(--slate-50);
-  --bg-surface:     #ffffff;
-  --border-color:   var(--slate-200);
-  --border-hover:   var(--slate-300);
-  --border-focus:   var(--slate-900);
+  --bg-page: var(--slate-50);
+  --bg-surface: #ffffff;
+  --border-color: var(--slate-200);
+  --border-hover: var(--slate-300);
+  --border-focus: var(--slate-900);
 
   /* Texto */
-  --text-primary:   var(--slate-900);
+  --text-primary: var(--slate-900);
   --text-secondary: var(--slate-600);
-  --text-muted:     var(--slate-400);
-  --text-inverted:  #ffffff;
+  --text-muted: var(--slate-400);
+  --text-inverted: #ffffff;
 
   /* Identidad DualOrganizer (Navy Institucional sobrio, sin violetas) */
-  --brand-navy:        #192a88;
-  --brand-navy-hover:  #13216e;
+  --brand-navy: #192a88;
+  --brand-navy-hover: #13216e;
   --brand-navy-subtle: rgba(25, 42, 136, 0.06);
   --brand-navy-border: rgba(25, 42, 136, 0.22);
-  --brand-focus-ring:  rgba(25, 42, 136, 0.15);
+  --brand-focus-ring: rgba(25, 42, 136, 0.15);
 
   /* Badges y Estados Semánticos Suaves (1px border, baja opacidad) */
-  --status-active-bg:       rgba(5, 150, 105, 0.08);
-  --status-active-text:     #065f46;
-  --status-active-border:   rgba(5, 150, 105, 0.25);
+  --status-active-bg: rgba(5, 150, 105, 0.08);
+  --status-active-text: #065f46;
+  --status-active-border: rgba(5, 150, 105, 0.25);
 
-  --status-inactive-bg:     var(--slate-100);
-  --status-inactive-text:   var(--slate-600);
+  --status-inactive-bg: var(--slate-100);
+  --status-inactive-text: var(--slate-600);
   --status-inactive-border: var(--slate-200);
 
-  --status-pending-bg:      rgba(217, 119, 6, 0.08);
-  --status-pending-text:    #92400e;
-  --status-pending-border:  rgba(217, 119, 6, 0.25);
+  --status-pending-bg: rgba(217, 119, 6, 0.08);
+  --status-pending-text: #92400e;
+  --status-pending-border: rgba(217, 119, 6, 0.25);
 
-  --status-review-bg:       rgba(25, 42, 136, 0.06);
-  --status-review-text:     var(--brand-navy);
-  --status-review-border:   rgba(25, 42, 136, 0.22);
+  --status-review-bg: rgba(25, 42, 136, 0.06);
+  --status-review-text: var(--brand-navy);
+  --status-review-border: rgba(25, 42, 136, 0.22);
 
   /* Tipografía y Espaciado */
   --font-family: 'Avenir', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono:   ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -112,19 +112,21 @@
   --radius-lg: 8px;
 
   /* Micro-interacciones Sutiles */
-  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Sombras Suaves y Precisas */
-  --shadow-soft:  0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-card:  0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.03);
+  --shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.03);
   --shadow-modal: 0 12px 32px -4px rgba(15, 23, 42, 0.22), 0 4px 12px -2px rgba(15, 23, 42, 0.12);
 }
 
 /* --------------------------------------------------------------------------
    3. Reset y Tipografía Global
    -------------------------------------------------------------------------- */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -306,8 +308,15 @@ body {
 }
 
 @keyframes adminFadeIn {
-  from { opacity: 0; transform: translateY(2px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .panel-header {
@@ -1268,5 +1277,3 @@ th[aria-sort="descending"] .sort-indicator {
     font-size: 0.75rem;
   }
 }
-
-
