@@ -7,22 +7,15 @@
 }
 
 .navBar{
-    display: inline;
-    background-color: #000000;
+    background-color: #423d58;
     padding: 2rem;
     margin-left: -1rem;
-}
-
-
-.link{
-    width: 10rem;
-    padding-top: 1rem;
-    padding-right: 0.5rem;
+    width: 100rem;
+    margin-top: -1rem;
 }
 
 .navBar img{
     width: 10rem;
-    padding-top: 1rem;
     padding-right: 0.5rem;
     background-position: left calc(95% - 0.125rem) !important; 
 }

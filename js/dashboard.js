@@ -1,14 +1,18 @@
+import { supabase } from './supabaseClient.js';
+
 // ==========================================================================
 // DualOrganizer - Lógica del Dashboard Semanal (Vanilla JS ES6+)
 // Buenas Prácticas: Delegación de Eventos, Sanitización, Persistencia Local
 // ==========================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     'use strict';
 
     // Validación de sesión
-    const sessionStr = sessionStorage.getItem('dualorganizer_session');
-    if (!sessionStr) {
+    const { data: authData } = supabase
+        ? await supabase.auth.getSession()
+        : { data: { session: null } };
+    if (!authData.session) {
         window.location.href = 'login.html';
         return;
     }

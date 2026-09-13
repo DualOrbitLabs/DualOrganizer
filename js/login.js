@@ -1,3 +1,5 @@
+import { supabase, supabaseConfigError } from './supabaseClient.js';
+
 // ==========================================================================
 // DualOrganizer - Lógica de Autenticación y Control de Acceso (Login)
 // Stack: Vanilla JavaScript ES6+ Puro (Cero frameworks)
@@ -214,35 +216,29 @@ document.addEventListener('DOMContentLoaded', () => {
       btnSubmitLogin.innerHTML = '<span>Verificando credenciales...</span>';
 
       try {
-        // Simulación de autenticación institucional
-        setTimeout(() => {
-          try {
-            // Almacenar sesión en sessionStorage
-            const sessionData = {
-              role: currentRole,
-              identifier: identifier.toLowerCase(),
-              name: currentRole === 'ADMIN' ? 'Coordinador General' : 'Juan Pérez',
-              loginTime: new Date().toISOString()
-            };
-            sessionStorage.setItem('dualorganizer_session', JSON.stringify(sessionData));
+        if (!supabase) {
+          throw new Error(supabaseConfigError);
+        }
 
-            showAlert('¡Credenciales válidas! Redirigiendo a tu espacio...', 'success');
+        if (!identifier.includes('@')) {
+          showAlert('El acceso con matrícula estará disponible cuando se conecte el directorio institucional. Usa tu correo por ahora.');
+          return;
+        }
 
-            setTimeout(() => {
-              window.location.href = 'hub.html';
-            }, 600);
-          } catch (storageErr) {
-            console.error('Error al persistir sesión:', storageErr);
-            showAlert('Error al procesar la sesión en el navegador. Revisa el almacenamiento local.');
-            isLoginSubmitting = false;
-            btnSubmitLogin.disabled = false;
-            btnSubmitLogin.removeAttribute('aria-busy');
-            btnSubmitLogin.innerHTML = originalBtnText;
-          }
-        }, 700);
+        const { error } = await supabase.auth.signInWithPassword({
+          email: identifier.toLowerCase(),
+          password
+        });
+
+        if (error) throw error;
+
+        showAlert('¡Credenciales válidas! Redirigiendo a tu espacio...', 'success');
+        window.setTimeout(() => {
+          window.location.href = 'hub.html';
+        }, 600);
       } catch (err) {
         console.error('Error en proceso de login:', err);
-        showAlert('Ocurrió un error inesperado. Inténtalo nuevamente.');
+        showAlert(err.message || 'Ocurrió un error inesperado. Inténtalo nuevamente.');
         isLoginSubmitting = false;
         btnSubmitLogin.disabled = false;
         btnSubmitLogin.removeAttribute('aria-busy');

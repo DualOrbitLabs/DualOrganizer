@@ -1,0 +1,146 @@
+# Configurar Supabase para DualOrganizer
+
+Esta guía está escrita para dos personas que nunca han usado SQL. No necesitan memorizar SQL: copiarán una migración preparada y aprenderán a reconocer qué está pasando.
+
+## 1. Qué estamos construyendo
+
+Supabase será el servidor de datos de DualOrganizer:
+
+- **PostgreSQL** guarda usuarios, perfiles, capítulos y sesiones.
+- **Auth** gestiona correos, contraseñas, sesiones y recuperación de acceso.
+- **Storage** guarda evidencias PDF/JPG/PNG.
+- **RLS** (Row Level Security) decide qué filas puede ver o cambiar cada usuario.
+
+La app actual guarda datos en `localStorage` y simula el login. Eso sirve para una demo, pero cualquier persona puede modificar esos datos desde las herramientas del navegador. En producción, Supabase debe ser la fuente de verdad.
+
+## 2. Crear el proyecto
+
+1. Entren en [supabase.com](https://supabase.com) y creen una cuenta.
+2. Pulsen **New project**.
+3. Pongan un nombre como `dualorganizer-dev`.
+4. Guarden la contraseña de la base de datos en un gestor de contraseñas. No la suban a Git.
+5. Elijan la región más cercana a sus usuarios.
+6. Esperen a que el proyecto termine de provisionarse.
+
+Para trabajar en equipo, una persona crea el proyecto y añade a la otra desde **Project Settings > Members**. No compartan la contraseña principal.
+
+## 3. Ejecutar la base de datos
+
+1. Abran **SQL Editor > New query**.
+2. Abran `supabase/migrations/001_initial_schema.sql` en VS Code.
+3. Copien todo el contenido en el editor de Supabase.
+4. Pulsen **Run**.
+5. Si termina sin error, revisen **Table Editor**. Deben aparecer `profiles`, `chapters`, `chapter_members`, `tutoring_sessions` y `session_evidence`.
+
+### SQL explicado sin drama
+
+- Una **tabla** es una hoja de cálculo para un tipo de cosa.
+- Una **fila** es un registro, por ejemplo una sesión.
+- Una **columna** es un dato, por ejemplo `hours`.
+- Una **clave primaria** identifica una fila sin repetirla.
+- Una **clave foránea** conecta una fila con otra tabla.
+- `select` lee, `insert` crea, `update` modifica y `delete` elimina.
+- Una **política RLS** es una regla que se aplica en el servidor, incluso si alguien manipula el navegador.
+
+No borren ni cambien políticas RLS sin entenderlas. Son parte de la seguridad, no solo configuración.
+
+## 4. Crear el primer usuario administrador
+
+1. Vayan a **Authentication > Users > Add user**.
+2. Creen su cuenta con un correo real y una contraseña temporal.
+3. Confirmen el correo si el proyecto lo solicita.
+4. En **SQL Editor**, ejecuten esto reemplazando el correo:
+
+```sql
+update public.profiles
+set role = 'ADMIN'
+where id = (
+  select id from auth.users where email = 'admin@institucion.edu'
+);
+```
+
+Este es el único paso inicial que cambia un rol directamente. Después, un administrador puede gestionar membresías, pero la app no permite que un usuario se convierta en admin editando el navegador.
+
+Cuando un usuario cree un capítulo desde la app, el esquema lo añadirá automáticamente como administrador de ese capítulo. El rol global `ADMIN` sigue siendo necesario para entrar al panel administrativo global.
+
+## 5. Configurar la aplicación
+
+1. Copien `.env.example` como `.env.local`.
+2. En Supabase abran **Project Settings > API**.
+3. Copien **Project URL** en `VITE_SUPABASE_URL`.
+4. Copien la clave pública **Publishable key** o la clave antigua `anon` en `VITE_SUPABASE_ANON_KEY`.
+5. Nunca copien `service_role` en `.env.local` usado por Vite. Esa clave ignora RLS y solo pertenece a un servidor privado.
+6. Instalen dependencias:
+
+```powershell
+npm install
+```
+
+El cliente de Supabase se integrará en la siguiente etapa de implementación. No intenten usar consultas desde HTML directamente.
+
+## 6. Crear el bucket de evidencias
+
+1. Abran **Storage > New bucket**.
+2. Usen exactamente el nombre `session-evidence`.
+3. Dejen **Public bucket** desactivado.
+4. Mantengan el límite de 5 MB y los tipos PDF, JPG y PNG en la interfaz.
+
+La migración guarda la ruta del archivo en la tabla, no el archivo dentro de PostgreSQL. El bucket debe permanecer privado y la app pedirá URLs temporales cuando tenga la integración terminada.
+
+## 7. Cómo trabajaremos con migraciones
+
+Una migración es un archivo SQL que describe un cambio de la base de datos. No editen una migración que ya se ejecutó en el proyecto compartido. Para un cambio nuevo, creen otro archivo con el siguiente número:
+
+```text
+supabase/migrations/002_add_session_notes.sql
+```
+
+Flujo de trabajo:
+
+1. Probar el SQL en un proyecto personal de desarrollo.
+2. Revisar las políticas RLS con dos cuentas distintas.
+3. Compartir el archivo y revisarlo entre ambos.
+4. Ejecutarlo en el proyecto compartido.
+5. Probar la interfaz después de la migración.
+
+## 8. Prueba mínima de seguridad
+
+Creen un tutor y un admin. Comprueben que:
+
+- El tutor puede ver y editar sus propias sesiones.
+- El tutor no puede leer sesiones de otro tutor.
+- El admin puede consultar los datos de su capítulo.
+- Cambiar `role` en DevTools no concede permisos.
+- Cerrar sesión elimina el acceso a las consultas protegidas.
+
+Si alguna prueba falla, detengan la integración y revisen las políticas antes de añadir más código.
+
+## 9. Errores habituales
+
+### `relation does not exist`
+
+La migración no se ejecutó completa o se ejecutó en otro proyecto. Vuelvan a **Table Editor** y comprueben las tablas.
+
+### `new row violates row-level security policy`
+
+La sesión no está autenticada o la fila no cumple la política. Revisen que el usuario esté conectado y que `tutor_id` coincida con su usuario actual.
+
+### La clave aparece en Git
+
+Detengan el trabajo, eliminen el archivo del repositorio y roten la clave desde Supabase. `.env.local` debe estar ignorado por Git.
+
+### Quieren empezar de cero
+
+Solo en el proyecto de desarrollo: eliminen y vuelvan a crear el proyecto o borren las tablas desde SQL Editor. Nunca hagan esto en producción para “probar algo”.
+
+## 10. Checklist antes de producción
+
+- [ ] El proyecto de producción es distinto del proyecto de desarrollo.
+- [ ] No hay contraseñas ni `service_role` en el repositorio.
+- [ ] Auth, recuperación de contraseña y logout funcionan.
+- [ ] Todas las tablas tienen RLS activado.
+- [ ] El bucket de evidencias es privado.
+- [ ] Un tutor no puede consultar otro tutor.
+- [ ] Un usuario no puede elevarse a admin desde el navegador.
+- [ ] Los datos ya no dependen de `localStorage`.
+- [ ] `npm run build` termina correctamente.

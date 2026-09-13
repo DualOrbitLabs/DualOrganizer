@@ -1,5 +1,11 @@
 *.json
+!/package.json
+!/package-lock.json
 /node_modules
+/dist
+.env
+.env.*
+!.env.example
 
 
 AGENTS.md
