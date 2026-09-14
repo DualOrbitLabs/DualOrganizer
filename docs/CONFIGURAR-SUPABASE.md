@@ -156,3 +156,16 @@ Solo en el proyecto de desarrollo: eliminen y vuelvan a crear el proyecto o borr
 - [ ] Un usuario no puede elevarse a admin desde el navegador.
 - [x] Los datos de perfiles, capítulos y sesiones no dependen de `localStorage`.
 - [ ] `npm run build` termina correctamente.
+
+## 11. Configurar Correos (Verificación y Recuperación)
+
+Para que el registro y la recuperación de contraseña funcionen, debes configurar los ajustes de correo en Supabase:
+
+1. Ve a **Authentication > URL Configuration**.
+2. En **Site URL**, escribe la URL base de tu aplicación. 
+   - Durante desarrollo local con VS Code Live Server, esto suele ser `http://localhost:5500` o `http://127.0.0.1:5500`.
+   - Cuando publiques la app, cámbialo a la URL real (ej. `https://tu-dominio.com`).
+3. Ve a **Authentication > Providers** y asegúrate de que **Email** está habilitado.
+   - Enciende **Confirm email** para obligar a los usuarios a confirmar su cuenta antes de iniciar sesión.
+   - Enciende **Secure email change** si quieres que confirmen el cambio de correo.
+4. En **Authentication > Email Templates**, puedes personalizar el mensaje que reciben los usuarios. Asegúrate de que las plantillas de **Confirm signup** y **Reset password** tengan un enlace claro y profesional. No cambies la variable `{{ .ConfirmationURL }}`, ya que es el enlace mágico que Supabase necesita.
