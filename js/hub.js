@@ -1,20 +1,18 @@
+import { getAuthenticatedUser, getCurrentProfile, supabase, signOut } from './supabaseClient.js';
+
 // ==========================================================================
 // DualOrganizer - Lógica del Portal Hub y Gestor de Capítulos
 // Stack: Vanilla JavaScript ES6+ Puro (Cero dependencias)
-// Arquitectura: State-driven rendering, localStorage persistence, 
+// Arquitectura: State-driven rendering, Supabase persistence,
 // diálogos nativos (<dialog>), WAI-ARIA y delegación de eventos.
 // ==========================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   'use strict';
 
   // --------------------------------------------------------------------------
   // 1. Constantes y Estado de Sesión
   // --------------------------------------------------------------------------
-  const STORAGE_CHAPTERS_KEY = 'dualorganizer_chapters_v1';
-  const STORAGE_SESSION_KEY = 'dualorganizer_session';
-  const STORAGE_ACTIVE_CHAPTER_KEY = 'dualorganizer_active_chapter';
-
   // Catálogo de capítulos predefinidos disponibles para unirse con código
   const AVAILABLE_CATALOG = [
     {
@@ -40,41 +38,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
-  // Capítulos por defecto del usuario
-  const DEFAULT_USER_CHAPTERS = [
-    {
-      id: 'chap-ing-01',
-      code: 'ING-2026',
-      name: 'Facultad de Ingeniería',
-      institution: 'Universidad Nacional',
-      department: 'Ciencias Básicas de Ingeniería',
-      description: 'Capítulo activo. Monitoreo de horas de tutoría y acreditación académica.',
-      role: 'Tutor Académico',
-      isPrimary: true
-    }
-  ];
-
   // --------------------------------------------------------------------------
   // 2. Validación de Sesión y Perfil del Usuario
   // --------------------------------------------------------------------------
-  let currentUser = {
-    name: 'Juan Pérez',
-    role: 'TUTOR',
-    identifier: 'juan.perez@institucion.edu'
-  };
-
-  const sessionStr = sessionStorage.getItem(STORAGE_SESSION_KEY);
-  if (sessionStr) {
-    try {
-      const parsed = JSON.parse(sessionStr);
-      currentUser = { ...currentUser, ...parsed };
-    } catch (e) {
-      console.warn('Error leyendo sesión, utilizando usuario base.', e);
-    }
-  } else {
-    // Si no hay sesión explícita, se almacena la sesión por defecto para evitar redirecciones forzadas
-    sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(currentUser));
+  const currentAuthUser = await getAuthenticatedUser();
+  if (!currentAuthUser) {
+    window.location.href = 'login.html';
+    return;
   }
+
+  const profile = await getCurrentProfile(currentAuthUser.id);
+  const currentUser = {
+    id: currentAuthUser.id,
+    name: profile?.full_name || currentAuthUser.email,
+    role: profile?.role || 'TUTOR',
+    identifier: currentAuthUser.email
+  };
 
   // Actualizar encabezado con nombre y rol
   const welcomeTitle = document.getElementById('welcomeTitle');
@@ -83,27 +62,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // 3. Persistencia de Capítulos en LocalStorage
+  // 3. Persistencia de Capítulos en Supabase
   // --------------------------------------------------------------------------
-  function loadUserChapters() {
-    const raw = localStorage.getItem(STORAGE_CHAPTERS_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_CHAPTERS_KEY, JSON.stringify(DEFAULT_USER_CHAPTERS));
-      return [...DEFAULT_USER_CHAPTERS];
-    }
-    try {
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : [...DEFAULT_USER_CHAPTERS];
-    } catch (e) {
-      return [...DEFAULT_USER_CHAPTERS];
-    }
+  async function loadUserChapters() {
+    const { data, error } = await supabase
+      .from('chapter_members')
+      .select('chapter_id, role, is_primary, chapters(id, code, name, institution, department, description)')
+      .eq('user_id', currentUser.id);
+    if (error) throw error;
+    return (data || []).map((membership) => ({
+      ...membership.chapters,
+      role: membership.role === 'ADMIN' ? 'Coordinador / Admin' : 'Tutor Académico',
+      isPrimary: membership.is_primary
+    }));
   }
 
-  function saveUserChapters(chapters) {
-    localStorage.setItem(STORAGE_CHAPTERS_KEY, JSON.stringify(chapters));
-  }
-
-  let userChapters = loadUserChapters();
+  let userChapters = await loadUserChapters();
 
   // --------------------------------------------------------------------------
   // 4. Selectores DOM
@@ -285,14 +259,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const chapterId = chapterCard.getAttribute('data-chapter-id');
         const selected = userChapters.find(c => c.id === chapterId);
         if (selected) {
-          localStorage.setItem(STORAGE_ACTIVE_CHAPTER_KEY, JSON.stringify(selected));
           showToast(`Ingresando a ${selected.name}...`);
           setTimeout(() => {
-            if (currentUser.role === 'ADMIN') {
-              window.location.href = 'admin.html';
-            } else {
-              window.location.href = 'dashboard.html';
-            }
+            const targetUrl = `dashboard.html?chapter=${encodeURIComponent(selected.id)}`;
+            window.location.href = targetUrl;
           }, 400);
         }
       }
@@ -332,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (createChapterForm) {
-    createChapterForm.addEventListener('submit', (e) => {
+    createChapterForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const name = document.getElementById('newChapterName').value.trim();
@@ -346,23 +316,25 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const newChapter = {
-        id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : `chap-${Date.now()}`,
-        code: generateChapterCode(name),
-        name: name,
-        institution: institution ? institution.slice(0, 100) : 'Universidad Nacional',
-        department: department ? department.slice(0, 80) : 'Departamento Académico',
-        description: description ? description.slice(0, 250) : 'Nuevo espacio de asesorías y seguimiento docente.',
-        role: currentUser.role === 'ADMIN' ? 'Coordinador General' : 'Tutor Académico',
-        isPrimary: false
-      };
-
-      userChapters.push(newChapter);
-      saveUserChapters(userChapters);
-      renderHubGrid();
-      closeCreateDialog();
-
-      showToast(`¡Capítulo "${name}" creado exitosamente!`);
+      try {
+        const { error } = await supabase.from('chapters').insert({
+          code: generateChapterCode(name),
+          name,
+          institution: institution ? institution.slice(0, 100) : 'Universidad Nacional',
+          department: department ? department.slice(0, 80) : 'Departamento Académico',
+          description: description ? description.slice(0, 250) : 'Nuevo espacio de asesorías y seguimiento docente.',
+          created_by: currentUser.id
+        });
+        if (error) throw error;
+        currentUser.role = 'ADMIN';
+        userChapters = await loadUserChapters();
+        renderHubGrid();
+        closeCreateDialog();
+        showToast(`¡Capítulo "${name}" creado exitosamente!`);
+      } catch (error) {
+        console.error('Error al crear capítulo:', error);
+        showToast('No se pudo crear el capítulo. Revisa el código y tus permisos.');
+      }
     });
   }
 
@@ -394,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Búsqueda en tiempo real del código ingresado
   if (joinCodeInput) {
-    joinCodeInput.addEventListener('input', () => {
+    joinCodeInput.addEventListener('input', async () => {
       const rawCode = joinCodeInput.value.trim().toUpperCase();
       joinCodeInput.value = rawCode;
 
@@ -414,18 +386,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Buscar en catálogo disponible o aceptar patrón válido
-      const foundInCatalog = AVAILABLE_CATALOG.find(c => c.code === rawCode);
-      if (foundInCatalog) {
+      const { data: foundChapter } = await supabase
+        .from('chapters')
+        .select('id, code, name, institution, department, description')
+        .eq('code', rawCode)
+        .maybeSingle();
+      if (foundChapter) {
         chapterPreviewBox.classList.remove('is-hidden');
-        previewTitle.textContent = foundInCatalog.name;
-        previewMeta.textContent = `${foundInCatalog.institution} • ${foundInCatalog.department}`;
-        btnSubmitJoin.disabled = false;
-      } else if (rawCode.length >= 6 && rawCode.includes('-')) {
-        // Código sintácticamente válido para capítulos personalizados
-        chapterPreviewBox.classList.remove('is-hidden');
-        previewTitle.textContent = `Capítulo ${rawCode}`;
-        previewMeta.textContent = 'Código institucional verificado. Haz clic en unirte.';
+        previewTitle.textContent = foundChapter.name;
+        previewMeta.textContent = `${foundChapter.institution} • ${foundChapter.department}`;
         btnSubmitJoin.disabled = false;
       } else {
         chapterPreviewBox.classList.add('is-hidden');
@@ -435,37 +404,34 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (joinChapterForm) {
-    joinChapterForm.addEventListener('submit', (e) => {
+    joinChapterForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const rawCode = joinCodeInput.value.trim().toUpperCase();
       if (!rawCode) return;
 
-      const found = AVAILABLE_CATALOG.find(c => c.code === rawCode) || {
-        code: rawCode,
-        name: `Capítulo ${rawCode}`,
-        institution: 'Facultad Universitaria',
-        department: 'Área Académica',
-        description: 'Capítulo agregado mediante código de acceso institucional.'
-      };
-
-      const joinedChapter = {
-        id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : `chap-${Date.now()}`,
-        code: found.code,
-        name: found.name,
-        institution: found.institution,
-        department: found.department,
-        description: found.description,
-        role: 'Tutor Académico',
-        isPrimary: false
-      };
-
-      userChapters.push(joinedChapter);
-      saveUserChapters(userChapters);
-      renderHubGrid();
-      closeJoinDialog();
-
-      showToast(`¡Te has unido con éxito a "${found.name}"!`);
+      try {
+        const { data: found, error: findError } = await supabase
+          .from('chapters')
+          .select('id, name')
+          .eq('code', rawCode)
+          .single();
+        if (findError) throw findError;
+        const { error } = await supabase.from('chapter_members').insert({
+          chapter_id: found.id,
+          user_id: currentUser.id,
+          role: 'TUTOR',
+          is_primary: userChapters.length === 0
+        });
+        if (error) throw error;
+        userChapters = await loadUserChapters();
+        renderHubGrid();
+        closeJoinDialog();
+        showToast(`¡Te has unido con éxito a "${found.name}"!`);
+      } catch (error) {
+        console.error('Error al unirse al capítulo:', error);
+        showToast('No se pudo unir al capítulo. Comprueba el código o si ya perteneces.');
+      }
     });
   }
 
@@ -493,5 +459,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // --------------------------------------------------------------------------
   // 10. Inicialización
   // --------------------------------------------------------------------------
+  document.querySelectorAll('[data-action="logout"]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      signOut();
+    });
+  });
+
   renderHubGrid();
 });

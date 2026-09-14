@@ -50,6 +50,10 @@ security definer
 set search_path = public
 as $$
 begin
+  update public.profiles
+  set role = 'ADMIN', updated_at = now()
+  where id = new.created_by;
+
   insert into public.chapter_members (chapter_id, user_id, role, is_primary)
   values (new.id, new.created_by, 'ADMIN', true)
   on conflict (chapter_id, user_id) do nothing;
@@ -170,6 +174,16 @@ as $$
   );
 $$;
 
+create or replace function public.current_user_role()
+returns public.user_role
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select role from public.profiles where id = auth.uid();
+$$;
+
 alter table public.profiles enable row level security;
 alter table public.chapters enable row level security;
 alter table public.chapter_members enable row level security;
@@ -189,12 +203,12 @@ on public.profiles for update to authenticated
 using (id = auth.uid())
 with check (
   id = auth.uid()
-  and role = (select p.role from public.profiles p where p.id = auth.uid())
+  and role = public.current_user_role()
 );
 
 create policy chapters_select_member
 on public.chapters for select to authenticated
-using (public.is_chapter_member(id));
+using (true);
 
 create policy chapters_insert_authenticated
 on public.chapters for insert to authenticated
@@ -230,7 +244,16 @@ using (tutor_id = auth.uid() or public.is_chapter_admin(chapter_id));
 
 create policy sessions_insert_own_membership
 on public.tutoring_sessions for insert to authenticated
-with check (tutor_id = auth.uid() and public.is_chapter_member(chapter_id));
+with check (
+  (
+    tutor_id = auth.uid()
+    and public.is_chapter_member(chapter_id)
+  )
+  or (
+    public.is_chapter_admin(chapter_id)
+    and public.is_chapter_member(chapter_id, tutor_id)
+  )
+);
 
 create policy sessions_update_owner_or_admin
 on public.tutoring_sessions for update to authenticated
@@ -257,7 +280,35 @@ with check (uploaded_by = auth.uid());
 
 create policy evidence_delete_owner_or_admin
 on public.session_evidence for delete to authenticated
-using (uploaded_by = auth.uid());
+using (
+  uploaded_by = auth.uid()
+  or exists (
+    select 1 from public.tutoring_sessions s
+    where s.id = session_id and public.is_chapter_admin(s.chapter_id)
+  )
+);
 
--- El bucket es privado. Las politicas de Storage se agregan despues de crear
--- el bucket "session-evidence" desde Storage > New bucket.
+-- Storage: crear primero el bucket privado "session-evidence".
+create policy evidence_storage_select
+on storage.objects for select to authenticated
+using (
+  bucket_id = 'session-evidence'
+  and (owner_id = auth.uid()::text or public.is_admin())
+);
+
+create policy evidence_storage_insert
+on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'session-evidence'
+  and owner_id = auth.uid()::text
+);
+
+create policy evidence_storage_delete
+on storage.objects for delete to authenticated
+using (
+  bucket_id = 'session-evidence'
+  and (owner_id = auth.uid()::text or public.is_admin())
+);
+
+-- Crear el bucket privado "session-evidence" desde Storage > New bucket
+-- antes de subir archivos; las politicas de Storage ya estan declaradas arriba.

@@ -43,7 +43,7 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </a>
-        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión" onclick="sessionStorage.removeItem('dualorganizer_session');">
+        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión" data-action="logout">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -60,9 +60,19 @@
     <!-- Tira de Identificación de Capítulo Activo -->
     <div class="active-chapter-bar" id="activeChapterBar">
       <div class="active-chapter-info">
-        <span class="active-chapter-pill" id="activeChapterCode">ING-2026</span>
-        <span class="active-chapter-name" id="activeChapterName">Facultad de Ingeniería</span>
+        <span class="active-chapter-pill" id="activeChapterCode">...</span>
+        <span class="active-chapter-name" id="activeChapterName">Cargando capítulo</span>
       </div>
+      <label class="chapter-switcher" for="dashboardChapterSelect">
+        <span>Capítulo</span>
+        <select id="dashboardChapterSelect" class="form-control" aria-label="Seleccionar capítulo">
+          <option value="">Cargando capítulos...</option>
+        </select>
+      </label>
+      <button type="button" id="btnRefreshDashboard" class="btn-refresh" aria-label="Actualizar dashboard" title="Actualizar datos">
+        <span aria-hidden="true">↻</span>
+        <span>Actualizar</span>
+      </button>
       <a href="hub.html" class="switch-chapter-link">Cambiar capítulo &rarr;</a>
     </div>
 
@@ -71,7 +81,7 @@
       <article class="kpi-card">
         <span class="kpi-label">Horas Acumuladas</span>
         <div class="kpi-value-row">
-          <span class="kpi-value tabular-nums" id="kpiTotalHours">0</span>
+          <span class="kpi-value tabular-nums" id="kpiTotalHours">--</span>
           <span class="badge-semantic green">Meta: 80h</span>
         </div>
       </article>
@@ -79,7 +89,7 @@
       <article class="kpi-card">
         <span class="kpi-label">Sesiones Totales</span>
         <div class="kpi-value-row">
-          <span class="kpi-value tabular-nums" id="kpiTotalSessions">0</span>
+          <span class="kpi-value tabular-nums" id="kpiTotalSessions">--</span>
           <span class="badge-semantic blue">Registradas</span>
         </div>
       </article>
@@ -87,7 +97,7 @@
       <article class="kpi-card">
         <span class="kpi-label">Promedio Semanal</span>
         <div class="kpi-value-row">
-          <span class="kpi-value tabular-nums" id="kpiWeeklyAvg">0.0</span>
+          <span class="kpi-value tabular-nums" id="kpiWeeklyAvg">--</span>
           <span class="kpi-unit">hrs / sem</span>
         </div>
       </article>

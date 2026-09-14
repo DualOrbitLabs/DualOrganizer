@@ -33,7 +33,7 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </a>
-        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión" onclick="sessionStorage.removeItem('dualorganizer_session');">
+        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión" data-action="logout">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
@@ -55,18 +55,29 @@
         <p class="admin-subtitle">Supervisión integral de tutores, gestión de bitácora institucional y exportación de registros de asesorías.</p>
       </div>
 
+      <div class="chapter-switcher admin-chapter-switcher">
+        <label for="adminChapterSelect">Capítulo activo</label>
+        <select id="adminChapterSelect" class="form-select" aria-label="Seleccionar capítulo administrativo">
+          <option value="">Cargando capítulos...</option>
+        </select>
+      </div>
+      <button type="button" id="btnRefreshAdmin" class="btn-refresh" aria-label="Actualizar administración" title="Actualizar datos">
+        <span aria-hidden="true">↻</span>
+        <span>Actualizar</span>
+      </button>
+
       <div class="admin-kpis" role="region" aria-label="Métricas generales">
         <div class="kpi-card">
           <span class="kpi-card__label">Mentores Registrados</span>
-          <span class="kpi-card__value" id="kpiTotalMembers">6</span>
+          <span class="kpi-card__value" id="kpiTotalMembers">--</span>
         </div>
         <div class="kpi-card">
           <span class="kpi-card__label">Horas en Bitácora</span>
-          <span class="kpi-card__value" id="kpiTotalHours">25.0</span>
+          <span class="kpi-card__value" id="kpiTotalHours">--</span>
         </div>
         <div class="kpi-card">
           <span class="kpi-card__label">Sesiones Totales</span>
-          <span class="kpi-card__value" id="kpiTotalSessions">12</span>
+          <span class="kpi-card__value" id="kpiTotalSessions">--</span>
         </div>
       </div>
     </header>
@@ -206,6 +217,7 @@
                   <span class="sort-indicator" aria-hidden="true"></span>
                 </span>
               </th>
+              <th scope="col">Acciones</th>
             </tr>
           </thead>
           <tbody id="recordsTableBody">
@@ -217,6 +229,57 @@
     </section>
 
   </main>
+
+  <dialog class="admin-dialog" id="sessionManagerModal" aria-labelledby="sessionManagerTitle">
+    <div class="admin-dialog__surface">
+      <header class="admin-dialog__header">
+        <div>
+          <span class="admin-badge">Calendario institucional</span>
+          <h2 class="admin-dialog__name" id="sessionManagerTitle">Gestionar sesión</h2>
+        </div>
+        <button type="button" class="admin-dialog__close" id="sessionManagerClose" aria-label="Cerrar gestión">×</button>
+      </header>
+      <form id="sessionManagerForm" class="dialog-form">
+        <div class="form-group">
+          <label for="managerOperation">Operación</label>
+          <select id="managerOperation" class="form-control">
+            <option value="add">Agregar sesión</option>
+            <option value="edit">Editar sesión</option>
+            <option value="delete">Eliminar sesión</option>
+            <option value="swap">Intercambiar horario</option>
+            <option value="send">Enviar al tutor</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="managerTutor">Tutor</label>
+          <select id="managerTutor" class="form-control" required></select>
+        </div>
+        <div class="form-group" id="managerSessionGroup">
+          <label for="managerSession">Sesión</label>
+          <select id="managerSession" class="form-control"></select>
+        </div>
+        <div class="form-group" id="managerTargetGroup">
+          <label for="managerTargetTutor">Tutor destino</label>
+          <select id="managerTargetTutor" class="form-control"></select>
+        </div>
+        <div class="form-group" id="managerTargetSessionGroup">
+          <label for="managerTargetSession">Sesión destino para intercambio</label>
+          <select id="managerTargetSession" class="form-control"></select>
+        </div>
+        <div class="form-grid" id="managerNewSessionFields">
+          <div class="form-group"><label for="managerDate">Fecha</label><input id="managerDate" class="form-control" type="date"></div>
+          <div class="form-group"><label for="managerTime">Hora</label><input id="managerTime" class="form-control" type="time"></div>
+          <div class="form-group"><label for="managerStudent">Alumno</label><input id="managerStudent" class="form-control" type="text" maxlength="80"></div>
+          <div class="form-group"><label for="managerSubject">Materia</label><input id="managerSubject" class="form-control" type="text" maxlength="60"></div>
+          <div class="form-group"><label for="managerHours">Horas</label><input id="managerHours" class="form-control" type="number" min="0.5" max="8" step="0.5" value="1"></div>
+        </div>
+        <footer class="admin-dialog__footer">
+          <button type="button" class="btn btn--secondary" id="sessionManagerCancel">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Aplicar operación</button>
+        </footer>
+      </form>
+    </div>
+  </dialog>
 
   <!-- Modal Nativo (<dialog>) para Ver Ficha Detallada del Mentor -->
   <dialog class="admin-dialog" id="memberModal" aria-labelledby="dialogMemberName">
@@ -309,7 +372,7 @@
   </div>
 
   <!-- Lógica en JavaScript ES6+ Puro -->
-  <script src="./js/admin.js"></script>
+  <script type="module" src="./js/admin.js"></script>
 </body>
 
 </html>

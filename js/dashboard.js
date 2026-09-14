@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient.js';
+import { getAuthenticatedUser, signOut, supabase } from './supabaseClient.js';
 
 // ==========================================================================
 // DualOrganizer - Lógica del Dashboard Semanal (Vanilla JS ES6+)
@@ -9,10 +9,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     'use strict';
 
     // Validación de sesión
-    const { data: authData } = supabase
-        ? await supabase.auth.getSession()
-        : { data: { session: null } };
-    if (!authData.session) {
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser) {
         window.location.href = 'login.html';
         return;
     }
@@ -20,8 +18,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --------------------------------------------------------------------------
     // 1. Estado y Datos Iniciales
     // --------------------------------------------------------------------------
-    const STORAGE_KEY = 'dualorganizer_sessions_v1';
     let currentDate = new Date();
+    let activeChapterId = new URLSearchParams(window.location.search).get('chapter');
+    const dashboardChapterSelect = document.getElementById('dashboardChapterSelect');
+    const btnRefreshDashboard = document.getElementById('btnRefreshDashboard');
 
     function getStartOfWeek(date) {
         const d = new Date(date);
@@ -55,28 +55,134 @@ document.addEventListener('DOMContentLoaded', async () => {
             .replace(/'/g, '&#039;');
     }
 
-    const loadInitialData = () => {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                return JSON.parse(stored);
-            }
-        } catch (err) {
-            console.warn('Error al leer de localStorage:', err);
+    let sessionsData = [];
+
+    const mapSession = (session) => ({
+        id: session.id,
+        studentName: session.student_name,
+        subject: session.subject,
+        hours: Number(session.hours),
+        date: session.session_date,
+        time: String(session.start_time).slice(0, 5),
+        evidence: session.evidence_path,
+        createdAt: session.created_at,
+        status: session.status
+    });
+
+    async function loadSessions() {
+        if (!activeChapterId) {
+            const { data: membership, error: membershipError } = await supabase
+                .from('chapter_members')
+                .select('chapter_id')
+                .eq('user_id', currentUser.id)
+                .eq('is_primary', true)
+                .maybeSingle();
+            if (membershipError) throw membershipError;
+            activeChapterId = membership?.chapter_id || null;
         }
 
-        return [];
-    };
+        if (!activeChapterId) return;
 
-    let sessionsData = loadInitialData();
+        const { data, error } = await supabase
+            .from('tutoring_sessions')
+            .select('*')
+            .eq('chapter_id', activeChapterId)
+            .order('session_date', { ascending: false });
+        if (error) throw error;
+        sessionsData = (data || []).map(mapSession);
+    }
 
-    const saveSessions = () => {
+    async function refreshDashboard() {
+        btnRefreshDashboard?.classList.add('is-loading');
+        if (btnRefreshDashboard) btnRefreshDashboard.disabled = true;
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionsData));
-        } catch (err) {
-            console.warn('Error al persistir en localStorage:', err);
+            await loadChapterOptions();
+            await loadSessions();
+            await initActiveChapter();
+            updateKPIs();
+            renderWeeklyCalendar();
+            showToast('Datos actualizados.');
+        } catch (error) {
+            console.error('Error al actualizar dashboard:', error);
+            showToast('No se pudieron actualizar los datos.', 'warning');
+        } finally {
+            btnRefreshDashboard?.classList.remove('is-loading');
+            if (btnRefreshDashboard) btnRefreshDashboard.disabled = false;
         }
-    };
+    }
+
+    async function loadChapterOptions() {
+        if (!dashboardChapterSelect) return;
+        const { data, error } = await supabase
+            .from('chapter_members')
+            .select('chapter_id, chapters(id, code, name)')
+            .eq('user_id', currentUser.id);
+        if (error) throw error;
+
+        dashboardChapterSelect.innerHTML = '';
+        (data || []).forEach((membership) => {
+            const chapter = membership.chapters;
+            if (!chapter) return;
+            const option = document.createElement('option');
+            option.value = chapter.id;
+            option.textContent = `${chapter.code} · ${chapter.name}`;
+            option.selected = chapter.id === activeChapterId;
+            dashboardChapterSelect.appendChild(option);
+        });
+
+        if (!activeChapterId && dashboardChapterSelect.options.length > 0) {
+            activeChapterId = dashboardChapterSelect.options[0].value;
+            dashboardChapterSelect.options[0].selected = true;
+        }
+    }
+
+    async function persistSession(session, editingId) {
+        const payload = {
+            chapter_id: activeChapterId,
+            tutor_id: currentUser.id,
+            student_name: session.studentName,
+            subject: session.subject,
+            session_date: session.date,
+            start_time: session.time,
+            hours: session.hours,
+            evidence_path: session.evidence || null
+        };
+        const query = editingId
+            ? supabase.from('tutoring_sessions').update(payload).eq('id', editingId).select().single()
+            : supabase.from('tutoring_sessions').insert(payload).select().single();
+        const { data, error } = await query;
+        if (error) throw error;
+        return data;
+    }
+
+    async function uploadEvidence(file, sessionId) {
+        if (!file) return null;
+        const fileCheck = validateUploadedFile(file);
+        if (!fileCheck.valid) throw new Error(fileCheck.error);
+
+        const storagePath = `${currentUser.id}/${sessionId}/${fileCheck.sanitizedName}`;
+        const { error: uploadError } = await supabase.storage
+            .from('session-evidence')
+            .upload(storagePath, file, { contentType: file.type, upsert: true });
+        if (uploadError) throw uploadError;
+
+        const { error: evidenceError } = await supabase.from('session_evidence').upsert({
+            session_id: sessionId,
+            uploaded_by: currentUser.id,
+            storage_path: storagePath,
+            file_name: fileCheck.sanitizedName,
+            mime_type: file.type,
+            file_size: file.size
+        }, { onConflict: 'storage_path' });
+        if (evidenceError) throw evidenceError;
+
+        const { error: sessionError } = await supabase
+            .from('tutoring_sessions')
+            .update({ evidence_path: storagePath })
+            .eq('id', sessionId);
+        if (sessionError) throw sessionError;
+        return storagePath;
+    }
 
     // --------------------------------------------------------------------------
     // 2. Selectores DOM
@@ -403,16 +509,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnCancelModal) btnCancelModal.addEventListener('click', closeModal);
 
     if (btnDeleteModal) {
-        btnDeleteModal.addEventListener('click', () => {
+        btnDeleteModal.addEventListener('click', async () => {
             const editingId = sessionForm.dataset.editingId;
             if (editingId) {
                 if (confirm('¿Estás seguro de que deseas cancelar esta sesión?')) {
-                    sessionsData = sessionsData.filter(s => s.id !== editingId);
-                    showToast('Sesión cancelada con éxito');
-                    saveSessions();
-                    closeModal();
-                    updateKPIs();
-                    renderWeeklyCalendar();
+                    try {
+                        const { error } = await supabase.from('tutoring_sessions').delete().eq('id', editingId);
+                        if (error) throw error;
+                        sessionsData = sessionsData.filter(s => s.id !== editingId);
+                        showToast('Sesión cancelada con éxito');
+                        closeModal();
+                        updateKPIs();
+                        renderWeeklyCalendar();
+                    } catch (error) {
+                        console.error('Error al borrar sesión:', error);
+                        showToast('No se pudo cancelar la sesión.', 'warning');
+                    }
                 }
             }
         });
@@ -437,7 +549,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let isSessionSubmitting = false;
 
     if (sessionForm) {
-        sessionForm.addEventListener('submit', (e) => {
+        sessionForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             if (isSessionSubmitting) return;
@@ -468,14 +580,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Validación 2: Archivo de evidencia seguro
-            let evidenceFileName = null;
+            let evidenceFile = null;
             if (evidenceFileInput && evidenceFileInput.files.length > 0) {
                 const fileCheck = validateUploadedFile(evidenceFileInput.files[0]);
                 if (!fileCheck.valid) {
                     showToast(fileCheck.error, 'warning');
                     return;
                 }
-                evidenceFileName = fileCheck.sanitizedName;
+                evidenceFile = evidenceFileInput.files[0];
             }
 
             // Validación 3: Solapamiento horario
@@ -501,6 +613,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     submitBtn.setAttribute('aria-busy', 'true');
                 }
 
+                if (!activeChapterId) {
+                    throw new Error('No hay un capítulo activo seleccionado.');
+                }
+
                 if (editingId) {
                     const idx = sessionsData.findIndex(s => s.id === editingId);
                     if (idx !== -1) {
@@ -509,8 +625,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         sessionsData[idx].hours = rawHours;
                         sessionsData[idx].date = rawDate;
                         sessionsData[idx].time = rawTime;
-                        if (evidenceFileName) {
-                            sessionsData[idx].evidence = evidenceFileName;
+                        const savedSession = await persistSession(sessionsData[idx], editingId);
+                        if (evidenceFile) {
+                            sessionsData[idx].evidence = await uploadEvidence(evidenceFile, savedSession.id);
                         }
                         showToast('Sesión actualizada con éxito');
                     }
@@ -522,15 +639,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                         hours: rawHours,
                         date: rawDate,
                         time: rawTime,
-                        evidence: evidenceFileName || null,
+                        evidence: null,
                         createdAt: new Date().toISOString()
                     };
 
-                    sessionsData.push(newSession);
+                    const savedSession = await persistSession(newSession, null);
+                    if (evidenceFile) await uploadEvidence(evidenceFile, savedSession.id);
+                    await loadSessions();
                     showToast('Sesión registrada con éxito');
                 }
-
-                saveSessions();
                 closeModal();
                 updateKPIs();
                 renderWeeklyCalendar();
@@ -606,11 +723,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --------------------------------------------------------------------------
     // 10. Inicialización y Carga de Capítulo Activo
     // --------------------------------------------------------------------------
-    const initActiveChapter = () => {
+    const initActiveChapter = async () => {
         try {
-            const activeChapterStr = sessionStorage.getItem('dualorganizer_active_chapter');
-            if (activeChapterStr) {
-                const chapter = JSON.parse(activeChapterStr);
+            const chapterId = new URLSearchParams(window.location.search).get('chapter') || activeChapterId;
+            if (chapterId) {
+                activeChapterId = chapterId;
+                const { data: chapter, error } = await supabase
+                    .from('chapters')
+                    .select('code, name')
+                    .eq('id', chapterId)
+                    .single();
+                if (error) throw error;
                 const codeEl = document.getElementById('activeChapterCode');
                 const nameEl = document.getElementById('activeChapterName');
                 if (codeEl && chapter.code) codeEl.textContent = chapter.code;
@@ -621,7 +744,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    initActiveChapter();
+    await initActiveChapter();
+    try {
+        await loadChapterOptions();
+        await initActiveChapter();
+    } catch (error) {
+        console.error('Error al cargar capítulos:', error);
+    }
+    try {
+        await loadSessions();
+    } catch (error) {
+        console.error('Error al cargar sesiones:', error);
+        showToast('No se pudieron cargar las sesiones del servidor.', 'warning');
+    }
     updateKPIs();
     renderWeeklyCalendar();
+
+    btnRefreshDashboard?.addEventListener('click', refreshDashboard);
+
+    document.querySelectorAll('[data-action="logout"]').forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            signOut();
+        });
+    });
+
+    dashboardChapterSelect?.addEventListener('change', () => {
+        const chapterId = dashboardChapterSelect.value;
+        if (chapterId) window.location.href = `dashboard.html?chapter=${encodeURIComponent(chapterId)}`;
+    });
 });

@@ -1,15 +1,17 @@
+import { getAuthenticatedUser, getCurrentProfile, signOut, supabase } from './supabaseClient.js';
+
 // ==========================================================================
 // Lógica para el Perfil del Tutor - DualOrganizer
 // Stack: Vanilla JavaScript ES6+ Puro (Sin librerías ni frameworks)
 // Características: Tag-Input Dinámico, Dirty-State Management, Delegación de Eventos
 // ==========================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     'use strict';
 
     // Validación de sesión
-    const sessionStr = sessionStorage.getItem('dualorganizer_session');
-    if (!sessionStr) {
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser) {
         window.location.href = 'login.html';
         return;
     }
@@ -35,82 +37,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
-    // --------------------------------------------------------------------------
-    // Carga e Hidratación de Sesión del Usuario
-    // --------------------------------------------------------------------------
-    const STORAGE_SESSION_KEY = 'dualorganizer_session';
-    const sessionRaw = sessionStorage.getItem(STORAGE_SESSION_KEY);
-    if (sessionRaw) {
+    const hydrateRemoteProfile = async () => {
         try {
-            const userSession = JSON.parse(sessionRaw);
+            const userProfile = await getCurrentProfile(currentUser.id);
+            if (!userProfile) return;
+
             const profileDisplayName = document.getElementById('profileDisplayName');
-            const avatarInitials = document.querySelector('.avatar-initials');
-            const profileAvatar = document.querySelector('.profile-avatar');
-            const badgeRole = document.querySelector('.badge-role');
             const inputFullName = document.getElementById('inputFullName');
-            const inputEmail = document.getElementById('inputEmail');
+            const inputPhone = document.getElementById('inputPhone');
+            const selectSemester = document.getElementById('selectSemester');
+            const textareaDesc = document.getElementById('textareaDescription');
+            const inputTime = document.getElementById('inputTimeSlots');
+            const inputUrl = document.getElementById('inputMeetingUrl');
+            const hiddenMat = document.getElementById('materiasHidden') || document.getElementById('hiddenMaterias');
+            const inputStudentId = document.getElementById('inputStudentId');
 
-            if (userSession.name) {
-                if (profileDisplayName) profileDisplayName.textContent = userSession.name;
-                if (inputFullName) inputFullName.value = userSession.name;
-
-                // Generar iniciales dinámicas
-                const nameParts = userSession.name.trim().split(/\s+/);
-                const initials = nameParts.length === 1
-                    ? nameParts[0].substring(0, 2).toUpperCase()
-                    : (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
-
-                if (avatarInitials) avatarInitials.textContent = initials;
-                if (profileAvatar) profileAvatar.setAttribute('aria-label', `Avatar de ${userSession.name}`);
-            }
-
-            if (userSession.identifier && inputEmail) {
-                inputEmail.value = userSession.identifier;
-            }
-
-            if (userSession.role === 'ADMIN') {
+            if (profileDisplayName) profileDisplayName.textContent = userProfile.full_name || currentUser.email;
+            if (inputFullName) inputFullName.value = userProfile.full_name || '';
+            if (inputPhone) inputPhone.value = userProfile.phone || '';
+            if (selectSemester && userProfile.semester) selectSemester.value = userProfile.semester;
+            if (textareaDesc) textareaDesc.value = userProfile.description || '';
+            if (inputTime) inputTime.value = userProfile.time_slots || '';
+            if (inputUrl) inputUrl.value = userProfile.meeting_url || '';
+            if (hiddenMat) hiddenMat.value = (userProfile.subjects || []).join(', ');
+            if (inputStudentId) inputStudentId.value = userProfile.institutional_id || '';
+            if (userProfile.role === 'ADMIN') {
+                const badgeRole = document.querySelector('.badge-role');
                 if (badgeRole) badgeRole.textContent = 'Coordinación Académica';
-                const studentIdInput = document.getElementById('inputStudentId');
-                if (studentIdInput) studentIdInput.value = 'ADM-2026-0001';
             }
-
-            // Hidratar perfil extendido si existe en localStorage
-            const savedProfileRaw = localStorage.getItem('dualorganizer_profile_v1');
-            if (savedProfileRaw) {
-                try {
-                    const savedProfile = JSON.parse(savedProfileRaw);
-                    if (savedProfile.phone) {
-                        const inputPhone = document.getElementById('inputPhone');
-                        if (inputPhone) inputPhone.value = savedProfile.phone;
-                    }
-                    if (savedProfile.semester) {
-                        const selectSemester = document.getElementById('selectSemester');
-                        if (selectSemester) selectSemester.value = savedProfile.semester;
-                    }
-                    if (savedProfile.description) {
-                        const textareaDesc = document.getElementById('textareaDescription');
-                        if (textareaDesc) textareaDesc.value = savedProfile.description;
-                    }
-                    if (savedProfile.timeSlots) {
-                        const inputTime = document.getElementById('inputTimeSlots');
-                        if (inputTime) inputTime.value = savedProfile.timeSlots;
-                    }
-                    if (savedProfile.meetingUrl) {
-                        const inputUrl = document.getElementById('inputMeetingUrl');
-                        if (inputUrl) inputUrl.value = savedProfile.meetingUrl;
-                    }
-                    if (savedProfile.materias) {
-                        const hiddenMat = document.getElementById('materiasHidden') || document.getElementById('hiddenMaterias');
-                        if (hiddenMat) hiddenMat.value = savedProfile.materias;
-                    }
-                } catch (e) {
-                    console.warn('Error al leer perfil persistido:', e);
-                }
-            }
-        } catch (err) {
-            console.warn('Error al procesar la sesión en profile.js:', err);
+        } catch (error) {
+            console.error('Error al cargar el perfil desde Supabase:', error);
+            showToast('No se pudo cargar el perfil remoto.');
         }
-    }
+    };
+
+    await hydrateRemoteProfile();
 
     // ==========================================================================
     // 1. Tag-Input Dinámico para Materias
@@ -434,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        const saveChanges = (e) => {
+        const saveChanges = async (e) => {
             if (e) e.preventDefault();
 
             if (!form.checkValidity()) {
@@ -452,23 +413,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 1. Sincronizar dualorganizer_session
-            const sessionRaw = sessionStorage.getItem(STORAGE_SESSION_KEY);
-            if (sessionRaw) {
-                try {
-                    const session = JSON.parse(sessionRaw);
-                    session.name = currentSnapshot.fullName?.trim() || session.name;
-                    sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(session));
-                } catch (err) {
-                    console.warn('Error al actualizar sesión en storage:', err);
-                }
-            }
-
-            // 2. Persistir perfil completo en localStorage
             try {
-                localStorage.setItem('dualorganizer_profile_v1', JSON.stringify(currentSnapshot));
+                const { error } = await supabase.from('profiles').update({
+                    full_name: currentSnapshot.fullName?.trim() || '',
+                    phone: currentSnapshot.phone || null,
+                    semester: currentSnapshot.semester || null,
+                    description: currentSnapshot.description || null,
+                    subjects: currentSnapshot.materias
+                        ? currentSnapshot.materias.split(',').map(item => item.trim()).filter(Boolean)
+                        : [],
+                    available_days: currentSnapshot.availableDays || [],
+                    time_slots: currentSnapshot.timeSlots || null,
+                    meeting_url: currentSnapshot.meetingUrl || null
+                }).eq('id', currentUser.id);
+                if (error) throw error;
             } catch (err) {
-                console.warn('Error al persistir perfil en localStorage:', err);
+                console.error('Error al persistir perfil en Supabase:', err);
+                showToast('No se pudo guardar el perfil.');
+                return;
             }
 
             // 3. Actualizar elementos visuales dependientes de inmediato
@@ -560,4 +522,11 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'dashboard.html';
         });
     }
+
+    document.querySelectorAll('[data-action="logout"]').forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            signOut();
+        });
+    });
 });
