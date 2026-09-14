@@ -39,8 +39,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const hydrateRemoteProfile = async () => {
         try {
-            const userProfile = await getCurrentProfile(currentUser.id);
+            const [{ data: sessionRows, error: sessionError }, userProfile] = await Promise.all([
+                supabase
+                    .from('tutoring_sessions')
+                    .select('hours, status')
+                    .eq('tutor_id', currentUser.id),
+                getCurrentProfile(currentUser.id)
+            ]);
+            if (sessionError) throw sessionError;
             if (!userProfile) return;
+
+            const totalHours = (sessionRows || []).reduce((total, session) => total + Number(session.hours || 0), 0);
+            const totalSessions = (sessionRows || []).length;
+            const hoursValue = document.getElementById('profileHoursValue');
+            const sessionsValue = document.getElementById('profileSessionsValue');
+            const hoursProgress = document.getElementById('profileHoursProgress');
+            const hoursBar = document.getElementById('profileHoursBar');
+            const percentage = Math.min(100, Math.round((totalHours / 80) * 100));
+            if (hoursValue) hoursValue.textContent = `${totalHours.toFixed(1).replace(/\.0$/, '')} / 80 hrs`;
+            if (sessionsValue) sessionsValue.textContent = String(totalSessions);
+            if (hoursProgress) hoursProgress.setAttribute('aria-valuenow', String(totalHours));
+            if (hoursBar) hoursBar.style.width = `${percentage}%`;
 
             const profileDisplayName = document.getElementById('profileDisplayName');
             const inputFullName = document.getElementById('inputFullName');

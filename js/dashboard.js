@@ -744,7 +744,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    await initActiveChapter();
     try {
         await loadChapterOptions();
         await initActiveChapter();

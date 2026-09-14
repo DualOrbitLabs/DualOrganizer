@@ -55,11 +55,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (membershipError) throw membershipError;
 
       const userIds = memberships.map(member => member.user_id);
-      const { data: profiles, error: profileError } = await supabase
+      const profileQuery = supabase
         .from('profiles')
         .select('*')
         .in('id', userIds.length ? userIds : ['00000000-0000-0000-0000-000000000000']);
+      const sessionsQuery = supabase
+        .from('tutoring_sessions')
+        .select('*')
+        .eq('chapter_id', chapterId)
+        .order('session_date', { ascending: false });
+      const [{ data: profiles, error: profileError }, { data: sessions, error: sessionError }] = await Promise.all([
+        profileQuery,
+        sessionsQuery
+      ]);
       if (profileError) throw profileError;
+      if (sessionError) throw sessionError;
 
       const profileById = new Map(profiles.map(profile => [profile.id, profile]));
       const members = memberships.map((membership) => {
@@ -80,13 +90,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           bio: profile.description || 'Sin descripción.'
         };
       });
-
-      const { data: sessions, error: sessionError } = await supabase
-        .from('tutoring_sessions')
-        .select('*')
-        .eq('chapter_id', chapterId)
-        .order('session_date', { ascending: false });
-      if (sessionError) throw sessionError;
 
       const memberByUserId = new Map(members.map(member => [member.userId, member]));
       calendarSessions = sessions;
@@ -129,6 +132,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         option.selected = membership.chapters.id === activeChapterId;
         elements.chapterSelect.appendChild(option);
       });
+
+      if (!activeChapterId && elements.chapterSelect.options.length > 0) {
+        activeChapterId = elements.chapterSelect.options[0].value;
+        elements.chapterSelect.options[0].selected = true;
+      }
     };
 
     /*
@@ -303,14 +311,72 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const refreshManagerVisibility = () => {
     const operation = elements.managerOperation?.value;
-    const needsSession = operation !== 'add';
+    const needsSession = operation !== 'add' && operation !== 'clear';
     const needsTarget = operation === 'swap' || operation === 'send';
+    const needsTargetSession = operation === 'swap';
+    const needsDetails = operation === 'add' || operation === 'edit';
+    const copy = {
+      add: {
+        title: 'Agregar sesión',
+        hint: 'Crea una sesión nueva en el calendario del tutor seleccionado.',
+        submit: 'Agregar sesión'
+      },
+      edit: {
+        title: 'Editar sesión',
+        hint: 'Selecciona una sesión y ajusta sus datos o su horario.',
+        submit: 'Guardar cambios'
+      },
+      delete: {
+        title: 'Eliminar sesión',
+        hint: 'La sesión se eliminará del calendario de forma permanente.',
+        submit: 'Eliminar sesión'
+      },
+      clear: {
+        title: 'Limpiar calendario del tutor',
+        hint: 'Borra todas las sesiones del tutor seleccionado dentro del capítulo activo.',
+        submit: 'Limpiar calendario'
+      },
+      swap: {
+        title: 'Intercambiar horario',
+        hint: 'Selecciona otra sesión para intercambiar sus tutores y horarios.',
+        submit: 'Intercambiar'
+      },
+      send: {
+        title: 'Enviar sesión',
+        hint: 'La sesión se moverá al horario libre más cercano del tutor destino.',
+        submit: 'Enviar sesión'
+      }
+    }[operation] || {};
+
     if (elements.managerSessionGroup) elements.managerSessionGroup.hidden = !needsSession;
     if (elements.managerTargetGroup) elements.managerTargetGroup.hidden = !needsTarget;
-    if (elements.managerTargetSessionGroup) elements.managerTargetSessionGroup.hidden = operation !== 'swap';
+    if (elements.managerTargetSessionGroup) elements.managerTargetSessionGroup.hidden = !needsTargetSession;
     if (elements.managerNewSessionFields) {
-      elements.managerNewSessionFields.hidden = operation !== 'add' && operation !== 'edit';
+      elements.managerNewSessionFields.hidden = !needsDetails;
     }
+
+    const detailFields = [
+      elements.managerDate,
+      elements.managerTime,
+      elements.managerStudent,
+      elements.managerSubject,
+      elements.managerHours
+    ];
+    detailFields.forEach(field => {
+      if (field) field.disabled = !needsDetails;
+    });
+    [elements.managerSession, elements.managerTargetTutor, elements.managerTargetSession].forEach(field => {
+      if (field) field.disabled = field === elements.managerSession ? !needsSession : !needsTarget && field !== elements.managerTargetSession;
+    });
+    if (elements.managerTargetSession) elements.managerTargetSession.disabled = !needsTargetSession;
+
+    const title = document.getElementById('sessionManagerTitle');
+    const hint = document.getElementById('sessionManagerHint');
+    const submit = document.getElementById('sessionManagerSubmit');
+    if (title && copy.title) title.textContent = copy.title;
+    if (hint && copy.hint) hint.textContent = copy.hint;
+    if (submit && copy.submit) submit.textContent = copy.submit;
+    if (submit) submit.classList.toggle('btn--danger', operation === 'delete' || operation === 'clear');
   };
 
   const loadSelectedSessionIntoForm = () => {
@@ -863,20 +929,29 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (error) throw error;
     }
 
+    if (operation === 'clear') {
+      const tutorName = state.members.find(member => member.userId === tutorId)?.name || 'este tutor';
+      const sessionCount = calendarSessions.filter(session => session.tutor_id === tutorId).length;
+      if (!sessionCount) throw new Error(`${tutorName} no tiene sesiones en este capítulo.`);
+      if (!window.confirm(`Vas a eliminar ${sessionCount} sesión(es) de ${tutorName}. Esta acción no se puede deshacer. ¿Continuar?`)) {
+        throw new Error('Operación cancelada.');
+      }
+      const { error } = await supabase
+        .from('tutoring_sessions')
+        .delete()
+        .eq('chapter_id', activeChapterId)
+        .eq('tutor_id', tutorId);
+      if (error) throw error;
+    }
+
     if (operation === 'swap') {
       const target = calendarSessions.find(session => session.id === elements.managerTargetSession.value);
       if (!target || target.id === selected.id) throw new Error('Selecciona otra sesión para intercambiar.');
-      const selectedUpdate = supabase.from('tutoring_sessions').update({
-        tutor_id: target.tutor_id,
-        start_time: target.start_time
-      }).eq('id', selected.id);
-      const targetUpdate = supabase.from('tutoring_sessions').update({
-        tutor_id: selected.tutor_id,
-        start_time: selected.start_time
-      }).eq('id', target.id);
-      const results = await Promise.all([selectedUpdate, targetUpdate]);
-      const failed = results.find(result => result.error);
-      if (failed) throw failed.error;
+      const { error } = await supabase.rpc('swap_tutoring_sessions', {
+        first_session_id: selected.id,
+        second_session_id: target.id
+      });
+      if (error) throw error;
     }
 
     if (operation === 'send') {
@@ -1034,7 +1109,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const init = async () => {
     await loadAdminChapterOptions();
     const remoteData = await getRemoteData();
-    await loadAdminChapterOptions();
     state.members = remoteData.members;
     state.records = remoteData.records;
     renderMembers();

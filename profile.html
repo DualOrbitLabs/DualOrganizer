@@ -59,20 +59,20 @@
         <div class="quick-stats" aria-label="Estadísticas de tutoría">
           <div class="stat-item">
             <div class="stat-label">Horas Acumuladas</div>
-            <div class="stat-value tabular-nums">45 / 80 hrs</div>
-            <div class="progress-container" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="80">
-              <div class="progress-bar" style="width: 56.25%;"></div>
+            <div class="stat-value tabular-nums" id="profileHoursValue">-- / 80 hrs</div>
+            <div class="progress-container" role="progressbar" id="profileHoursProgress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="80">
+              <div class="progress-bar" id="profileHoursBar" style="width: 0%;"></div>
             </div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">Sesiones Completadas</div>
-            <div class="stat-value tabular-nums">32</div>
+            <div class="stat-value tabular-nums" id="profileSessionsValue">--</div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">Materias Asignadas</div>
-            <div class="stat-value tabular-nums" id="statMateriasCount">3</div>
+            <div class="stat-value tabular-nums" id="statMateriasCount">--</div>
           </div>
         </div>
       </div>

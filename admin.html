@@ -236,6 +236,7 @@
         <div>
           <span class="admin-badge">Calendario institucional</span>
           <h2 class="admin-dialog__name" id="sessionManagerTitle">Gestionar sesión</h2>
+          <p class="session-manager__hint" id="sessionManagerHint">Selecciona una operación para comenzar.</p>
         </div>
         <button type="button" class="admin-dialog__close" id="sessionManagerClose" aria-label="Cerrar gestión">×</button>
       </header>
@@ -246,6 +247,7 @@
             <option value="add">Agregar sesión</option>
             <option value="edit">Editar sesión</option>
             <option value="delete">Eliminar sesión</option>
+            <option value="clear">Limpiar calendario del tutor</option>
             <option value="swap">Intercambiar horario</option>
             <option value="send">Enviar al tutor</option>
           </select>
@@ -275,7 +277,7 @@
         </div>
         <footer class="admin-dialog__footer">
           <button type="button" class="btn btn--secondary" id="sessionManagerCancel">Cancelar</button>
-          <button type="submit" class="btn btn--primary">Aplicar operación</button>
+          <button type="submit" class="btn btn--primary" id="sessionManagerSubmit">Aplicar operación</button>
         </footer>
       </form>
     </div>
