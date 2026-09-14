@@ -1419,3 +1419,28 @@ th[aria-sort="descending"] .sort-indicator {
     grid-template-columns: 1fr;
   }
 }
+
+#sessionManagerModal .session-manager__hint {
+  max-width: 42ch;
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+#sessionManagerModal .form-control:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  background: var(--slate-100);
+}
+
+#sessionManagerModal .btn--danger {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+#sessionManagerModal .btn--danger:hover {
+  border-color: #b91c1c;
+  background: #b91c1c;
+}

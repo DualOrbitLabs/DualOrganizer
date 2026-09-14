@@ -34,6 +34,10 @@ Para trabajar en equipo, una persona crea el proyecto y añade a la otra desde *
 
 Si ya ejecutaron una versión anterior de `001_initial_schema.sql`, ejecuten también `supabase/migrations/002_complete_persistence.sql`. No borren las tablas: esa segunda migración actualiza las políticas de seguridad y el acceso al bucket.
 
+Si ejecutaron la versión anterior de `002_complete_persistence.sql`, ejecuten además `supabase/migrations/003_new_database.sql`. Esta migración añade el intercambio atómico de sesiones y permite que administración cree sesiones para otros tutores del mismo capítulo. No borra datos.
+
+Si ejecutaron `003_new_database.sql`, ejecuten también `supabase/migrations/004_security_hardening.sql`. Esta migración limita funciones privilegiadas a usuarios autenticados, fuerza el bucket de evidencias a privado y protege campos sensibles del perfil. El registro nuevo exige contraseñas de al menos 12 caracteres con mayúsculas, minúsculas, número y símbolo. Supabase Auth gestiona el hash de la contraseña en el servidor; la aplicación nunca guarda ni calcula hashes.
+
 ### SQL explicado sin drama
 
 - Una **tabla** es una hoja de cálculo para un tipo de cosa.
@@ -143,6 +147,8 @@ Solo en el proyecto de desarrollo: eliminen y vuelvan a crear el proyecto o borr
 
 - [ ] El proyecto de producción es distinto del proyecto de desarrollo.
 - [ ] No hay contraseñas ni `service_role` en el repositorio.
+- [ ] La política de contraseñas de Supabase Auth exige al menos 12 caracteres.
+- [ ] Las funciones `SECURITY DEFINER` no son ejecutables por `anon`.
 - [ ] Auth, recuperación de contraseña y logout funcionan.
 - [ ] Todas las tablas tienen RLS activado.
 - [ ] El bucket de evidencias es privado.

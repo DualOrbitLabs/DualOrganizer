@@ -124,6 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
     registerAlert.removeAttribute('hidden');
   }
 
+  function isStrongPassword(password) {
+    return password.length >= 12
+      && password.length <= 128
+      && /[a-z]/.test(password)
+      && /[A-Z]/.test(password)
+      && /\d/.test(password)
+      && /[^A-Za-z0-9]/.test(password);
+  }
+
   if (btnOpenRegister && registerDialog) {
     btnOpenRegister.addEventListener('click', () => {
       registerForm?.reset();
@@ -152,8 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showRegisterAlert('Introduce un correo institucional válido.');
         return;
       }
-      if (password.length < 6 || password.length > 128) {
-        showRegisterAlert('La contraseña debe contener entre 6 y 128 caracteres.');
+      if (!isStrongPassword(password)) {
+        showRegisterAlert('La contraseña debe tener 12-128 caracteres e incluir mayúsculas, minúsculas, un número y un símbolo.');
         return;
       }
       if (!supabase) {
