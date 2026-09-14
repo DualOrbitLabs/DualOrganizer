@@ -11,7 +11,7 @@ Supabase será el servidor de datos de DualOrganizer:
 - **Storage** guarda evidencias PDF/JPG/PNG.
 - **RLS** (Row Level Security) decide qué filas puede ver o cambiar cada usuario.
 
-La app actual guarda datos en `localStorage` y simula el login. Eso sirve para una demo, pero cualquier persona puede modificar esos datos desde las herramientas del navegador. En producción, Supabase debe ser la fuente de verdad.
+La aplicación usa Supabase como fuente de verdad para Auth, perfiles, capítulos, membresías y sesiones. El navegador solo conserva temporalmente la sesión interna que gestiona el cliente oficial de Supabase.
 
 ## 2. Crear el proyecto
 
@@ -32,6 +32,8 @@ Para trabajar en equipo, una persona crea el proyecto y añade a la otra desde *
 4. Pulsen **Run**.
 5. Si termina sin error, revisen **Table Editor**. Deben aparecer `profiles`, `chapters`, `chapter_members`, `tutoring_sessions` y `session_evidence`.
 
+Si ya ejecutaron una versión anterior de `001_initial_schema.sql`, ejecuten también `supabase/migrations/002_complete_persistence.sql`. No borren las tablas: esa segunda migración actualiza las políticas de seguridad y el acceso al bucket.
+
 ### SQL explicado sin drama
 
 - Una **tabla** es una hoja de cálculo para un tipo de cosa.
@@ -45,6 +47,8 @@ Para trabajar en equipo, una persona crea el proyecto y añade a la otra desde *
 No borren ni cambien políticas RLS sin entenderlas. Son parte de la seguridad, no solo configuración.
 
 ## 4. Crear el primer usuario administrador
+
+También pueden usar el flujo normal de la aplicación: en `login.html`, pulsen **Crear cuenta de tutor**. Esa cuenta se crea como `TUTOR`. Después de confirmar el correo e iniciar sesión, creen un capítulo desde el hub; el trigger SQL convertirá automáticamente al creador en `ADMIN` y el enlace del capítulo abrirá el panel administrativo.
 
 1. Vayan a **Authentication > Users > Add user**.
 2. Creen su cuenta con un correo real y una contraseña temporal.
@@ -63,6 +67,8 @@ Este es el único paso inicial que cambia un rol directamente. Después, un admi
 
 Cuando un usuario cree un capítulo desde la app, el esquema lo añadirá automáticamente como administrador de ese capítulo. El rol global `ADMIN` sigue siendo necesario para entrar al panel administrativo global.
 
+El registro público siempre crea un usuario `TUTOR`. Cuando ese tutor crea su primer capítulo, el trigger SQL cambia su perfil a `ADMIN` y lo añade como administrador del capítulo. Desde entonces puede abrir el panel de administración **y conserva todas las capacidades de tutor**: puede entrar al dashboard, registrar horas, editar sesiones y subir evidencias. Un tutor que solo se une a capítulos no obtiene permisos de administración.
+
 ## 5. Configurar la aplicación
 
 1. Copien `.env.example` como `.env.local`.
@@ -76,7 +82,7 @@ Cuando un usuario cree un capítulo desde la app, el esquema lo añadirá autom�
 npm install
 ```
 
-El cliente de Supabase se integrará en la siguiente etapa de implementación. No intenten usar consultas desde HTML directamente.
+El cliente de Supabase ya está integrado en las páginas. No intenten usar consultas desde HTML directamente.
 
 ## 6. Crear el bucket de evidencias
 
@@ -142,5 +148,5 @@ Solo en el proyecto de desarrollo: eliminen y vuelvan a crear el proyecto o borr
 - [ ] El bucket de evidencias es privado.
 - [ ] Un tutor no puede consultar otro tutor.
 - [ ] Un usuario no puede elevarse a admin desde el navegador.
-- [ ] Los datos ya no dependen de `localStorage`.
+- [x] Los datos de perfiles, capítulos y sesiones no dependen de `localStorage`.
 - [ ] `npm run build` termina correctamente.

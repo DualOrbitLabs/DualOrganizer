@@ -1,182 +1,154 @@
+import { getAuthenticatedUser, getCurrentProfile, supabase, signOut } from './supabaseClient.js';
+
 // ==========================================================================
 // DualOrganizer - Lógica del Panel de Administración y Gestor de Datos
 // Stack: Vanilla JavaScript ES6+ (Cero frameworks ni dependencias externas)
 // Arquitectura: State-driven rendering, delegación de eventos, Exportación CSV con BOM UTF-8
 // ==========================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   'use strict';
 
   // --------------------------------------------------------------------------
   // 1. Guardia de Autorización en Cliente (RBAC)
   // --------------------------------------------------------------------------
-  const enforceAdminAuthorization = () => {
-    const sessionStr = sessionStorage.getItem('dualorganizer_session');
-    if (!sessionStr) {
+    const enforceAdminAuthorization = async () => {
+      const user = await getAuthenticatedUser();
+      if (!user) {
       window.location.replace('login.html');
       return null;
     }
-    try {
-      const session = JSON.parse(sessionStr);
-      if (!session || typeof session !== 'object' || session.role !== 'ADMIN') {
-        console.warn('[Seguridad] Intento de acceso sin privilegios de ADMIN:', session?.role);
+      const profile = await getCurrentProfile(user.id);
+      if (!profile || profile.role !== 'ADMIN') {
+        console.warn('[Seguridad] Intento de acceso sin privilegios de ADMIN');
         window.location.replace('dashboard.html');
         return null;
       }
-      return session;
-    } catch (e) {
-      console.error('[Seguridad] Sesión corrupta detectada:', e);
-      sessionStorage.removeItem('dualorganizer_session');
-      window.location.replace('login.html');
-      return null;
-    }
-  };
+      return { ...profile, authUser: user };
+    };
 
-  const currentAdmin = enforceAdminAuthorization();
-  if (!currentAdmin) return;
+    const currentAdmin = await enforceAdminAuthorization();
+    if (!currentAdmin) return;
 
-  // --------------------------------------------------------------------------
-  // 2. Datos Institucionales por Defecto y Sincronización
-  // --------------------------------------------------------------------------
-  const INITIAL_MEMBERS = [
-    {
-      id: 'TUT-2023-0891',
-      name: 'Juan Pérez',
-      initials: 'JP',
-      role: 'Tutor Académico',
-      status: 'Activo',
-      totalHours: 45.0,
-      targetHours: 80,
-      semester: 'Sexto Semestre',
-      email: 'juan.perez@institucion.edu',
-      phone: '555-123-4567',
-      subjects: ['Cálculo Diferencial', 'Física Mecánica', 'Álgebra Lineal'],
-      bio: 'Apoyo enfocado en bases matemáticas analíticas y resolución paso a paso.'
-    },
-    {
-      id: 'TUT-2024-0102',
-      name: 'Sofía Torres',
-      initials: 'ST',
-      role: 'Tutora Titular',
-      status: 'Activo',
-      totalHours: 62.5,
-      targetHours: 80,
-      semester: 'Octavo Semestre',
-      email: 'sofia.torres@institucion.edu',
-      phone: '555-987-6543',
-      subjects: ['Química Orgánica', 'Bioquímica Clínica'],
-      bio: 'Especialista en tutorías departamentales del área biomédica y farmacología.'
-    },
-    {
-      id: 'TUT-2024-0345',
-      name: 'Diego Ramírez',
-      initials: 'DR',
-      role: 'Tutor Par',
-      status: 'Activo',
-      totalHours: 28.0,
-      targetHours: 80,
-      semester: 'Quinto Semestre',
-      email: 'diego.ramirez@institucion.edu',
-      phone: '555-456-7890',
-      subjects: ['Programación Web', 'Estructuras de Datos'],
-      bio: 'Acompañamiento en algoritmos, estructuras de almacenamiento y buenas prácticas.'
-    },
-    {
-      id: 'TUT-2023-0511',
-      name: 'Mariana Castillo',
-      initials: 'MC',
-      role: 'Tutora Académica',
-      status: 'Revisión',
-      totalHours: 19.5,
-      targetHours: 80,
-      semester: 'Séptimo Semestre',
-      email: 'mariana.castillo@institucion.edu',
-      phone: '555-789-0123',
-      subjects: ['Termodinámica', 'Mecánica de Fluidos'],
-      bio: 'Tutorías en ciencias aplicadas de ingeniería química.'
-    }
-  ];
+  let activeChapterId = new URLSearchParams(window.location.search).get('chapter');
+  let calendarSessions = [];
 
-  const INITIAL_RECORDS = [
-    {
-      id: 'rec-01',
-      matricula: 'TUT-2023-0891',
-      tutorName: 'Juan Pérez',
-      subject: 'Cálculo Diferencial',
-      date: '2026-09-08',
-      hours: 2.0,
-      status: 'Aprobada'
-    },
-    {
-      id: 'rec-02',
-      matricula: 'TUT-2024-0102',
-      tutorName: 'Sofía Torres',
-      subject: 'Química Orgánica',
-      date: '2026-09-08',
-      hours: 1.5,
-      status: 'Aprobada'
-    },
-    {
-      id: 'rec-03',
-      matricula: 'TUT-2024-0345',
-      tutorName: 'Diego Ramírez',
-      subject: 'Programación Web',
-      date: '2026-09-07',
-      hours: 2.0,
-      status: 'Pendiente'
-    },
-    {
-      id: 'rec-04',
-      matricula: 'TUT-2023-0891',
-      tutorName: 'Juan Pérez',
-      subject: 'Física Mecánica',
-      date: '2026-09-05',
-      hours: 1.5,
-      status: 'Aprobada'
-    }
-  ];
-
-  const loadMergedRecords = () => {
-    const list = [...INITIAL_RECORDS];
-    try {
-      const localSessionsRaw = localStorage.getItem('dualorganizer_sessions_v1');
-      if (localSessionsRaw) {
-        const localSessions = JSON.parse(localSessionsRaw);
-        if (Array.isArray(localSessions)) {
-          localSessions.forEach(s => {
-            const exists = list.some(r => r.date === s.date && r.subject === s.subject);
-            if (!exists) {
-              list.unshift({
-                id: s.id || `local-${Date.now()}`,
-                matricula: 'TUT-2023-0891',
-                tutorName: 'Juan Pérez',
-                subject: s.subject || 'Tutoría General',
-                date: s.date || new Date().toISOString().slice(0, 10),
-                hours: parseFloat(s.hours) || 1.0,
-                status: 'Pendiente'
-              });
-            }
-          });
-        }
+    const getRemoteData = async () => {
+      let chapterId = new URLSearchParams(window.location.search).get('chapter');
+      if (!chapterId) {
+        const { data: membership, error } = await supabase
+          .from('chapter_members')
+          .select('chapter_id')
+          .eq('user_id', currentAdmin.id)
+          .eq('is_primary', true)
+          .maybeSingle();
+        if (error) throw error;
+        chapterId = membership?.chapter_id;
       }
-    } catch (err) {
-      console.warn('Error sincronizando sesiones locales en admin:', err);
-    }
-    return list;
-  };
 
-  // --------------------------------------------------------------------------
-  // 3. Estado Global de la Aplicación
-  // --------------------------------------------------------------------------
-  const state = {
-    records: loadMergedRecords(),
-    members: [...INITIAL_MEMBERS],
-    filterMember: 'ALL',
-    searchQuery: '',
-    sortKey: 'date',
-    sortDirection: 'desc',
-    activeTab: 'members'
-  };
+      if (!chapterId) return { members: [], records: [], chapterId: null };
+
+      const { data: memberships, error: membershipError } = await supabase
+        .from('chapter_members')
+        .select('user_id, role')
+        .eq('chapter_id', chapterId);
+      if (membershipError) throw membershipError;
+
+      const userIds = memberships.map(member => member.user_id);
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', userIds.length ? userIds : ['00000000-0000-0000-0000-000000000000']);
+      if (profileError) throw profileError;
+
+      const profileById = new Map(profiles.map(profile => [profile.id, profile]));
+      const members = memberships.map((membership) => {
+        const profile = profileById.get(membership.user_id) || {};
+        return {
+          id: profile.institutional_id || profile.id,
+          userId: profile.id,
+          name: profile.full_name || 'Sin nombre',
+          initials: getInitials(profile.full_name || ''),
+          role: membership.role === 'ADMIN' ? 'Coordinador / Admin' : 'Tutor Académico',
+          status: 'Activo',
+          totalHours: 0,
+          targetHours: 80,
+          semester: profile.semester || 'Sin especificar',
+          email: profile.id === currentAdmin.id ? currentAdmin.authUser.email : '',
+          phone: profile.phone || 'No registrado',
+          subjects: profile.subjects || [],
+          bio: profile.description || 'Sin descripción.'
+        };
+      });
+
+      const { data: sessions, error: sessionError } = await supabase
+        .from('tutoring_sessions')
+        .select('*')
+        .eq('chapter_id', chapterId)
+        .order('session_date', { ascending: false });
+      if (sessionError) throw sessionError;
+
+      const memberByUserId = new Map(members.map(member => [member.userId, member]));
+      calendarSessions = sessions;
+      const records = sessions.map(session => {
+        const member = memberByUserId.get(session.tutor_id);
+        if (member) member.totalHours += Number(session.hours) || 0;
+        return {
+          id: session.id,
+          matricula: member?.id || session.tutor_id,
+          tutorName: member?.name || 'Tutor sin perfil',
+          subject: session.subject,
+          date: session.session_date,
+          hours: Number(session.hours),
+          status: session.status === 'APPROVED' ? 'Aprobada' : session.status === 'REJECTED' ? 'Rechazada' : 'Pendiente'
+          ,tutorId: session.tutor_id,
+          startTime: String(session.start_time).slice(0, 5),
+          studentName: session.student_name
+        };
+      });
+
+      activeChapterId = chapterId;
+      return { members, records, chapterId };
+    };
+
+    const loadAdminChapterOptions = async () => {
+      if (!elements?.chapterSelect) return;
+      const { data, error } = await supabase
+        .from('chapter_members')
+        .select('chapter_id, role, chapters(id, code, name)')
+        .eq('user_id', currentAdmin.id)
+        .eq('role', 'ADMIN');
+      if (error) throw error;
+
+      elements.chapterSelect.innerHTML = '';
+      data.forEach((membership) => {
+        if (!membership.chapters) return;
+        const option = document.createElement('option');
+        option.value = membership.chapters.id;
+        option.textContent = `${membership.chapters.code} · ${membership.chapters.name}`;
+        option.selected = membership.chapters.id === activeChapterId;
+        elements.chapterSelect.appendChild(option);
+      });
+    };
+
+    /*
+     * El resto del módulo consume state.members y state.records, por lo que
+     * la interfaz conserva sus filtros y exportación sin duplicar consultas.
+     */
+    const state = {
+      records: [],
+      members: [],
+      filterMember: 'ALL',
+      searchQuery: '',
+      sortKey: 'date',
+      sortDirection: 'desc',
+      activeTab: 'members'
+    };
+
+    /*
+     * El código de renderizado empieza aquí; las declaraciones demo anteriores
+     * fueron eliminadas para que SQL sea la única fuente de datos.
+     */
 
   // --------------------------------------------------------------------------
   // 3. Referencias al DOM
@@ -221,7 +193,25 @@ document.addEventListener('DOMContentLoaded', () => {
     dialogCloseFooterBtn: document.getElementById('dialogCloseFooterBtn'),
     // Toast
     toast: document.getElementById('adminToast'),
-    toastMsg: document.getElementById('adminToastMsg')
+    toastMsg: document.getElementById('adminToastMsg'),
+    refreshButton: document.getElementById('btnRefreshAdmin')
+    ,chapterSelect: document.getElementById('adminChapterSelect')
+    ,sessionManagerModal: document.getElementById('sessionManagerModal')
+    ,sessionManagerForm: document.getElementById('sessionManagerForm')
+    ,managerOperation: document.getElementById('managerOperation')
+    ,managerTutor: document.getElementById('managerTutor')
+    ,managerSession: document.getElementById('managerSession')
+    ,managerTargetTutor: document.getElementById('managerTargetTutor')
+    ,managerTargetSession: document.getElementById('managerTargetSession')
+    ,managerTargetGroup: document.getElementById('managerTargetGroup')
+    ,managerTargetSessionGroup: document.getElementById('managerTargetSessionGroup')
+    ,managerSessionGroup: document.getElementById('managerSessionGroup')
+    ,managerNewSessionFields: document.getElementById('managerNewSessionFields')
+    ,managerDate: document.getElementById('managerDate')
+    ,managerTime: document.getElementById('managerTime')
+    ,managerStudent: document.getElementById('managerStudent')
+    ,managerSubject: document.getElementById('managerSubject')
+    ,managerHours: document.getElementById('managerHours')
   };
 
   let toastTimeout = null;
@@ -243,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const getStatusBadgeClass = (status) => {
-    switch (status.toLowerCase()) {
+    switch (String(status || '').toLowerCase()) {
       case 'activo':
       case 'aprobada':
         return 'status-badge--active';
@@ -265,6 +255,101 @@ document.addEventListener('DOMContentLoaded', () => {
     if (parts.length === 0 || !parts[0]) return 'TO';
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const formatSessionLabel = (session) =>
+    `${session.session_date} ${String(session.start_time).slice(0, 5)} · ${session.subject} · ${session.hours}h`;
+
+  const refreshManagerSessions = () => {
+    const tutorId = elements.managerTutor?.value;
+    const sessions = calendarSessions.filter(session => session.tutor_id === tutorId);
+    if (elements.managerSession) {
+      elements.managerSession.innerHTML = '';
+      sessions.forEach(session => {
+        const option = document.createElement('option');
+        option.value = session.id;
+        option.textContent = formatSessionLabel(session);
+        elements.managerSession.appendChild(option);
+      });
+      if (!sessions.length) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Sin sesiones';
+        elements.managerSession.appendChild(option);
+      }
+    }
+    refreshManagerTargetSessions();
+  };
+
+  const refreshManagerTargetSessions = () => {
+    const targetId = elements.managerTargetTutor?.value;
+    const sessions = calendarSessions.filter(session => session.tutor_id === targetId);
+    if (elements.managerTargetSession) {
+      elements.managerTargetSession.innerHTML = '';
+      sessions.forEach(session => {
+        const option = document.createElement('option');
+        option.value = session.id;
+        option.textContent = formatSessionLabel(session);
+        elements.managerTargetSession.appendChild(option);
+      });
+      if (!sessions.length) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Sin sesiones';
+        elements.managerTargetSession.appendChild(option);
+      }
+    }
+  };
+
+  const refreshManagerVisibility = () => {
+    const operation = elements.managerOperation?.value;
+    const needsSession = operation !== 'add';
+    const needsTarget = operation === 'swap' || operation === 'send';
+    if (elements.managerSessionGroup) elements.managerSessionGroup.hidden = !needsSession;
+    if (elements.managerTargetGroup) elements.managerTargetGroup.hidden = !needsTarget;
+    if (elements.managerTargetSessionGroup) elements.managerTargetSessionGroup.hidden = operation !== 'swap';
+    if (elements.managerNewSessionFields) {
+      elements.managerNewSessionFields.hidden = operation !== 'add' && operation !== 'edit';
+    }
+  };
+
+  const loadSelectedSessionIntoForm = () => {
+    const session = calendarSessions.find(item => item.id === elements.managerSession?.value);
+    if (!session) return;
+    elements.managerDate.value = session.session_date;
+    elements.managerTime.value = String(session.start_time).slice(0, 5);
+    elements.managerStudent.value = session.student_name;
+    elements.managerSubject.value = session.subject;
+    elements.managerHours.value = session.hours;
+  };
+
+  const openSessionManager = (tutorId = '', sessionId = '') => {
+    if (!elements.sessionManagerModal) return;
+    [elements.managerTutor, elements.managerTargetTutor].forEach((select) => {
+      select.innerHTML = '';
+      state.members.forEach(member => {
+        const option = document.createElement('option');
+        option.value = member.userId;
+        option.textContent = member.name;
+        select.appendChild(option);
+      });
+    });
+    if (tutorId) elements.managerTutor.value = tutorId;
+    if (sessionId) {
+      const session = calendarSessions.find(item => item.id === sessionId);
+      if (session) {
+        elements.managerTutor.value = session.tutor_id;
+        elements.managerOperation.value = 'delete';
+      }
+    }
+    refreshManagerSessions();
+    if (sessionId) elements.managerSession.value = sessionId;
+    if (sessionId) {
+      elements.managerOperation.value = 'edit';
+      loadSelectedSessionIntoForm();
+    }
+    refreshManagerVisibility();
+    elements.sessionManagerModal.showModal();
   };
 
   // --------------------------------------------------------------------------
@@ -383,7 +468,18 @@ document.addEventListener('DOMContentLoaded', () => {
       btnView.setAttribute('data-member-id', member.id);
       btnView.textContent = 'Ver Detalle';
 
-      card.append(innerWrapper, btnView);
+      const actions = document.createElement('div');
+      actions.className = 'member-card__actions';
+      actions.appendChild(btnView);
+      const btnManage = document.createElement('button');
+      btnManage.type = 'button';
+      btnManage.className = 'btn btn--outline-action btn--full';
+      btnManage.setAttribute('data-action', 'manage-tutor');
+      btnManage.setAttribute('data-member-id', member.userId);
+      btnManage.textContent = 'Gestionar calendario';
+      actions.appendChild(btnManage);
+
+      card.append(innerWrapper, actions);
       fragment.appendChild(card);
     });
 
@@ -492,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (records.length === 0) {
       const emptyRow = document.createElement('tr');
       const emptyTd = document.createElement('td');
-      emptyTd.colSpan = 6;
+      emptyTd.colSpan = 7;
       emptyTd.className = 'table-empty';
       emptyTd.textContent = 'No se encontraron sesiones registradas con los criterios seleccionados.';
       emptyRow.appendChild(emptyTd);
@@ -536,7 +632,16 @@ document.addEventListener('DOMContentLoaded', () => {
       statusSpan.textContent = rec.status;
       tdStatus.appendChild(statusSpan);
 
-      row.append(tdMatricula, tdTutor, tdSubject, tdDate, tdHours, tdStatus);
+      const tdActions = document.createElement('td');
+      const manageButton = document.createElement('button');
+      manageButton.type = 'button';
+      manageButton.className = 'btn btn--secondary';
+      manageButton.setAttribute('data-action', 'manage-session');
+      manageButton.setAttribute('data-session-id', rec.id);
+      manageButton.textContent = 'Gestionar';
+      tdActions.appendChild(manageButton);
+
+      row.append(tdMatricula, tdTutor, tdSubject, tdDate, tdHours, tdStatus, tdActions);
       fragment.appendChild(row);
     });
 
@@ -646,6 +751,147 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  const minutesFromTime = (value) => {
+    const [hours, minutes] = String(value).slice(0, 5).split(':').map(Number);
+    return (hours || 0) * 60 + (minutes || 0);
+  };
+
+  const timeFromMinutes = (value) =>
+    `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+
+  const overlaps = (candidate, existing) => {
+    const candidateStart = minutesFromTime(candidate.start_time);
+    const candidateEnd = candidateStart + Math.round(Number(candidate.hours) * 60);
+    return existing.some((session) => {
+      if (session.id === candidate.id) return false;
+      if (session.tutor_id !== candidate.tutor_id || session.session_date !== candidate.session_date) return false;
+      const start = minutesFromTime(session.start_time);
+      const end = start + Math.round(Number(session.hours) * 60);
+      return candidateStart < end && candidateEnd > start;
+    });
+  };
+
+  const findNearestFreeTime = (session, targetTutorId) => {
+    const sourceMinutes = minutesFromTime(session.start_time);
+    const candidates = [];
+    for (let offset = 0; offset <= 600; offset += 30) {
+      if (offset === 0) candidates.push(sourceMinutes);
+      else candidates.push(sourceMinutes + offset, sourceMinutes - offset);
+    }
+    return candidates
+      .filter(value => value >= 8 * 60 && value <= 18 * 60)
+      .find(value => !overlaps({
+        ...session,
+        tutor_id: targetTutorId,
+        start_time: timeFromMinutes(value)
+      }, calendarSessions));
+  };
+
+  const reloadRemoteData = async () => {
+    const remoteData = await getRemoteData();
+    state.members = remoteData.members;
+    state.records = remoteData.records;
+    renderMembers();
+    populateMemberFilter();
+    renderRecords();
+  };
+
+  const refreshAdmin = async () => {
+    elements.refreshButton?.classList.add('is-loading');
+    if (elements.refreshButton) elements.refreshButton.disabled = true;
+    try {
+      await reloadRemoteData();
+      await loadAdminChapterOptions();
+      showToast('Datos actualizados.');
+    } catch (error) {
+      console.error('Error al actualizar administración:', error);
+      showToast('No se pudieron actualizar los datos.');
+    } finally {
+      elements.refreshButton?.classList.remove('is-loading');
+      if (elements.refreshButton) elements.refreshButton.disabled = false;
+    }
+  };
+
+  const applySessionOperation = async () => {
+    const operation = elements.managerOperation.value;
+    const tutorId = elements.managerTutor.value;
+    const selectedId = elements.managerSession.value;
+    const selected = calendarSessions.find(session => session.id === selectedId);
+
+    if (operation !== 'add' && !selected) throw new Error('Selecciona una sesión.');
+
+    if (operation === 'edit') {
+      const payload = {
+        tutor_id: tutorId,
+        student_name: elements.managerStudent.value.trim(),
+        subject: elements.managerSubject.value.trim(),
+        session_date: elements.managerDate.value,
+        start_time: elements.managerTime.value,
+        hours: Number(elements.managerHours.value)
+      };
+      if (!payload.student_name || !payload.subject || !payload.session_date || !payload.start_time) {
+        throw new Error('Completa los datos de la sesión.');
+      }
+      if (overlaps({ ...payload, id: selected.id }, calendarSessions)) {
+        throw new Error('El tutor ya tiene una sesión en ese horario.');
+      }
+      const { error } = await supabase.from('tutoring_sessions').update(payload).eq('id', selected.id);
+      if (error) throw error;
+    }
+
+    if (operation === 'add') {
+      const payload = {
+        chapter_id: activeChapterId,
+        tutor_id: tutorId,
+        student_name: elements.managerStudent.value.trim(),
+        subject: elements.managerSubject.value.trim(),
+        session_date: elements.managerDate.value,
+        start_time: elements.managerTime.value,
+        hours: Number(elements.managerHours.value),
+        status: 'PENDING'
+      };
+      if (!payload.student_name || !payload.subject || !payload.session_date || !payload.start_time) {
+        throw new Error('Completa los datos de la nueva sesión.');
+      }
+      if (overlaps(payload, calendarSessions)) throw new Error('El tutor ya tiene una sesión en ese horario.');
+      const { error } = await supabase.from('tutoring_sessions').insert(payload);
+      if (error) throw error;
+    }
+
+    if (operation === 'delete') {
+      const { error } = await supabase.from('tutoring_sessions').delete().eq('id', selected.id);
+      if (error) throw error;
+    }
+
+    if (operation === 'swap') {
+      const target = calendarSessions.find(session => session.id === elements.managerTargetSession.value);
+      if (!target || target.id === selected.id) throw new Error('Selecciona otra sesión para intercambiar.');
+      const selectedUpdate = supabase.from('tutoring_sessions').update({
+        tutor_id: target.tutor_id,
+        start_time: target.start_time
+      }).eq('id', selected.id);
+      const targetUpdate = supabase.from('tutoring_sessions').update({
+        tutor_id: selected.tutor_id,
+        start_time: selected.start_time
+      }).eq('id', target.id);
+      const results = await Promise.all([selectedUpdate, targetUpdate]);
+      const failed = results.find(result => result.error);
+      if (failed) throw failed.error;
+    }
+
+    if (operation === 'send') {
+      const targetTutorId = elements.managerTargetTutor.value;
+      if (!targetTutorId || targetTutorId === selected.tutor_id) throw new Error('Selecciona otro tutor.');
+      const freeMinutes = findNearestFreeTime(selected, targetTutorId);
+      if (freeMinutes === undefined) throw new Error('No hay un horario libre para ese tutor entre 08:00 y 18:00.');
+      const { error } = await supabase.from('tutoring_sessions').update({
+        tutor_id: targetTutorId,
+        start_time: timeFromMinutes(freeMinutes)
+      }).eq('id', selected.id);
+      if (error) throw error;
+    }
+  };
+
   // --------------------------------------------------------------------------
   // 10. Delegación de Eventos y Manejadores
   // --------------------------------------------------------------------------
@@ -678,13 +924,45 @@ document.addEventListener('DOMContentLoaded', () => {
   if (elements.membersGrid) {
     elements.membersGrid.addEventListener('click', (e) => {
       const actionBtn = e.target.closest('[data-action="view-member"]');
-      if (!actionBtn) return;
-      const memberId = actionBtn.getAttribute('data-member-id');
-      if (memberId) {
+      if (actionBtn) {
+        const memberId = actionBtn.getAttribute('data-member-id');
         openMemberModal(memberId);
+        return;
+      }
+
+      const manageTutorButton = e.target.closest('[data-action="manage-tutor"]');
+      if (manageTutorButton) {
+        openSessionManager(manageTutorButton.getAttribute('data-member-id'));
       }
     });
   }
+
+  if (elements.recordsTable) {
+    elements.recordsTable.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-action="manage-session"]');
+      if (button) openSessionManager('', button.getAttribute('data-session-id'));
+    });
+  }
+
+  elements.managerOperation?.addEventListener('change', refreshManagerVisibility);
+  elements.managerTutor?.addEventListener('change', refreshManagerSessions);
+  elements.managerSession?.addEventListener('change', loadSelectedSessionIntoForm);
+  elements.managerTargetTutor?.addEventListener('change', refreshManagerTargetSessions);
+  document.getElementById('sessionManagerClose')?.addEventListener('click', () => elements.sessionManagerModal.close());
+  document.getElementById('sessionManagerCancel')?.addEventListener('click', () => elements.sessionManagerModal.close());
+
+  elements.sessionManagerForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    try {
+      await applySessionOperation();
+      await reloadRemoteData();
+      elements.sessionManagerModal.close();
+      showToast('Calendario actualizado correctamente.');
+    } catch (error) {
+      console.error('Error en operación de calendario:', error);
+      showToast(error.message || 'No se pudo actualizar el calendario.');
+    }
+  });
 
   // C) Filtro por Tutor en Toolbar
   if (elements.memberFilterSelect) {
@@ -753,11 +1031,34 @@ document.addEventListener('DOMContentLoaded', () => {
   // --------------------------------------------------------------------------
   // 11. Inicialización de la Aplicación
   // --------------------------------------------------------------------------
-  const init = () => {
+  const init = async () => {
+    await loadAdminChapterOptions();
+    const remoteData = await getRemoteData();
+    await loadAdminChapterOptions();
+    state.members = remoteData.members;
+    state.records = remoteData.records;
     renderMembers();
     populateMemberFilter();
     renderRecords();
   };
 
-  init();
+  elements.chapterSelect?.addEventListener('change', () => {
+    const chapterId = elements.chapterSelect.value;
+    if (chapterId) window.location.href = `admin.html?chapter=${encodeURIComponent(chapterId)}`;
+  });
+  elements.refreshButton?.addEventListener('click', refreshAdmin);
+
+    document.querySelectorAll('[data-action="logout"]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        signOut();
+      });
+    });
+
+    try {
+      await init();
+    } catch (error) {
+      console.error('Error cargando administración desde Supabase:', error);
+      showToast('No se pudieron cargar los datos del capítulo.');
+    }
 });

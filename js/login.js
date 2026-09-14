@@ -30,6 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelForgot = document.getElementById('btnCancelForgot');
   const forgotForm = document.getElementById('forgotForm');
   const forgotAlert = document.getElementById('forgotAlert');
+  const btnOpenRegister = document.getElementById('btnOpenRegister');
+  const registerDialog = document.getElementById('registerDialog');
+  const btnCloseRegister = document.getElementById('btnCloseRegister');
+  const btnCancelRegister = document.getElementById('btnCancelRegister');
+  const registerForm = document.getElementById('registerForm');
+  const registerAlert = document.getElementById('registerAlert');
 
   let currentRole = 'TUTOR'; // 'TUTOR' | 'ADMIN'
 
@@ -117,6 +123,76 @@ document.addEventListener('DOMContentLoaded', () => {
     loginAlert.setAttribute('hidden', '');
   }
 
+  function showRegisterAlert(message, type = 'danger') {
+    if (!registerAlert) return;
+    registerAlert.className = `login-alert ${type}`;
+    registerAlert.textContent = message;
+    registerAlert.removeAttribute('hidden');
+  }
+
+  if (btnOpenRegister && registerDialog) {
+    btnOpenRegister.addEventListener('click', () => {
+      registerForm?.reset();
+      registerAlert?.setAttribute('hidden', '');
+      registerDialog.showModal();
+      document.getElementById('registerNameInput')?.focus();
+    });
+  }
+
+  [btnCloseRegister, btnCancelRegister].forEach((button) => {
+    button?.addEventListener('click', () => registerDialog?.close());
+  });
+
+  if (registerForm) {
+    registerForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const name = document.getElementById('registerNameInput').value.trim();
+      const email = document.getElementById('registerEmailInput').value.trim().toLowerCase();
+      const password = document.getElementById('registerPasswordInput').value;
+
+      if (name.length < 3 || name.length > 80) {
+        showRegisterAlert('El nombre debe contener entre 3 y 80 caracteres.');
+        return;
+      }
+      if (!EMAIL_STRICT_REGEX.test(email) || email.length > 100) {
+        showRegisterAlert('Introduce un correo institucional válido.');
+        return;
+      }
+      if (password.length < 6 || password.length > 128) {
+        showRegisterAlert('La contraseña debe contener entre 6 y 128 caracteres.');
+        return;
+      }
+      if (!supabase) {
+        showRegisterAlert(supabaseConfigError);
+        return;
+      }
+
+      const submitButton = registerForm.querySelector('button[type="submit"]');
+      if (submitButton) submitButton.disabled = true;
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: name } }
+        });
+        if (error) throw error;
+
+        if (data.session) {
+          window.location.href = 'hub.html';
+          return;
+        }
+
+        showRegisterAlert('Cuenta creada. Revisa tu correo para confirmar la cuenta y después inicia sesión.', 'success');
+      } catch (error) {
+        console.error('Error al registrar usuario:', error);
+        showRegisterAlert(error.message || 'No se pudo crear la cuenta.');
+      } finally {
+        if (submitButton) submitButton.disabled = false;
+      }
+    });
+  }
+
   // --------------------------------------------------------------------------
   // 5. Credenciales Demo Rápidas (1-Click para Evaluadores y QA)
   // --------------------------------------------------------------------------
@@ -158,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isLoginSubmitting = false;
 
   if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       clearAlert();
 
@@ -280,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let isForgotSubmitting = false;
   if (forgotForm && forgotDialog) {
-    forgotForm.addEventListener('submit', (e) => {
+    forgotForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (isForgotSubmitting) return;
 
@@ -296,15 +372,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = forgotForm.querySelector('button[type="submit"]');
       if (submitBtn) submitBtn.disabled = true;
 
-      forgotAlert.className = 'login-alert success';
-      forgotAlert.textContent = `Hemos enviado un enlace de restablecimiento a ${email}. Revisa tu bandeja institucional.`;
-      forgotAlert.removeAttribute('hidden');
+      try {
+        if (!supabase) throw new Error(supabaseConfigError);
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/login.html`
+        });
+        if (error) throw error;
 
-      setTimeout(() => {
+        forgotAlert.className = 'login-alert success';
+        forgotAlert.textContent = `Hemos enviado un enlace de restablecimiento a ${email}. Revisa tu bandeja institucional.`;
+        forgotAlert.removeAttribute('hidden');
+      } catch (error) {
+        console.error('Error al solicitar recuperación:', error);
+        forgotAlert.className = 'login-alert danger';
+        forgotAlert.textContent = error.message || 'No se pudo enviar el enlace de recuperación.';
+        forgotAlert.removeAttribute('hidden');
+      } finally {
         isForgotSubmitting = false;
         if (submitBtn) submitBtn.disabled = false;
-        forgotDialog.close();
-      }, 2500);
+      }
     });
   }
 });

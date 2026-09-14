@@ -16,3 +16,26 @@ export const supabase = supabaseConfigError
         detectSessionInUrl: true
       }
     });
+
+export async function getAuthenticatedUser() {
+  if (!supabase) return null;
+  const { data, error } = await supabase.auth.getUser();
+  if (error) throw error;
+  return data.user;
+}
+
+export async function getCurrentProfile(userId) {
+  if (!supabase || !userId) return null;
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function signOut() {
+  if (supabase) await supabase.auth.signOut();
+  window.location.href = 'login.html';
+}

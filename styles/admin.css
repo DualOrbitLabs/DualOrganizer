@@ -1277,3 +1277,145 @@ th[aria-sort="descending"] .sort-indicator {
     font-size: 0.75rem;
   }
 }
+
+.admin-chapter-switcher {
+  margin-left: auto;
+  color: var(--slate-300);
+  flex: 0 1 260px;
+}
+
+.admin-chapter-switcher label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-chapter-switcher .form-select {
+  width: 100%;
+  min-height: 35px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-inverted);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color-scheme: dark;
+}
+
+.admin-chapter-switcher .form-select option {
+  background: var(--slate-900);
+  color: var(--text-inverted);
+}
+
+.admin-chapter-switcher .form-select:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 1px;
+}
+
+.admin-header .btn-refresh {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-inverted);
+}
+
+.admin-header .btn-refresh:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.member-card__actions {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.member-card__actions .btn {
+  min-height: 34px;
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+  min-width: 110px;
+  text-align: right;
+}
+
+#sessionManagerModal {
+  width: min(560px, calc(100% - 32px));
+  max-width: 560px;
+  border: 0;
+  padding: 0;
+  background: var(--bg-surface);
+}
+
+#sessionManagerModal::backdrop {
+  background: rgba(15, 23, 42, 0.52);
+  backdrop-filter: blur(2px);
+}
+
+#sessionManagerModal .admin-dialog__surface {
+  background: var(--bg-surface);
+  max-height: min(88vh, 760px);
+  overflow-y: auto;
+}
+
+#sessionManagerModal .dialog-form {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+#sessionManagerModal .form-group {
+  display: grid;
+  gap: 6px;
+}
+
+#sessionManagerModal .form-group label {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+#sessionManagerModal .form-control {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+#sessionManagerModal .form-control option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+#sessionManagerModal .form-control:focus {
+  outline: 2px solid var(--brand-focus-ring);
+  outline-offset: 1px;
+  border-color: var(--brand-navy);
+}
+
+#sessionManagerModal .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+#sessionManagerModal .admin-dialog__footer {
+  margin: 0 calc(var(--space-5) * -1) calc(var(--space-5) * -1);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 640px) {
+  #sessionManagerModal .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
