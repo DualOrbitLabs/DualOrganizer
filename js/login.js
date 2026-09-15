@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function isStrongPassword(password) {
-    return password.length >= 12
+    return password.length >= 8
       && password.length <= 128
       && /[a-z]/.test(password)
       && /[A-Z]/.test(password)
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       if (!isStrongPassword(password)) {
-        showRegisterAlert('La contraseña debe tener 12-128 caracteres e incluir mayúsculas, minúsculas, un número y un símbolo.');
+        showRegisterAlert('La contraseña debe contener al menos 8 caracteres, incluyendo letras, números y simbolos.');
         return;
       }
       if (!supabase) {
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Validación 2: Longitud de contraseña
       if (password.length < 6 || password.length > 128) {
-        showAlert('La contraseña debe contener entre 6 y 128 caracteres.');
+        showAlert('La contraseña debe contener al menos 8 caracteres');
         passwordInput.focus();
         return;
       }
