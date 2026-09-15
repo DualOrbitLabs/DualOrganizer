@@ -1,4 +1,5 @@
 import { getAuthenticatedUser, getCurrentProfile, supabase, signOut } from './supabaseClient.js';
+import { APP_CONFIG, isDateInCurrentMonth } from './config.js';
 
 // ==========================================================================
 // DualOrganizer - Lógica del Panel de Administración y Gestor de Datos
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           role: membership.role === 'ADMIN' ? 'Coordinador / Admin' : 'Tutor Académico',
           status: 'Activo',
           totalHours: 0,
-          targetHours: 80,
+          targetHours: APP_CONFIG.academic.monthlyTargetHours,
           semester: profile.semester || 'Sin especificar',
           email: profile.id === currentAdmin.id ? currentAdmin.authUser.email : '',
           phone: profile.phone || 'No registrado',
@@ -95,7 +96,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       calendarSessions = sessions;
       const records = sessions.map(session => {
         const member = memberByUserId.get(session.tutor_id);
-        if (member) member.totalHours += Number(session.hours) || 0;
+        if (member && isDateInCurrentMonth(session.session_date)) {
+          member.totalHours += Number(session.hours) || 0;
+        }
         return {
           id: session.id,
           matricula: member?.id || session.tutor_id,
@@ -647,7 +650,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       elements.kpiTotalSessions.textContent = state.records.length;
     }
     if (elements.kpiTotalHours) {
-      const totalHours = state.records.reduce((acc, curr) => acc + (Number(curr.hours) || 0), 0);
+      const totalHours = state.records
+        .filter(record => isDateInCurrentMonth(record.date))
+        .reduce((acc, curr) => acc + (Number(curr.hours) || 0), 0);
       elements.kpiTotalHours.textContent = totalHours.toFixed(1);
     }
 

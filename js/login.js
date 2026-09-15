@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelRegister = document.getElementById('btnCancelRegister');
   const registerForm = document.getElementById('registerForm');
   const registerAlert = document.getElementById('registerAlert');
+  let registerLockedUntil = 0;
 
   let currentRole = 'TUTOR'; // 'TUTOR' | 'ADMIN'
 
@@ -133,6 +134,18 @@ document.addEventListener('DOMContentLoaded', () => {
       && /[^A-Za-z0-9]/.test(password);
   }
 
+  function getRegistrationErrorMessage(error) {
+    const message = String(error?.message || '').toLowerCase();
+    if (message.includes('rate limit') || message.includes('too many')) {
+      registerLockedUntil = Date.now() + 60_000;
+      return 'Supabase limitó temporalmente los correos de confirmación. Espera un minuto o crea la cuenta desde Authentication > Users.';
+    }
+    if (message.includes('already registered') || message.includes('already exists') || message.includes('user already')) {
+      return 'Ese correo ya está asociado a una cuenta. Inicia sesión o usa “¿Olvidaste tu contraseña?”.';
+    }
+    return 'No se pudo crear la cuenta. Revisa el correo e inténtalo de nuevo.';
+  }
+
   if (btnOpenRegister && registerDialog) {
     btnOpenRegister.addEventListener('click', () => {
       registerForm?.reset();
@@ -149,6 +162,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (registerForm) {
     registerForm.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (Date.now() < registerLockedUntil) {
+        const seconds = Math.ceil((registerLockedUntil - Date.now()) / 1000);
+        showRegisterAlert(`Espera ${seconds} segundos antes de volver a solicitar un correo de confirmación.`);
+        return;
+      }
       const name = document.getElementById('registerNameInput').value.trim();
       const email = document.getElementById('registerEmailInput').value.trim().toLowerCase();
       const password = document.getElementById('registerPasswordInput').value;
@@ -189,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showRegisterAlert('Cuenta creada. Revisa tu correo para confirmar la cuenta y después inicia sesión.', 'success');
       } catch (error) {
         console.error('Error al registrar usuario:', error);
-        showRegisterAlert(error.message || 'No se pudo crear la cuenta.');
+        showRegisterAlert(getRegistrationErrorMessage(error));
       } finally {
         if (submitButton) submitButton.disabled = false;
       }

@@ -463,7 +463,7 @@ body {
 .weekly-calendar-grid {
     display: grid;
     grid-template-columns: 56px repeat(7, minmax(0, 1fr));
-    grid-auto-rows: minmax(54px, auto);
+    grid-auto-rows: var(--calendar-row-height, 54px);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     background-color: var(--bg-card);
@@ -584,6 +584,9 @@ body {
     flex-direction: column;
     gap: 1px;
     overflow: hidden;
+    height: calc(var(--session-duration, 1) * var(--calendar-row-height, 54px) - 8px);
+    position: relative;
+    z-index: 2;
 }
 
 .session-item:hover {
