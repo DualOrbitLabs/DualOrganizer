@@ -36,7 +36,7 @@ Si ya ejecutaron una versión anterior de `001_initial_schema.sql`, ejecuten tam
 
 Si ejecutaron la versión anterior de `002_complete_persistence.sql`, ejecuten además `supabase/migrations/003_new_database.sql`. Esta migración añade el intercambio atómico de sesiones y permite que administración cree sesiones para otros tutores del mismo capítulo. No borra datos.
 
-Si ejecutaron `003_new_database.sql`, ejecuten también `supabase/migrations/004_security_hardening.sql`. Esta migración limita funciones privilegiadas a usuarios autenticados, fuerza el bucket de evidencias a privado y protege campos sensibles del perfil. El registro nuevo exige contraseñas de al menos 12 caracteres con mayúsculas, minúsculas, número y símbolo. Supabase Auth gestiona el hash de la contraseña en el servidor; la aplicación nunca guarda ni calcula hashes.
+Si ejecutaron `003_new_database.sql`, ejecuten también `supabase/migrations/004_security_hardening.sql`. Esta migración limita funciones privilegiadas a usuarios autenticados, fuerza el bucket de evidencias a privado y protege campos sensibles del perfil. El registro exige contraseñas de al menos 12 caracteres con mayúsculas, minúsculas, número y símbolo. Supabase Auth gestiona el hash en el servidor; la aplicación nunca guarda ni calcula hashes.
 
 ### SQL explicado sin drama
 
@@ -68,6 +68,8 @@ where id = (
 ```
 
 Este es el único paso inicial que cambia un rol directamente. Después, un administrador puede gestionar membresías, pero la app no permite que un usuario se convierta en admin editando el navegador.
+
+El email es único en Supabase Auth. El registro usa `auth.signUp`; no consulta ni expone `auth.users` desde el navegador. Si el correo ya existe, usa el login o la recuperación de contraseña. Si aparece `email rate limit exceeded`, espera el tiempo indicado o crea el usuario manualmente desde **Authentication > Users**. Para desarrollo frecuente, configura un proveedor SMTP propio en **Project Settings > Auth > SMTP**.
 
 Cuando un usuario cree un capítulo desde la app, el esquema lo añadirá automáticamente como administrador de ese capítulo. El rol global `ADMIN` sigue siendo necesario para entrar al panel administrativo global.
 
@@ -145,27 +147,15 @@ Solo en el proyecto de desarrollo: eliminen y vuelvan a crear el proyecto o borr
 
 ## 10. Checklist antes de producción
 
-- [ ] El proyecto de producción es distinto del proyecto de desarrollo.
-- [ ] No hay contraseñas ni `service_role` en el repositorio.
-- [ ] La política de contraseñas de Supabase Auth exige al menos 12 caracteres.
-- [ ] Las funciones `SECURITY DEFINER` no son ejecutables por `anon`.
-- [ ] Auth, recuperación de contraseña y logout funcionan.
-- [ ] Todas las tablas tienen RLS activado.
+- [x] El proyecto de producción es distinto del proyecto de desarrollo.
+- [x] No hay contraseñas ni `service_role` en el repositorio.
+- [x] La política de contraseñas de Supabase Auth exige al menos 8 caracteres
+ .
+-   ] Las funciones `SECURITY DEFINER` no son ejecutables por `anon`.
+- x ] Auth, recuperación de contraseña y logout funcionan.
+- x ] Todas las tablas tienen RLS activado.
 - [ ] El bucket de evidencias es privado.
-- [ ] Un tutor no puede consultar otro tutor.
+- x ] Un tutor no puede consultar otro tutor.
 - [ ] Un usuario no puede elevarse a admin desde el navegador.
 - [x] Los datos de perfiles, capítulos y sesiones no dependen de `localStorage`.
-- [ ] `npm run build` termina correctamente.
-
-## 11. Configurar Correos (Verificación y Recuperación)
-
-Para que el registro y la recuperación de contraseña funcionen, debes configurar los ajustes de correo en Supabase:
-
-1. Ve a **Authentication > URL Configuration**.
-2. En **Site URL**, escribe la URL base de tu aplicación. 
-   - Durante desarrollo local con VS Code Live Server, esto suele ser `http://localhost:5500` o `http://127.0.0.1:5500`.
-   - Cuando publiques la app, cámbialo a la URL real (ej. `https://tu-dominio.com`).
-3. Ve a **Authentication > Providers** y asegúrate de que **Email** está habilitado.
-   - Enciende **Confirm email** para obligar a los usuarios a confirmar su cuenta antes de iniciar sesión.
-   - Enciende **Secure email change** si quieres que confirmen el cambio de correo.
-4. En **Authentication > Email Templates**, puedes personalizar el mensaje que reciben los usuarios. Asegúrate de que las plantillas de **Confirm signup** y **Reset password** tengan un enlace claro y profesional. No cambies la variable `{{ .ConfirmationURL }}`, ya que es el enlace mágico que Supabase necesita.
+- [x] `npm run build` termina correctamente.

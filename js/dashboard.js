@@ -1,4 +1,5 @@
 import { getAuthenticatedUser, signOut, supabase } from './supabaseClient.js';
+import { APP_CONFIG, isDateInCurrentMonth } from './config.js';
 
 // ==========================================================================
 // DualOrganizer - Lógica del Dashboard Semanal (Vanilla JS ES6+)
@@ -242,7 +243,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 3. Actualización de KPIs con Números Tabulares
     // --------------------------------------------------------------------------
     function updateKPIs() {
-        const totalHours = sessionsData.reduce((acc, curr) => acc + (Number(curr.hours) || 0), 0);
+        const currentMonthSessions = sessionsData.filter(session => isDateInCurrentMonth(session.date));
+        const totalHours = currentMonthSessions.reduce((acc, curr) => acc + (Number(curr.hours) || 0), 0);
         const totalSessions = sessionsData.length;
 
         if (kpiTotalHours) {
@@ -252,7 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             kpiTotalSessions.textContent = totalSessions;
         }
         if (kpiWeeklyAvg) {
-            const uniqueWeeks = new Set(sessionsData.map(s => {
+            const uniqueWeeks = new Set(currentMonthSessions.map(s => {
                 const d = new Date(s.date + 'T00:00:00');
                 const sow = getStartOfWeek(d);
                 return sow.getTime();
@@ -269,6 +271,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderWeeklyCalendar() {
         if (!weeklyCalendarGrid) return;
         weeklyCalendarGrid.innerHTML = '';
+        weeklyCalendarGrid.style.setProperty('--calendar-row-height', `${APP_CONFIG.academic.calendarRowHeightPx}px`);
 
         const startOfWeek = getStartOfWeek(currentDate);
         const endOfWeek = new Date(startOfWeek);
@@ -314,7 +317,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // 4.3 Filas de horas (8:00 a 18:00)
-        for (let hour = 8; hour <= 18; hour++) {
+        for (let hour = APP_CONFIG.academic.calendarStartHour; hour <= APP_CONFIG.academic.calendarEndHour; hour++) {
             const hourString = `${String(hour).padStart(2, '0')}:00`;
 
             const timeLabel = document.createElement('div');
@@ -338,6 +341,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const sessionItem = document.createElement('div');
                     sessionItem.className = 'session-item';
                     sessionItem.dataset.id = session.id;
+                    sessionItem.style.setProperty('--session-duration', String(Math.max(Number(session.hours) || 1, 1)));
                     sessionItem.title = `${session.subject} - Alumno: ${session.studentName} (${session.hours} hrs)`;
 
                     const evidenceBadge = session.evidence 
@@ -435,8 +439,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 7. Funciones Defensivas de Tiempo y Validación de Ficheros
     // --------------------------------------------------------------------------
     const FILE_CONSTRAINTS = {
-        MAX_BYTES: 5 * 1024 * 1024, // 5 MB
-        ALLOWED_MIME_TYPES: ['image/jpeg', 'image/png', 'application/pdf']
+        MAX_BYTES: APP_CONFIG.uploads.maxBytes,
+        ALLOWED_MIME_TYPES: APP_CONFIG.uploads.allowedMimeTypes
     };
 
     function validateUploadedFile(file) {
