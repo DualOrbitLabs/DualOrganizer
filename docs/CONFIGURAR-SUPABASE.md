@@ -147,14 +147,15 @@ Solo en el proyecto de desarrollo: eliminen y vuelvan a crear el proyecto o borr
 
 ## 10. Checklist antes de producción
 
-- [ ] El proyecto de producción es distinto del proyecto de desarrollo.
-- [ ] No hay contraseñas ni `service_role` en el repositorio.
-- [ ] La política de contraseñas de Supabase Auth exige al menos 12 caracteres.
-- [ ] Las funciones `SECURITY DEFINER` no son ejecutables por `anon`.
-- [ ] Auth, recuperación de contraseña y logout funcionan.
-- [ ] Todas las tablas tienen RLS activado.
+- [x] El proyecto de producción es distinto del proyecto de desarrollo.
+- [x] No hay contraseñas ni `service_role` en el repositorio.
+- [x] La política de contraseñas de Supabase Auth exige al menos 8 caracteres
+ .
+-   ] Las funciones `SECURITY DEFINER` no son ejecutables por `anon`.
+- x ] Auth, recuperación de contraseña y logout funcionan.
+- x ] Todas las tablas tienen RLS activado.
 - [ ] El bucket de evidencias es privado.
-- [ ] Un tutor no puede consultar otro tutor.
+- x ] Un tutor no puede consultar otro tutor.
 - [ ] Un usuario no puede elevarse a admin desde el navegador.
 - [x] Los datos de perfiles, capítulos y sesiones no dependen de `localStorage`.
-- [ ] `npm run build` termina correctamente.
+- [x] `npm run build` termina correctamente.

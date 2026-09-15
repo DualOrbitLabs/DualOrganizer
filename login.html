@@ -7,7 +7,6 @@
   <title>Acceso al Sistema - DualOrganizer</title>
   <link rel="stylesheet" href="./styles/login.css">
 </head>
-
 <body>
   <!-- Contenedor Principal de Autenticación -->
   <div class="login-wrapper">
@@ -180,6 +179,34 @@
           <div class="dialog-actions">
             <button type="button" id="btnCancelRegister" class="btn-demo">Cancelar</button>
             <button type="submit" class="btn-submit">Registrarme</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <dialog id="resetPasswordDialog" class="login-dialog" aria-labelledby="resetTitle">
+      <div class="dialog-content">
+        <header class="dialog-header">
+          <h3 id="resetTitle">Crear Nueva Contraseña</h3>
+        </header>
+
+        <p style="font-size: 0.85rem; color: var(--slate-600); margin: 0;">
+          Escribe tu nueva contraseña de acceso. Al guardarla, iniciarás sesión automáticamente.
+        </p>
+
+        <div id="resetAlert" class="login-alert" role="alert" aria-live="assertive" hidden></div>
+
+        <form id="resetPasswordForm" class="login-form" novalidate>
+          <div class="form-group">
+            <label for="newPasswordInput" class="form-label">Nueva Contraseña</label>
+            <div class="input-wrapper">
+              <input type="password" id="newPasswordInput" class="form-control input-with-toggle" required minlength="12" maxlength="128" autocomplete="new-password">
+            </div>
+            <span class="help-text">Mínimo 12 caracteres, mayúsculas, minúsculas, números y símbolos.</span>
+          </div>
+
+          <div class="dialog-actions">
+            <button type="submit" class="btn-submit">Guardar y Entrar</button>
           </div>
         </form>
       </div>

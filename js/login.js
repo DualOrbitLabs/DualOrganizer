@@ -414,4 +414,75 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // --------------------------------------------------------------------------
+  // 8. Flujo de Nueva Contraseña (Tras clic en correo de recuperación)
+  // --------------------------------------------------------------------------
+  const resetPasswordDialog = document.getElementById('resetPasswordDialog');
+  const resetPasswordForm = document.getElementById('resetPasswordForm');
+  const resetAlert = document.getElementById('resetAlert');
+
+  if (supabase) {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        // Mostrar el modal forzadamente sobre cualquier otra cosa
+        if (resetPasswordDialog) {
+          resetPasswordDialog.showModal();
+          document.getElementById('newPasswordInput')?.focus();
+        }
+      }
+    });
+  }
+
+  if (resetPasswordForm) {
+    let isResetting = false;
+    resetPasswordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (isResetting) return;
+
+      const newPassword = document.getElementById('newPasswordInput').value;
+
+      if (!isStrongPassword(newPassword)) {
+        if (resetAlert) {
+          resetAlert.className = 'login-alert danger';
+          resetAlert.textContent = 'La contraseña debe tener al menos 12 caracteres e incluir mayúsculas, minúsculas, un número y un símbolo.';
+          resetAlert.removeAttribute('hidden');
+        }
+        return;
+      }
+
+      isResetting = true;
+      const submitBtn = resetPasswordForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitBtn) submitBtn.textContent = 'Guardando...';
+
+      try {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+
+        if (resetAlert) {
+          resetAlert.className = 'login-alert success';
+          resetAlert.textContent = 'Contraseña actualizada correctamente. Entrando...';
+          resetAlert.removeAttribute('hidden');
+        }
+
+        // Redirigir al hub ya que updateUser automáticamente inicia sesión si es exitoso
+        window.setTimeout(() => {
+          window.location.href = 'hub.html';
+        }, 1000);
+
+      } catch (error) {
+        console.error('Error al actualizar contraseña:', error);
+        if (resetAlert) {
+          resetAlert.className = 'login-alert danger';
+          resetAlert.textContent = error.message || 'No se pudo actualizar la contraseña. Inténtalo de nuevo.';
+          resetAlert.removeAttribute('hidden');
+        }
+        isResetting = false;
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitBtn) submitBtn.textContent = 'Guardar y Entrar';
+      }
+    });
+  }
+
 });
