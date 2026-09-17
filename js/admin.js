@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     if (!activeChapterId && elements.chapterSelect.options.length > 0) {
-      console.log("id: ", elements.chapterSelect.options[0].value)
       activeChapterId = elements.chapterSelect.options[0].value;
       elements.chapterSelect.options[0].selected = true;
       const url = new URL(window.location.href);

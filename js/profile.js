@@ -75,6 +75,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             const inputUrl = document.getElementById('inputMeetingUrl');
             const hiddenMat = document.getElementById('materiasHidden') || document.getElementById('hiddenMaterias');
             const inputStudentId = document.getElementById('inputStudentId');
+            const initials = document.getElementById("avatarInitials");
+
+            if(initials){
+                const name = (userProfile.full_name).toUpperCase();
+                if(name && name != "DUAL ORBIT LABS"){
+                    if(name.includes(' ')){
+                        initials.textContent = name[0] + name[name.indexOf(' ')+1];
+                    } else {
+                        initials.textContent = name[0] + name[1];
+                    }
+                } else if(name === "DUAL ORBIT LABS") {
+                    initials.textContent = "DOL"
+                }
+            }
 
             if (profileDisplayName) profileDisplayName.textContent = userProfile.full_name || currentUser.email;
             if (inputFullName) inputFullName.value = userProfile.full_name || '';
