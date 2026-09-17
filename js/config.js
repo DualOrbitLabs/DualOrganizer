@@ -12,7 +12,10 @@ export const APP_CONFIG = Object.freeze({
     },
     uploads: {
         maxBytes: 5 * 1024 * 1024,
-        allowedMimeTypes: ['image/jpeg', 'image/png', 'application/pdf']
+        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif', 'application/pdf']
+    },
+    session: {
+        autoRefreshIntervalMs: 60 * 60 * 1000
     },
     legal: {
         termsPath: 'terms.html'

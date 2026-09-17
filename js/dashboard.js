@@ -1,20 +1,245 @@
 import { getAuthenticatedUser, signOut, supabase } from './supabaseClient.js';
 import { APP_CONFIG, isDateInCurrentMonth } from './config.js';
+import { serializeTutorCSV, downloadCSV } from './csvUtils.js';
+import { validateEvidenceFile, exportEvidenceReport } from './evidenceUtils.js';
+import { initLogicalTimer } from './logicalTimer.js';
 
 // ==========================================================================
 // DualOrganizer - Lógica del Dashboard Semanal (Vanilla JS ES6+)
 // Buenas Prácticas: Delegación de Eventos, Sanitización, Persistencia Local
 // ==========================================================================
 
-document.addEventListener('DOMContentLoaded', async () => {
-    'use strict';
+/**
+ * Convierte un string de hora ('HH:MM') a minutos enteros desde la medianoche.
+ * @param {string} timeStr
+ * @returns {number}
+ */
+export function timeToMinutes(timeStr) {
+    if (!timeStr) return 0;
+    const [h, m] = String(timeStr).split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+}
 
-    // Validación de sesión
-    const currentUser = await getAuthenticatedUser();
-    if (!currentUser) {
-        window.location.href = 'login.html';
-        return;
+/**
+ * Evalúa si una o más sesiones ocupan un slot de fecha y hora determinado.
+ * Soporta duraciones enteras y fraccionarias (0.5, 1.0, 1.5, 2.0, 3.0 hrs, etc.).
+ * @param {Array} sessions - Lista de objetos de sesión.
+ * @param {string} slotDate - Fecha 'YYYY-MM-DD'.
+ * @param {number} hour - Hora entera (ej. 8 a 18).
+ * @returns {Array<{ session: object, role: 'start'|'continuation', slotIndex: number, totalSlots: number, isLast: boolean, fraction: number }>}
+ */
+export function getSlotSessionMatches(sessions, slotDate, hour) {
+    if (!Array.isArray(sessions) || !slotDate) return [];
+    const slotStartMin = hour * 60;
+    const slotEndMin = (hour + 1) * 60;
+    const matches = [];
+
+    for (const session of sessions) {
+        if (session.date !== slotDate) continue;
+
+        const sessionStartMin = timeToMinutes(session.time);
+        const durationHours = Math.max(Number(session.hours) || 1, 0.5);
+        const sessionEndMin = sessionStartMin + Math.round(durationHours * 60);
+
+        // ¿El intervalo de la sesión se solapa con la franja de esta hora?
+        if (sessionStartMin < slotEndMin && sessionEndMin > slotStartMin) {
+            const isStart = (sessionStartMin >= slotStartMin && sessionStartMin < slotEndMin);
+            const totalSlots = Math.max(1, Math.ceil(durationHours));
+            const roundedStartMin = Math.floor(sessionStartMin / 60) * 60;
+            const slotIndex = Math.max(1, Math.floor((slotStartMin - roundedStartMin) / 60) + 1);
+            const isLast = sessionEndMin <= slotEndMin;
+            const fraction = Math.min(1, Math.max(0.2, (Math.min(sessionEndMin, slotEndMin) - Math.max(sessionStartMin, slotStartMin)) / 60));
+
+            matches.push({
+                session,
+                role: isStart ? 'start' : 'continuation',
+                slotIndex,
+                totalSlots,
+                isLast,
+                fraction
+            });
+        }
     }
+    return matches;
+}
+
+/**
+ * Valida si una sesión candidata entra en conflicto horario con sesiones existentes.
+ * @param {object} candidate
+ * @param {Array} existingSessions
+ * @returns {boolean}
+ */
+export function hasTimeOverlapConflict(candidate, existingSessions) {
+    if (!candidate || !Array.isArray(existingSessions)) return false;
+    const candStart = timeToMinutes(candidate.time);
+    const candEnd = candStart + Math.round((Number(candidate.hours) || 1) * 60);
+
+    return existingSessions.some((s) => {
+        if (candidate.id && s.id === candidate.id) return false;
+        if (s.date !== candidate.date) return false;
+
+        const sStart = timeToMinutes(s.time);
+        const sEnd = sStart + Math.round((Number(s.hours) || 1) * 60);
+
+        return candStart < sEnd && candEnd > sStart;
+    });
+}
+
+/**
+ * Controlador de ciclo de vida para auto-refresco y revalidación de sesión cada 1 hora.
+ * Utiliza marcas de tiempo reales para evitar deriva por suspensión de pestañas y Page Visibility API.
+ */
+export function createSessionAutoRefresher({
+    intervalMs = 60 * 60 * 1000,
+    revalidateAuth = async () => true,
+    refreshData = async () => {},
+    onSessionExpired = () => {},
+    isModalOpen = () => false,
+    isSubmitting = () => false,
+    now = () => Date.now(),
+    logger = console
+} = {}) {
+    let lastRefreshTime = now();
+    let timerId = null;
+    let isRefreshing = false;
+    let pendingRefreshReason = null;
+
+    async function triggerRefresh(reason = 'manual', options = {}) {
+        if (isRefreshing) return false;
+
+        // Si el usuario tiene el diálogo abierto o una solicitud en curso, posponer
+        if (isModalOpen() || isSubmitting()) {
+            pendingRefreshReason = reason;
+            logger?.info?.(`[AutoRefresh] Refresco pospuesto (${reason}): usuario editando o guardando.`);
+            return false;
+        }
+
+        isRefreshing = true;
+        try {
+            // 1. Revalidar sesión y credenciales
+            const authOk = await revalidateAuth();
+            if (!authOk) {
+                logger?.warn?.('[AutoRefresh] Revalidación fallida. Sesión expirada.');
+                onSessionExpired();
+                return false;
+            }
+
+            // 2. Refrescar datos
+            await refreshData(options);
+
+            // 3. Registrar marca de tiempo y reprogramar
+            lastRefreshTime = now();
+            pendingRefreshReason = null;
+            scheduleNext();
+            return true;
+        } catch (err) {
+            logger?.error?.('[AutoRefresh] Error durante el refresco:', err);
+            return false;
+        } finally {
+            isRefreshing = false;
+        }
+    }
+
+    function scheduleNext() {
+        if (timerId) {
+            clearTimeout(timerId);
+            timerId = null;
+        }
+        const elapsed = now() - lastRefreshTime;
+        const remaining = Math.max(0, intervalMs - elapsed);
+
+        timerId = setTimeout(() => {
+            triggerRefresh('interval_timer', { silent: true, isAuto: true });
+        }, remaining);
+    }
+
+    function handleVisibilityChange(visibilityState = (typeof document !== 'undefined' ? document.visibilityState : 'visible')) {
+        if (visibilityState === 'visible') {
+            const elapsed = now() - lastRefreshTime;
+            if (elapsed >= intervalMs) {
+                triggerRefresh('visibility_change', { silent: true, isAuto: true });
+            } else if (pendingRefreshReason) {
+                triggerRefresh(pendingRefreshReason, { silent: true, isAuto: true });
+            }
+        }
+    }
+
+    function handleModalClosed() {
+        if (pendingRefreshReason) {
+            const reason = pendingRefreshReason;
+            pendingRefreshReason = null;
+            triggerRefresh(`deferred_${reason}`, { silent: true, isAuto: true });
+        }
+    }
+
+    function start() {
+        lastRefreshTime = now();
+        scheduleNext();
+    }
+
+    function stop() {
+        if (timerId) {
+            clearTimeout(timerId);
+            timerId = null;
+        }
+        pendingRefreshReason = null;
+    }
+
+    return {
+        start,
+        stop,
+        triggerRefresh,
+        handleVisibilityChange,
+        handleModalClosed,
+        getLastRefreshTime: () => lastRefreshTime,
+        isPending: () => Boolean(pendingRefreshReason),
+        isRunning: () => timerId !== null
+    };
+}
+
+/**
+ * Obtiene las preferencias de interfaz de usuario desde localStorage ('dualorganizer_ui_config').
+ * @param {Storage} [storage]
+ * @returns {{ defaultSessionHours: string, sessionAutoRefresh: boolean }}
+ */
+export function getUIPreferences(storage = (typeof localStorage !== 'undefined' ? localStorage : null)) {
+    const defaults = {
+        defaultSessionHours: '1.0',
+        sessionAutoRefresh: true
+    };
+    if (!storage) return defaults;
+    try {
+        const raw = storage.getItem('dualorganizer_ui_config') || storage.getItem('dualorganizer_preferences');
+        if (!raw) return defaults;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return defaults;
+
+        let hours = String(parsed.defaultSessionHours || '1.0');
+        if (!hours.includes('.') && ['1', '2', '3'].includes(hours)) {
+            hours = `${hours}.0`;
+        }
+
+        return {
+            defaultSessionHours: ['1.0', '1.5', '2.0', '3.0'].includes(hours) ? hours : defaults.defaultSessionHours,
+            sessionAutoRefresh: typeof parsed.sessionAutoRefresh === 'boolean'
+                ? parsed.sessionAutoRefresh
+                : defaults.sessionAutoRefresh
+        };
+    } catch {
+        return defaults;
+    }
+}
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', async () => {
+        'use strict';
+
+        // Validación de sesión
+        let currentUser = await getAuthenticatedUser();
+        if (!currentUser) {
+            window.location.href = 'login.html';
+            return;
+        }
 
     // --------------------------------------------------------------------------
     // 1. Estado y Datos Iniciales
@@ -93,22 +318,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         sessionsData = (data || []).map(mapSession);
     }
 
-    async function refreshDashboard() {
-        btnRefreshDashboard?.classList.add('is-loading');
-        if (btnRefreshDashboard) btnRefreshDashboard.disabled = true;
+    async function refreshDashboard({ silent = false, isAuto = false } = {}) {
+        if (!silent) {
+            btnRefreshDashboard?.classList.add('is-loading');
+            if (btnRefreshDashboard) btnRefreshDashboard.disabled = true;
+        }
         try {
             await loadChapterOptions();
             await loadSessions();
             await initActiveChapter();
             updateKPIs();
             renderWeeklyCalendar();
-            showToast('Datos actualizados.');
+            if (!silent) {
+                showToast('Datos actualizados.');
+            }
         } catch (error) {
             console.error('Error al actualizar dashboard:', error);
-            showToast('No se pudieron actualizar los datos.', 'warning');
+            if (!silent) {
+                showToast('No se pudieron actualizar los datos.', 'warning');
+            }
         } finally {
-            btnRefreshDashboard?.classList.remove('is-loading');
-            if (btnRefreshDashboard) btnRefreshDashboard.disabled = false;
+            if (!silent) {
+                btnRefreshDashboard?.classList.remove('is-loading');
+                if (btnRefreshDashboard) btnRefreshDashboard.disabled = false;
+            }
         }
     }
 
@@ -158,7 +391,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function uploadEvidence(file, sessionId) {
         if (!file) return null;
-        const fileCheck = validateUploadedFile(file);
+        const fileCheck = validateEvidenceFile(file);
         if (!fileCheck.valid) throw new Error(fileCheck.error);
 
         const storagePath = `${currentUser.id}/${sessionId}/${fileCheck.sanitizedName}`;
@@ -333,16 +566,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 slot.dataset.date = slotDate;
                 slot.dataset.time = hourString;
                 slot.setAttribute('role', 'gridcell');
-                slot.setAttribute('aria-label', `${days[i]} ${slotDate} a las ${hourString}`);
 
-                const slotSessions = sessionsData.filter(s => s.date === slotDate && s.time === hourString);
+                const matches = getSlotSessionMatches(sessionsData, slotDate, hour);
 
-                slotSessions.forEach(session => {
-                    const sessionItem = document.createElement('div');
-                    sessionItem.className = 'session-item';
-                    sessionItem.dataset.id = session.id;
-                    sessionItem.style.setProperty('--session-duration', String(Math.max(Number(session.hours) || 1, 1)));
-                    sessionItem.title = `${session.subject} - Alumno: ${session.studentName} (${session.hours} hrs)`;
+                if (matches.length === 0) {
+                    slot.setAttribute('aria-label', `${days[i]} ${slotDate} a las ${hourString} (Disponible)`);
+                } else {
+                    const match = matches[0];
+                    const session = match.session;
+                    slot.classList.add('slot--occupied');
+                    slot.dataset.sessionId = session.id;
 
                     const evidenceBadge = session.evidence 
                         ? `<span class="badge-semantic green" title="Evidencia adjunta">
@@ -352,19 +585,50 @@ document.addEventListener('DOMContentLoaded', async () => {
                            </span>` 
                         : '';
 
-                    sessionItem.innerHTML = `
-                        <span class="session-title">${escapeHTML(session.subject)}</span>
-                        <div class="session-meta">
-                            <span class="session-student">${escapeHTML(session.studentName)}</span>
-                            <div style="display:flex; gap: 4px;">
-                                ${evidenceBadge}
-                                <span class="badge-semantic blue">${session.hours}h</span>
-                            </div>
-                        </div>
-                    `;
+                    if (match.role === 'start') {
+                        slot.classList.add('slot--span-start');
+                        slot.setAttribute('aria-label', `${days[i]} ${slotDate} a las ${hourString} - Sesión: ${session.subject}, Alumno: ${session.studentName} (${session.hours}h)`);
 
-                    slot.appendChild(sessionItem);
-                });
+                        const sessionItem = document.createElement('div');
+                        sessionItem.className = 'session-item session-item--span-start';
+                        sessionItem.dataset.id = session.id;
+                        sessionItem.title = `${session.subject} - Alumno: ${session.studentName} (${session.hours} hrs)`;
+
+                        sessionItem.innerHTML = `
+                            <div class="session-title-row">
+                                <span class="session-title">${escapeHTML(session.subject)}</span>
+                            </div>
+                            <div class="session-meta">
+                                <span class="session-student">${escapeHTML(session.studentName)}</span>
+                                <div class="session-badge-group">
+                                    ${evidenceBadge}
+                                    <span class="badge-semantic blue tabular-nums">${session.hours}h</span>
+                                </div>
+                            </div>
+                        `;
+                        slot.appendChild(sessionItem);
+                    } else {
+                        // Continuation block
+                        slot.classList.add('slot--span-cont');
+                        if (match.isLast) slot.classList.add('slot--span-end');
+                        slot.setAttribute('aria-label', `${days[i]} ${slotDate} a las ${hourString} - Continuación: ${session.subject} (Bloque ${match.slotIndex} de ${match.totalSlots})`);
+
+                        const sessionItem = document.createElement('div');
+                        sessionItem.className = 'session-item is-continuation session-item--continuation';
+                        if (match.isLast) sessionItem.classList.add('session-item--span-end');
+                        sessionItem.dataset.id = session.id;
+                        sessionItem.title = `${session.subject} (Continuación) - Alumno: ${session.studentName} (Bloque ${match.slotIndex}/${match.totalSlots})`;
+
+                        sessionItem.innerHTML = `
+                            <div class="session-continuation-inner">
+                                <span class="session-continuation-arrow" aria-hidden="true">↳</span>
+                                <span class="session-continuation-text">${escapeHTML(session.subject)}</span>
+                                <span class="badge-semantic blue tabular-nums" style="font-size:0.6rem; padding:1px 4px;">${match.slotIndex}/${match.totalSlots}</span>
+                            </div>
+                        `;
+                        slot.appendChild(sessionItem);
+                    }
+                }
 
                 weeklyCalendarGrid.appendChild(slot);
             }
@@ -374,32 +638,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --------------------------------------------------------------------------
     // 5. Delegación de Eventos en la Cuadrícula del Calendario
     // --------------------------------------------------------------------------
+    function openEditModal(session) {
+        if (!sessionModal || !session) return;
+        modalDateInput.value = session.date;
+        modalTimeInput.value = session.time;
+        studentNameInput.value = session.studentName;
+        subjectInput.value = session.subject;
+        hoursInput.value = session.hours;
+
+        sessionForm.dataset.editingId = session.id;
+        if (btnDeleteModal) btnDeleteModal.style.display = 'block';
+        sessionModal.showModal();
+        setTimeout(() => studentNameInput?.focus(), 50);
+    }
+
     if (weeklyCalendarGrid) {
         weeklyCalendarGrid.addEventListener('click', (e) => {
-            // Caso A: Clic en una sesión agendada -> abrir modal con datos cargados para editar o ver
+            // Caso A: Clic en una sesión agendada (inicio o continuación)
             const sessionEl = e.target.closest('.session-item');
             if (sessionEl) {
                 e.stopPropagation();
                 const sessionId = sessionEl.dataset.id;
                 const session = sessionsData.find(s => s.id === sessionId);
-                if (session && sessionModal) {
-                    modalDateInput.value = session.date;
-                    modalTimeInput.value = session.time;
-                    studentNameInput.value = session.studentName;
-                    subjectInput.value = session.subject;
-                    hoursInput.value = session.hours;
-
-                    sessionForm.dataset.editingId = session.id;
-                    if (btnDeleteModal) btnDeleteModal.style.display = 'block';
-                    sessionModal.showModal();
-                    setTimeout(() => studentNameInput?.focus(), 50);
+                if (session) {
+                    openEditModal(session);
                 }
                 return;
             }
 
-            // Caso B: Clic en un slot vacío para agendar nueva sesión
+            // Caso B: Clic en un slot del grid
             const slot = e.target.closest('.grid-cell.slot');
             if (slot) {
+                // Si el slot está ocupado por una sesión multi-hora, abrir esa sesión
+                if (slot.classList.contains('slot--occupied')) {
+                    const sessionId = slot.dataset.sessionId;
+                    const session = sessionsData.find(s => s.id === sessionId);
+                    if (session) {
+                        openEditModal(session);
+                    }
+                    return;
+                }
+
+                // Slot vacío: abrir modal para agendar
                 const date = slot.dataset.date;
                 const time = slot.dataset.time;
                 if (date && time) {
@@ -438,52 +718,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --------------------------------------------------------------------------
     // 7. Funciones Defensivas de Tiempo y Validación de Ficheros
     // --------------------------------------------------------------------------
-    const FILE_CONSTRAINTS = {
-        MAX_BYTES: APP_CONFIG.uploads.maxBytes,
-        ALLOWED_MIME_TYPES: APP_CONFIG.uploads.allowedMimeTypes
-    };
-
     function validateUploadedFile(file) {
-        if (!file) return { valid: true };
-
-        if (file.size > FILE_CONSTRAINTS.MAX_BYTES) {
-            const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
-            return {
-                valid: false,
-                error: `El archivo (${sizeInMB} MB) excede el tamaño máximo permitido de 5 MB.`
-            };
-        }
-
-        if (!FILE_CONSTRAINTS.ALLOWED_MIME_TYPES.includes(file.type)) {
-            return {
-                valid: false,
-                error: 'Formato no permitido. Solo se aceptan archivos PDF e imágenes JPG o PNG.'
-            };
-        }
-
-        const sanitizedName = file.name.replace(/[^a-zA-Z0-9_.\-]/g, '_');
-        return { valid: true, sanitizedName };
-    }
-
-    function timeToMinutes(timeStr) {
-        if (!timeStr) return 0;
-        const [h, m] = timeStr.split(':').map(Number);
-        return (h || 0) * 60 + (m || 0);
-    }
-
-    function hasTimeOverlapConflict(candidate, existingSessions) {
-        const candStart = timeToMinutes(candidate.time);
-        const candEnd = candStart + Math.round(candidate.hours * 60);
-
-        return existingSessions.some((s) => {
-            if (candidate.id && s.id === candidate.id) return false;
-            if (s.date !== candidate.date) return false;
-
-            const sStart = timeToMinutes(s.time);
-            const sEnd = sStart + Math.round((Number(s.hours) || 1) * 60);
-
-            return candStart < sEnd && candEnd > sStart;
-        });
+        return validateEvidenceFile(file);
     }
 
     // --------------------------------------------------------------------------
@@ -492,10 +728,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     function openModal(date, time) {
         if (!sessionModal) return;
 
+        const prefs = getUIPreferences();
         sessionForm.reset();
         modalDateInput.value = date;
         modalTimeInput.value = time;
-        hoursInput.value = '1.0';
+        hoursInput.value = prefs.defaultSessionHours || '1.0';
         if (evidenceFileInput) evidenceFileInput.value = '';
 
         sessionModal.showModal();
@@ -506,6 +743,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (sessionModal && sessionModal.open) {
             sessionModal.close();
             delete sessionForm.dataset.editingId;
+            sessionRefresher?.handleModalClosed();
         }
     }
 
@@ -586,7 +824,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Validación 2: Archivo de evidencia seguro
             let evidenceFile = null;
             if (evidenceFileInput && evidenceFileInput.files.length > 0) {
-                const fileCheck = validateUploadedFile(evidenceFileInput.files[0]);
+                const fileCheck = validateEvidenceFile(evidenceFileInput.files[0]);
                 if (!fileCheck.valid) {
                     showToast(fileCheck.error, 'warning');
                     return;
@@ -652,6 +890,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     await loadSessions();
                     showToast('Sesión registrada con éxito');
                 }
+                isSessionSubmitting = false;
                 closeModal();
                 updateKPIs();
                 renderWeeklyCalendar();
@@ -670,57 +909,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --------------------------------------------------------------------------
-    // 9. Módulo de Exportación CSV Seguro (Formula Injection Mitigation + Async Revoke)
+    // 9. Módulo de Exportación CSV Seguro (Tutor Personal Export)
     // --------------------------------------------------------------------------
     if (btnExportCSV) {
         btnExportCSV.addEventListener('click', () => {
-            if (sessionsData.length === 0) {
+            if (!sessionsData || sessionsData.length === 0) {
                 showToast('No hay sesiones registradas para exportar', 'warning');
                 return;
             }
 
-            const headers = ['ID', 'Alumno', 'Materia', 'Horas', 'Fecha', 'Hora', 'Creado'];
-            const escapeCSV = (field) => {
-                if (field === null || field === undefined) return '""';
-                let str = String(field).trim();
-                if (/^[=+\-@\t\r]/.test(str)) {
-                    str = `'${str}`;
-                }
-                return `"${str.replace(/"/g, '""')}"`;
-            };
-
-            const csvRows = [headers.map(escapeCSV).join(',')];
-
-            sessionsData.forEach(s => {
-                const row = [
-                    escapeCSV(s.id),
-                    escapeCSV(s.studentName),
-                    escapeCSV(s.subject),
-                    escapeCSV(s.hours),
-                    escapeCSV(s.date),
-                    escapeCSV(s.time),
-                    escapeCSV(s.createdAt)
-                ];
-                csvRows.push(row.join(','));
-            });
-
-            const csvString = '\uFEFF' + csvRows.join('\r\n');
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', `reporte_sesiones_${formatDate(new Date())}.csv`);
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-
-            setTimeout(() => {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 1500);
-
+            const csvContent = serializeTutorCSV(sessionsData);
+            const filename = `reporte_sesiones_${formatDate(new Date())}.csv`;
+            downloadCSV(filename, csvContent);
             showToast('Reporte CSV descargado con éxito');
+        });
+    }
+
+    const btnExportEvidenceReport = document.getElementById('btnExportEvidenceReport');
+    if (btnExportEvidenceReport) {
+        btnExportEvidenceReport.addEventListener('click', () => {
+            if (!sessionsData || sessionsData.length === 0) {
+                showToast('No hay sesiones registradas para generar el reporte.', 'warning');
+                return;
+            }
+
+            const chapterNameEl = document.getElementById('activeChapterName');
+            const chapterName = chapterNameEl ? chapterNameEl.textContent : 'Capítulo Dual';
+            const tutorName = currentUser?.user_metadata?.full_name || currentUser?.email || 'Tutor Académico';
+
+            exportEvidenceReport(sessionsData, {
+                chapterName,
+                tutorName
+            });
+            showToast('Generando reporte PDF...');
         });
     }
 
@@ -763,7 +984,91 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateKPIs();
     renderWeeklyCalendar();
 
-    btnRefreshDashboard?.addEventListener('click', refreshDashboard);
+    // --------------------------------------------------------------------------
+    // 11. Auto-refresco de Sesión de 1 Hora y Revalidación de Tokens
+    // --------------------------------------------------------------------------
+    const AUTO_REFRESH_INTERVAL = APP_CONFIG.session?.autoRefreshIntervalMs || (60 * 60 * 1000);
+
+    let authSubscription = null;
+    if (supabase) {
+        const { data } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT') {
+                window.location.href = 'login.html?reason=signed_out';
+            } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+                currentUser = session.user;
+            }
+        });
+        authSubscription = data?.subscription || null;
+    }
+
+    const sessionRefresher = createSessionAutoRefresher({
+        intervalMs: AUTO_REFRESH_INTERVAL,
+        revalidateAuth: async () => {
+            if (!supabase) return true;
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (error || !user) {
+                    return false;
+                }
+                currentUser = user;
+                return true;
+            } catch (err) {
+                if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                    console.warn('[Dashboard] Sin conexión. Se pospone la revalidación.');
+                    return true;
+                }
+                return false;
+            }
+        },
+        refreshData: async (opts) => {
+            await refreshDashboard(opts);
+        },
+        onSessionExpired: async () => {
+            showToast('Tu sesión ha expirado. Redirigiendo al inicio de sesión...', 'warning');
+            setTimeout(() => {
+                signOut();
+            }, 1500);
+        },
+        isModalOpen: () => Boolean(sessionModal && sessionModal.open),
+        isSubmitting: () => isSessionSubmitting
+    });
+
+    btnRefreshDashboard?.addEventListener('click', () => {
+        sessionRefresher.triggerRefresh('manual_click', { silent: false });
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        sessionRefresher.handleVisibilityChange();
+    });
+
+    window.addEventListener('online', () => {
+        const elapsed = Date.now() - sessionRefresher.getLastRefreshTime();
+        if (elapsed >= AUTO_REFRESH_INTERVAL) {
+            sessionRefresher.triggerRefresh('network_reconnected', { silent: true, isAuto: true });
+        }
+    });
+
+    const logicalTimer = initLogicalTimer({
+        checkIntervalMs: 60000,
+        supabase,
+        chapterId: activeChapterId
+    });
+    logicalTimer.start();
+
+    window.addEventListener('beforeunload', () => {
+        sessionRefresher.stop();
+        logicalTimer.stop();
+        if (authSubscription) {
+            authSubscription.unsubscribe();
+        }
+    });
+
+    const initPrefs = getUIPreferences();
+    if (initPrefs.sessionAutoRefresh !== false) {
+        sessionRefresher.start();
+    } else {
+        sessionRefresher.stop();
+    }
 
     document.querySelectorAll('[data-action="logout"]').forEach((button) => {
         button.addEventListener('click', (event) => {
@@ -772,8 +1077,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    dashboardChapterSelect?.addEventListener('change', () => {
-        const chapterId = dashboardChapterSelect.value;
-        if (chapterId) window.location.href = `dashboard.html?chapter=${encodeURIComponent(chapterId)}`;
+        dashboardChapterSelect?.addEventListener('change', () => {
+            const chapterId = dashboardChapterSelect.value;
+            if (chapterId) window.location.href = `dashboard.html?chapter=${encodeURIComponent(chapterId)}`;
+        });
     });
-});
+}
+

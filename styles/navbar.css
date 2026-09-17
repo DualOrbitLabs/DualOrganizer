@@ -128,8 +128,9 @@
     gap: 8px;
 }
 
-/* Botón de Perfil con Icono SVG Vectorial */
-.btn-profile {
+/* Botón de Perfil y Botón de Configuración con Icono SVG Vectorial */
+.btn-profile,
+.btn-config {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -143,21 +144,28 @@
     border: 1px solid var(--nav-border);
 }
 
-.btn-profile svg {
+.btn-profile svg,
+.btn-config svg {
     width: 16px;
     height: 16px;
     stroke-width: 2;
-    transition: color 150ms ease;
+    transition: color 150ms ease, transform 200ms ease;
 }
 
-.btn-profile:hover {
+.btn-profile:hover,
+.btn-config:hover {
     background-color: var(--nav-active-bg);
     border-color: var(--nav-primary-blue);
     color: var(--nav-primary-blue);
     transform: translateY(-1px);
 }
 
-.btn-profile.active {
+.btn-config:hover svg {
+    transform: rotate(25deg);
+}
+
+.btn-profile.active,
+.btn-config.active {
     background-color: var(--nav-hover-bg);
     border-color: var(--nav-primary-blue);
     color: var(--nav-primary-blue);
@@ -229,6 +237,14 @@
     transform: translateY(0);
 }
 
+.btn-export-pdf {
+    background-color: #334155;
+}
+
+.btn-export-pdf:hover {
+    background-color: #1e293b;
+}
+
 /* ==========================================================================
    Responsive — Mobile First
    Reference device: 390 × 844 px (iPhone 14 / Pixel 7)
@@ -282,6 +298,7 @@
 
     /* Touch targets en botones de acción */
     .btn-profile,
+    .btn-config,
     .btn-logout {
         width: 40px;
         height: 40px;
@@ -311,6 +328,7 @@
 
     /* Touch targets mínimos WCAG 2.5.5 = 44px */
     .btn-profile,
+    .btn-config,
     .btn-logout {
         width: 44px;
         height: 44px;

@@ -80,7 +80,7 @@
           </div>
           <div class="input-wrapper">
             <input type="password" id="passwordInput" name="password" class="form-control input-with-toggle"
-              placeholder="••••••••••••" required minlength="6" maxlength="128" autocomplete="current-password">
+              placeholder="••••••••••••" required minlength="8" maxlength="128" autocomplete="current-password">
             <button type="button" id="btnTogglePassword" class="btn-toggle-password" aria-label="Mostrar contraseña"
               aria-pressed="false">
               <!-- Icono SVG Ojo abierto -->
@@ -174,7 +174,7 @@
           </div>
           <div class="form-group">
             <label for="registerPasswordInput" class="form-label">Contraseña</label>
-            <input type="password" id="registerPasswordInput" class="form-control" required minlength="12" maxlength="128" autocomplete="new-password">
+            <input type="password" id="registerPasswordInput" class="form-control" required minlength="8" maxlength="128" autocomplete="new-password">
           </div>
           <div class="dialog-actions">
             <button type="button" id="btnCancelRegister" class="btn-demo">Cancelar</button>
@@ -188,6 +188,12 @@
       <div class="dialog-content">
         <header class="dialog-header">
           <h3 id="resetTitle">Crear Nueva Contraseña</h3>
+          <button type="button" id="btnCloseResetDialog" class="btn-close-dialog" aria-label="Cerrar modal">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </header>
 
         <p style="font-size: 0.85rem; color: var(--slate-600); margin: 0;">
@@ -200,9 +206,9 @@
           <div class="form-group">
             <label for="newPasswordInput" class="form-label">Nueva Contraseña</label>
             <div class="input-wrapper">
-              <input type="password" id="newPasswordInput" class="form-control input-with-toggle" required minlength="12" maxlength="128" autocomplete="new-password">
+              <input type="password" id="newPasswordInput" class="form-control input-with-toggle" required minlength="8" maxlength="128" autocomplete="new-password">
             </div>
-            <span class="help-text">Mínimo 12 caracteres, mayúsculas, minúsculas, números y símbolos.</span>
+            <span class="help-text">Mínimo 8 caracteres, mayúsculas, minúsculas, números y símbolos.</span>
           </div>
 
           <div class="dialog-actions">

@@ -1,5 +1,7 @@
 import { getAuthenticatedUser, getCurrentProfile, supabase, signOut } from './supabaseClient.js';
 import { APP_CONFIG, isDateInCurrentMonth } from './config.js';
+import { serializeChapterCSV, downloadCSV, parseCSV, validateImportedSessions } from './csvUtils.js';
+import { initLogicalTimer } from './logicalTimer.js';
 
 // ==========================================================================
 // DualOrganizer - Lógica del Panel de Administración y Gestor de Datos
@@ -13,153 +15,153 @@ document.addEventListener('DOMContentLoaded', async () => {
   // --------------------------------------------------------------------------
   // 1. Guardia de Autorización en Cliente (RBAC)
   // --------------------------------------------------------------------------
-    const enforceAdminAuthorization = async () => {
-      const user = await getAuthenticatedUser();
-      if (!user) {
+  const enforceAdminAuthorization = async () => {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       window.location.replace('login.html');
       return null;
     }
-      const profile = await getCurrentProfile(user.id);
-      if (!profile || profile.role !== 'ADMIN') {
-        console.warn('[Seguridad] Intento de acceso sin privilegios de ADMIN');
-        window.location.replace('dashboard.html');
-        return null;
-      }
-      return { ...profile, authUser: user };
-    };
+    const profile = await getCurrentProfile(user.id);
+    if (!profile || profile.role !== 'ADMIN') {
+      console.warn('[Seguridad] Intento de acceso sin privilegios de ADMIN');
+      window.location.replace('dashboard.html');
+      return null;
+    }
+    return { ...profile, authUser: user };
+  };
 
-    const currentAdmin = await enforceAdminAuthorization();
-    if (!currentAdmin) return;
+  const currentAdmin = await enforceAdminAuthorization();
+  if (!currentAdmin) return;
 
   let activeChapterId = new URLSearchParams(window.location.search).get('chapter');
   let calendarSessions = [];
 
-    const getRemoteData = async () => {
-      let chapterId = new URLSearchParams(window.location.search).get('chapter');
-      if (!chapterId) {
-        const { data: membership, error } = await supabase
-          .from('chapter_members')
-          .select('chapter_id')
-          .eq('user_id', currentAdmin.id)
-          .eq('is_primary', true)
-          .maybeSingle();
-        if (error) throw error;
-        chapterId = membership?.chapter_id;
-      }
-
-      if (!chapterId) return { members: [], records: [], chapterId: null };
-
-      const { data: memberships, error: membershipError } = await supabase
+  const getRemoteData = async () => {
+    let chapterId = new URLSearchParams(window.location.search).get('chapter');
+    if (!chapterId) {
+      const { data: membership, error } = await supabase
         .from('chapter_members')
-        .select('user_id, role')
-        .eq('chapter_id', chapterId);
-      if (membershipError) throw membershipError;
-
-      const userIds = memberships.map(member => member.user_id);
-      const profileQuery = supabase
-        .from('profiles')
-        .select('*')
-        .in('id', userIds.length ? userIds : ['00000000-0000-0000-0000-000000000000']);
-      const sessionsQuery = supabase
-        .from('tutoring_sessions')
-        .select('*')
-        .eq('chapter_id', chapterId)
-        .order('session_date', { ascending: false });
-      const [{ data: profiles, error: profileError }, { data: sessions, error: sessionError }] = await Promise.all([
-        profileQuery,
-        sessionsQuery
-      ]);
-      if (profileError) throw profileError;
-      if (sessionError) throw sessionError;
-
-      const profileById = new Map(profiles.map(profile => [profile.id, profile]));
-      const members = memberships.map((membership) => {
-        const profile = profileById.get(membership.user_id) || {};
-        return {
-          id: profile.institutional_id || profile.id,
-          userId: profile.id,
-          name: profile.full_name || 'Sin nombre',
-          initials: getInitials(profile.full_name || ''),
-          role: membership.role === 'ADMIN' ? 'Coordinador / Admin' : 'Tutor Académico',
-          status: 'Activo',
-          totalHours: 0,
-          targetHours: APP_CONFIG.academic.monthlyTargetHours,
-          semester: profile.semester || 'Sin especificar',
-          email: profile.id === currentAdmin.id ? currentAdmin.authUser.email : '',
-          phone: profile.phone || 'No registrado',
-          subjects: profile.subjects || [],
-          bio: profile.description || 'Sin descripción.'
-        };
-      });
-
-      const memberByUserId = new Map(members.map(member => [member.userId, member]));
-      calendarSessions = sessions;
-      const records = sessions.map(session => {
-        const member = memberByUserId.get(session.tutor_id);
-        if (member && isDateInCurrentMonth(session.session_date)) {
-          member.totalHours += Number(session.hours) || 0;
-        }
-        return {
-          id: session.id,
-          matricula: member?.id || session.tutor_id,
-          tutorName: member?.name || 'Tutor sin perfil',
-          subject: session.subject,
-          date: session.session_date,
-          hours: Number(session.hours),
-          status: session.status === 'APPROVED' ? 'Aprobada' : session.status === 'REJECTED' ? 'Rechazada' : 'Pendiente'
-          ,tutorId: session.tutor_id,
-          startTime: String(session.start_time).slice(0, 5),
-          studentName: session.student_name
-        };
-      });
-
-      activeChapterId = chapterId;
-      return { members, records, chapterId };
-    };
-
-    const loadAdminChapterOptions = async () => {
-      if (!elements?.chapterSelect) return;
-      const { data, error } = await supabase
-        .from('chapter_members')
-        .select('chapter_id, role, chapters(id, code, name)')
+        .select('chapter_id')
         .eq('user_id', currentAdmin.id)
-        .eq('role', 'ADMIN');
+        .eq('is_primary', true)
+        .maybeSingle();
       if (error) throw error;
+      chapterId = membership?.chapter_id;
+    }
 
-      elements.chapterSelect.innerHTML = '';
-      data.forEach((membership) => {
-        if (!membership.chapters) return;
-        const option = document.createElement('option');
-        option.value = membership.chapters.id;
-        option.textContent = `${membership.chapters.code} · ${membership.chapters.name}`;
-        option.selected = membership.chapters.id === activeChapterId;
-        elements.chapterSelect.appendChild(option);
-      });
+    if (!chapterId) return { members: [], records: [], chapterId: null };
 
-      if (!activeChapterId && elements.chapterSelect.options.length > 0) {
-        activeChapterId = elements.chapterSelect.options[0].value;
-        elements.chapterSelect.options[0].selected = true;
+    const { data: memberships, error: membershipError } = await supabase
+      .from('chapter_members')
+      .select('user_id, role')
+      .eq('chapter_id', chapterId);
+    if (membershipError) throw membershipError;
+
+    const userIds = memberships.map(member => member.user_id);
+    const profileQuery = supabase
+      .from('profiles')
+      .select('*')
+      .in('id', userIds.length ? userIds : ['00000000-0000-0000-0000-000000000000']);
+    const sessionsQuery = supabase
+      .from('tutoring_sessions')
+      .select('*')
+      .eq('chapter_id', chapterId)
+      .order('session_date', { ascending: false });
+    const [{ data: profiles, error: profileError }, { data: sessions, error: sessionError }] = await Promise.all([
+      profileQuery,
+      sessionsQuery
+    ]);
+    if (profileError) throw profileError;
+    if (sessionError) throw sessionError;
+
+    const profileById = new Map(profiles.map(profile => [profile.id, profile]));
+    const members = memberships.map((membership) => {
+      const profile = profileById.get(membership.user_id) || {};
+      return {
+        id: profile.institutional_id || profile.id,
+        userId: profile.id,
+        name: profile.full_name || 'Sin nombre',
+        initials: getInitials(profile.full_name || ''),
+        role: membership.role === 'ADMIN' ? 'Coordinador / Admin' : 'Tutor Académico',
+        status: 'Activo',
+        totalHours: 0,
+        targetHours: APP_CONFIG.academic.monthlyTargetHours,
+        semester: profile.semester || 'Sin especificar',
+        email: profile.id === currentAdmin.id ? currentAdmin.authUser.email : '',
+        phone: profile.phone || 'No registrado',
+        subjects: profile.subjects || [],
+        bio: profile.description || 'Sin descripción.'
+      };
+    });
+
+    const memberByUserId = new Map(members.map(member => [member.userId, member]));
+    calendarSessions = sessions;
+    const records = sessions.map(session => {
+      const member = memberByUserId.get(session.tutor_id);
+      if (member && isDateInCurrentMonth(session.session_date)) {
+        member.totalHours += Number(session.hours) || 0;
       }
-    };
+      return {
+        id: session.id,
+        matricula: member?.id || session.tutor_id,
+        tutorName: member?.name || 'Tutor sin perfil',
+        subject: session.subject,
+        date: session.session_date,
+        hours: Number(session.hours),
+        status: session.status === 'APPROVED' ? 'Aprobada' : session.status === 'REJECTED' ? 'Rechazada' : 'Pendiente'
+        , tutorId: session.tutor_id,
+        startTime: String(session.start_time).slice(0, 5),
+        studentName: session.student_name
+      };
+    });
 
-    /*
-     * El resto del módulo consume state.members y state.records, por lo que
-     * la interfaz conserva sus filtros y exportación sin duplicar consultas.
-     */
-    const state = {
-      records: [],
-      members: [],
-      filterMember: 'ALL',
-      searchQuery: '',
-      sortKey: 'date',
-      sortDirection: 'desc',
-      activeTab: 'members'
-    };
+    activeChapterId = chapterId;
+    return { members, records, chapterId };
+  };
 
-    /*
-     * El código de renderizado empieza aquí; las declaraciones demo anteriores
-     * fueron eliminadas para que SQL sea la única fuente de datos.
-     */
+  const loadAdminChapterOptions = async () => {
+    if (!elements?.chapterSelect) return;
+    const { data, error } = await supabase
+      .from('chapter_members')
+      .select('chapter_id, role, chapters(id, code, name)')
+      .eq('user_id', currentAdmin.id)
+      .eq('role', 'ADMIN');
+    if (error) throw error;
+
+    elements.chapterSelect.innerHTML = '';
+    data.forEach((membership) => {
+      if (!membership.chapters) return;
+      const option = document.createElement('option');
+      option.value = membership.chapters.id;
+      option.textContent = `${membership.chapters.code} · ${membership.chapters.name}`;
+      option.selected = membership.chapters.id === activeChapterId;
+      elements.chapterSelect.appendChild(option);
+    });
+
+    if (!activeChapterId && elements.chapterSelect.options.length > 0) {
+      activeChapterId = elements.chapterSelect.options[0].value;
+      elements.chapterSelect.options[0].selected = true;
+    }
+  };
+
+  /*
+   * El resto del módulo consume state.members y state.records, por lo que
+   * la interfaz conserva sus filtros y exportación sin duplicar consultas.
+   */
+  const state = {
+    records: [],
+    members: [],
+    filterMember: 'ALL',
+    searchQuery: '',
+    sortKey: 'date',
+    sortDirection: 'desc',
+    activeTab: 'members'
+  };
+
+  /*
+   * El código de renderizado empieza aquí; las declaraciones demo anteriores
+   * fueron eliminadas para que SQL sea la única fuente de datos.
+   */
 
   // --------------------------------------------------------------------------
   // 3. Referencias al DOM
@@ -179,6 +181,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     recordSearchInput: document.getElementById('recordSearchInput'),
     memberFilterSelect: document.getElementById('memberFilterSelect'),
     btnExportCSV: document.getElementById('btnExportCSV'),
+    btnImportCSV: document.getElementById('btnImportCSV'),
+    csvImportModal: document.getElementById('csvImportModal'),
+    csvImportClose: document.getElementById('csvImportClose'),
+    csvImportCancel: document.getElementById('csvImportCancel'),
+    csvFileInputDialog: document.getElementById('csvFileInputDialog'),
+    csvImportFeedback: document.getElementById('csvImportFeedback'),
+    csvImportSummary: document.getElementById('csvImportSummary'),
+    csvImportErrors: document.getElementById('csvImportErrors'),
+    csvImportConfirm: document.getElementById('csvImportConfirm'),
     recordsCounterText: document.getElementById('recordsCounterText'),
     recordsTable: document.getElementById('recordsTable'),
     recordsTableBody: document.getElementById('recordsTableBody'),
@@ -206,23 +217,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     toast: document.getElementById('adminToast'),
     toastMsg: document.getElementById('adminToastMsg'),
     refreshButton: document.getElementById('btnRefreshAdmin')
-    ,chapterSelect: document.getElementById('adminChapterSelect')
-    ,sessionManagerModal: document.getElementById('sessionManagerModal')
-    ,sessionManagerForm: document.getElementById('sessionManagerForm')
-    ,managerOperation: document.getElementById('managerOperation')
-    ,managerTutor: document.getElementById('managerTutor')
-    ,managerSession: document.getElementById('managerSession')
-    ,managerTargetTutor: document.getElementById('managerTargetTutor')
-    ,managerTargetSession: document.getElementById('managerTargetSession')
-    ,managerTargetGroup: document.getElementById('managerTargetGroup')
-    ,managerTargetSessionGroup: document.getElementById('managerTargetSessionGroup')
-    ,managerSessionGroup: document.getElementById('managerSessionGroup')
-    ,managerNewSessionFields: document.getElementById('managerNewSessionFields')
-    ,managerDate: document.getElementById('managerDate')
-    ,managerTime: document.getElementById('managerTime')
-    ,managerStudent: document.getElementById('managerStudent')
-    ,managerSubject: document.getElementById('managerSubject')
-    ,managerHours: document.getElementById('managerHours')
+    , chapterSelect: document.getElementById('adminChapterSelect')
+    , sessionManagerModal: document.getElementById('sessionManagerModal')
+    , sessionManagerForm: document.getElementById('sessionManagerForm')
+    , managerOperation: document.getElementById('managerOperation')
+    , managerTutor: document.getElementById('managerTutor')
+    , managerSession: document.getElementById('managerSession')
+    , managerTargetTutor: document.getElementById('managerTargetTutor')
+    , managerTargetSession: document.getElementById('managerTargetSession')
+    , managerTargetGroup: document.getElementById('managerTargetGroup')
+    , managerTargetSessionGroup: document.getElementById('managerTargetSessionGroup')
+    , managerSessionGroup: document.getElementById('managerSessionGroup')
+    , managerNewSessionFields: document.getElementById('managerNewSessionFields')
+    , managerDate: document.getElementById('managerDate')
+    , managerTime: document.getElementById('managerTime')
+    , managerStudent: document.getElementById('managerStudent')
+    , managerSubject: document.getElementById('managerSubject')
+    , managerHours: document.getElementById('managerHours')
   };
 
   let toastTimeout = null;
@@ -720,58 +731,149 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // --------------------------------------------------------------------------
-  // 8. Exportar a CSV Seguro (Con BOM UTF-8 y Mitigación de Formula Injection)
+  // 8. Módulo de Exportación e Importación CSV Seguro
   // --------------------------------------------------------------------------
-  const sanitizeCSVCell = (val) => {
-    if (val === null || val === undefined) return '""';
-    let str = String(val).trim();
-
-    if (/^[=+\-@\t\r]/.test(str)) {
-      str = `'${str}`;
-    }
-
-    return `"${str.replace(/"/g, '""')}"`;
-  };
-
   const exportToCSV = () => {
     const recordsToExport = getProcessedRecords();
 
-    if (recordsToExport.length === 0) {
+    if (!recordsToExport || recordsToExport.length === 0) {
       showToast('No hay registros disponibles para exportar con los filtros actuales');
       return;
     }
 
-    const headers = ['Matrícula', 'Tutor', 'Materia', 'Fecha', 'Horas', 'Estado'];
-    const headerRow = headers.map(sanitizeCSVCell).join(',');
-
-    const rows = recordsToExport.map(rec => [
-      sanitizeCSVCell(rec.matricula),
-      sanitizeCSVCell(rec.tutorName),
-      sanitizeCSVCell(rec.subject),
-      sanitizeCSVCell(rec.date),
-      sanitizeCSVCell(Number(rec.hours).toFixed(1)),
-      sanitizeCSVCell(rec.status)
-    ].join(','));
-
-    const csvContent = '\uFEFF' + [headerRow, ...rows].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const objectUrl = window.URL.createObjectURL(blob);
-
-    const downloadLink = document.createElement('a');
+    const csvContent = serializeChapterCSV(recordsToExport);
     const timestamp = new Date().toISOString().slice(0, 10);
-    downloadLink.href = objectUrl;
-    downloadLink.setAttribute('download', `dualorganizer_sesiones_${timestamp}.csv`);
-    downloadLink.style.display = 'none';
-    document.body.appendChild(downloadLink);
-
-    downloadLink.click();
-
-    setTimeout(() => {
-      document.body.removeChild(downloadLink);
-      window.URL.revokeObjectURL(objectUrl);
-    }, 1500);
+    downloadCSV(`dualorganizer_sesiones_${timestamp}.csv`, csvContent);
 
     showToast(`Exportadas ${recordsToExport.length} sesiones a CSV con éxito`);
+  };
+
+  let pendingImportSessions = [];
+  let isImporting = false;
+
+  const openCSVImportModal = () => {
+    if (isImporting) return;
+    pendingImportSessions = [];
+    if (elements.csvFileInputDialog) elements.csvFileInputDialog.value = '';
+    if (elements.csvImportFeedback) elements.csvImportFeedback.style.display = 'none';
+    if (elements.csvImportSummary) elements.csvImportSummary.textContent = '';
+    if (elements.csvImportErrors) elements.csvImportErrors.innerHTML = '';
+    if (elements.csvImportConfirm) {
+      elements.csvImportConfirm.disabled = true;
+      elements.csvImportConfirm.textContent = 'Importar 0 Sesiones';
+    }
+    elements.csvImportModal?.showModal();
+  };
+
+  const closeCSVImportModal = () => {
+    if (isImporting) return;
+    elements.csvImportModal?.close();
+  };
+
+  const handleCSVFileSelection = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const parseResult = parseCSV(text);
+
+      if (elements.csvImportFeedback) elements.csvImportFeedback.style.display = 'block';
+      if (elements.csvImportErrors) elements.csvImportErrors.innerHTML = '';
+
+      if (parseResult.errors && parseResult.errors.length > 0 && parseResult.rows.length === 0) {
+        if (elements.csvImportSummary) {
+          elements.csvImportSummary.textContent = 'Error al procesar el archivo CSV:';
+        }
+        parseResult.errors.forEach(err => {
+          const li = document.createElement('li');
+          li.textContent = err;
+          elements.csvImportErrors.appendChild(li);
+        });
+        if (elements.csvImportConfirm) {
+          elements.csvImportConfirm.disabled = true;
+          elements.csvImportConfirm.textContent = 'Importar 0 Sesiones';
+        }
+        return;
+      }
+
+      const validation = validateImportedSessions(parseResult.rows, {
+        chapterId: activeChapterId,
+        members: state.members
+      });
+
+      pendingImportSessions = validation.validSessions;
+
+      const combinedErrors = [...(parseResult.errors || []), ...validation.errors];
+
+      if (elements.csvImportSummary) {
+        elements.csvImportSummary.textContent = `${validation.validSessions.length} sesión(es) válida(s) lista(s) para importar. ${combinedErrors.length} advertencia(s)/error(es).`;
+      }
+
+      if (combinedErrors.length > 0) {
+        combinedErrors.forEach(err => {
+          const li = document.createElement('li');
+          li.textContent = err;
+          elements.csvImportErrors.appendChild(li);
+        });
+      }
+
+      if (elements.csvImportConfirm) {
+        elements.csvImportConfirm.disabled = validation.validSessions.length === 0;
+        elements.csvImportConfirm.textContent = `Importar ${validation.validSessions.length} Sesiones`;
+      }
+    } catch (err) {
+      console.error('Error al leer el archivo CSV:', err);
+      showToast('Error al leer el archivo CSV: ' + err.message);
+    }
+  };
+
+  const confirmCSVImport = async () => {
+    if (isImporting) return;
+    if (!pendingImportSessions || pendingImportSessions.length === 0) {
+      showToast('No hay sesiones válidas para importar');
+      return;
+    }
+
+    try {
+      isImporting = true;
+      if (elements.csvImportConfirm) {
+        elements.csvImportConfirm.disabled = true;
+        elements.csvImportConfirm.textContent = 'Importando...';
+      }
+      if (elements.csvImportCancel) {
+        elements.csvImportCancel.disabled = true;
+      }
+      if (elements.csvImportClose) {
+        elements.csvImportClose.disabled = true;
+      }
+
+      const { error } = await supabase
+        .from('tutoring_sessions')
+        .insert(pendingImportSessions);
+
+      if (error) throw error;
+
+      showToast(`Se importaron ${pendingImportSessions.length} sesiones correctamente.`);
+      isImporting = false;
+      closeCSVImportModal();
+      await reloadRemoteData();
+    } catch (err) {
+      console.error('Error insertando sesiones importadas:', err);
+      showToast('Error al guardar las sesiones: ' + (err.message || err));
+      if (elements.csvImportConfirm) {
+        elements.csvImportConfirm.disabled = false;
+        elements.csvImportConfirm.textContent = `Reintentar (${pendingImportSessions.length})`;
+      }
+    } finally {
+      isImporting = false;
+      if (elements.csvImportCancel) {
+        elements.csvImportCancel.disabled = false;
+      }
+      if (elements.csvImportClose) {
+        elements.csvImportClose.disabled = false;
+      }
+    }
   };
 
   // --------------------------------------------------------------------------
@@ -975,7 +1077,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // --------------------------------------------------------------------------
   // 10. Delegación de Eventos y Manejadores
   // --------------------------------------------------------------------------
-  
+
   // A) Cambio de Pestañas
   if (elements.tabsNav) {
     elements.tabsNav.addEventListener('click', (e) => {
@@ -1085,9 +1187,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // F) Exportación a CSV
+  // F) Exportación e Importación a CSV
   if (elements.btnExportCSV) {
     elements.btnExportCSV.addEventListener('click', exportToCSV);
+  }
+  if (elements.btnImportCSV) {
+    elements.btnImportCSV.addEventListener('click', openCSVImportModal);
+  }
+  if (elements.csvImportClose) {
+    elements.csvImportClose.addEventListener('click', closeCSVImportModal);
+  }
+  if (elements.csvImportCancel) {
+    elements.csvImportCancel.addEventListener('click', closeCSVImportModal);
+  }
+  if (elements.csvFileInputDialog) {
+    elements.csvFileInputDialog.addEventListener('change', handleCSVFileSelection);
+  }
+  if (elements.csvImportConfirm) {
+    elements.csvImportConfirm.addEventListener('click', confirmCSVImport);
+  }
+  if (elements.csvImportModal) {
+    elements.csvImportModal.addEventListener('click', (e) => {
+      if (isImporting) return;
+      const surface = elements.csvImportModal.querySelector('.admin-dialog__surface');
+      if (surface && !surface.contains(e.target)) {
+        closeCSVImportModal();
+      }
+    });
+
+    elements.csvImportModal.addEventListener('cancel', (e) => {
+      if (isImporting) {
+        e.preventDefault();
+      }
+    });
   }
 
   // G) Control de Cierre del Modal Nativo
@@ -1127,17 +1259,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   elements.refreshButton?.addEventListener('click', refreshAdmin);
 
-    document.querySelectorAll('[data-action="logout"]').forEach((button) => {
-      button.addEventListener('click', (event) => {
-        event.preventDefault();
-        signOut();
-      });
+  document.querySelectorAll('[data-action="logout"]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      signOut();
     });
+  });
 
-    try {
-      await init();
-    } catch (error) {
-      console.error('Error cargando administración desde Supabase:', error);
-      showToast('No se pudieron cargar los datos del capítulo.');
-    }
+  let adminLogicalTimer = null;
+  try {
+    await init();
+    adminLogicalTimer = initLogicalTimer({
+      checkIntervalMs: 60000,
+      supabase,
+      chapterId: activeChapterId
+    });
+    adminLogicalTimer.start();
+  } catch (error) {
+    console.error('Error cargando administración desde Supabase:', error);
+    showToast('No se pudieron cargar los datos del capítulo.');
+  }
+
+  window.addEventListener('beforeunload', () => {
+    adminLogicalTimer?.stop();
+  });
 });

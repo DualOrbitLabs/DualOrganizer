@@ -566,6 +566,24 @@ body {
     background-color: var(--slate-100);
 }
 
+/* Slots Ocupados y Continuidad Visual */
+.grid-cell.slot.slot--occupied {
+    background-color: var(--bg-card);
+}
+
+.grid-cell.slot.slot--span-start {
+    border-bottom-color: transparent;
+}
+
+.grid-cell.slot.slot--span-cont {
+    border-top-color: transparent;
+    padding-top: 0;
+}
+
+.grid-cell.slot.slot--span-cont:not(.slot--span-end) {
+    border-bottom-color: transparent;
+}
+
 /* --------------------------------------------------------------------------
    10. Tarjetas de Sesión (Micro-Interacciones & Colores Semánticos)
    - Sin bloques rígidos monocromáticos; aspecto ligero de producto de diseño
@@ -574,7 +592,7 @@ body {
     background-color: var(--semantic-blue-bg);
     border: 1px solid var(--semantic-blue-border);
     color: var(--semantic-blue-text);
-    padding: 3px 5px;
+    padding: 4px 6px;
     border-radius: var(--radius-xs);
     font-size: 0.7rem;
     line-height: 1.25;
@@ -582,11 +600,13 @@ body {
     box-shadow: var(--shadow-soft);
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 2px;
     overflow: hidden;
-    height: calc(var(--session-duration, 1) * var(--calendar-row-height, 54px) - 8px);
+    height: 100%;
+    min-height: calc(var(--calendar-row-height, 54px) - 8px);
+    box-sizing: border-box;
     position: relative;
-    z-index: 2;
+    user-select: none;
 }
 
 .session-item:hover {
@@ -594,6 +614,66 @@ body {
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
     background-color: rgba(25, 42, 136, 0.09);
     border-color: rgba(25, 42, 136, 0.35);
+}
+
+/* Continuidad Visual Multi-Hora */
+.session-item.session-item--span-start {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 1px dashed var(--semantic-blue-border);
+}
+
+.session-item.session-item--continuation,
+.session-item.is-continuation {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top: none;
+    background-color: rgba(25, 42, 136, 0.04);
+}
+
+.session-item.session-item--continuation:not(.session-item--span-end),
+.session-item.is-continuation:not(.session-item--span-end) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 1px dashed var(--semantic-blue-border);
+}
+
+/* Contenido de Bloque Continuación */
+.session-continuation-inner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.685rem;
+    color: var(--slate-700);
+    height: 100%;
+}
+
+.session-continuation-arrow {
+    color: var(--brand-navy);
+    font-weight: 700;
+    font-size: 0.8rem;
+    line-height: 1;
+}
+
+.session-continuation-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.session-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.session-badge-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .session-item .session-title {

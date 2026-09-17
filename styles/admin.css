@@ -1,13 +1,3 @@
-/* ==========================================================================
-   DualOrganizer - Estilos del Panel de Administración y Gestor de Datos
-   Estética: Anti-Generic AI UI, Diseño de Producto Premium Institucional
-   Paleta: Escala neutra Slate / Zinc, Navy institucional (#192a88), bordes finos 1px
-   Arquitectura: CSS3 Nativo, Flexbox/CSS Grid, clamp(), font-variant-numeric: tabular-nums
-   ========================================================================== */
-
-/* --------------------------------------------------------------------------
-   1. Declaración de Fuentes Locales (Avenir)
-   -------------------------------------------------------------------------- */
 @font-face {
   font-family: 'Avenir';
   src: url('../global/fonts/Avenir/Avenir Regular/Avenir Regular.ttf') format('truetype');
@@ -93,6 +83,10 @@
   --status-review-bg: rgba(25, 42, 136, 0.06);
   --status-review-text: var(--brand-navy);
   --status-review-border: rgba(25, 42, 136, 0.22);
+
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.08);
+  --danger-border: rgba(239, 68, 68, 0.25);
 
   /* Tipografía y Espaciado */
   --font-family: 'Avenir', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -980,6 +974,27 @@ th[aria-sort="descending"] .sort-indicator {
   justify-content: flex-end;
   padding-top: var(--space-3);
   border-top: 1px solid var(--border-color);
+}
+
+/* Feedback y lista de errores en importación CSV */
+.csv-import-feedback {
+  display: none;
+  margin-top: var(--space-4);
+}
+
+.csv-import-summary {
+  margin-bottom: var(--space-2);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.csv-import-errors {
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  color: var(--danger);
+  padding-left: 1.2rem;
+  margin: 0;
 }
 
 /* --------------------------------------------------------------------------

@@ -6,7 +6,8 @@
 .env
 .env.*
 !.env.example
+skills-lock.json
 
-
+PROJECT.md
 AGENTS.md
 GEMINI.md
