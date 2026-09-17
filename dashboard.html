@@ -93,6 +93,18 @@
 
   <!-- Contenedor Principal Dashboard -->
   <div class="dashboard-shell">
+    <!-- Banner de Vista de Administrador -->
+    <div class="admin-view-banner" id="adminViewBanner" hidden>
+      <div class="admin-view-banner-content">
+        <span class="admin-view-icon" aria-hidden="true"></span>
+        <span><strong>Administrador:</strong> Viendo el calendario de <strong
+            id="adminViewTutorName">Tutor</strong></span>
+      </div>
+      <a href="admin.html" id="btnBackToAdmin" class="btn-admin-back">
+        <span>&larr; Volver al Panel de Administración</span>
+      </a>
+    </div>
+
     <!-- Tira de Identificación de Capítulo Activo -->
     <div class="active-chapter-bar" id="activeChapterBar">
       <div class="active-chapter-info">
@@ -103,6 +115,12 @@
         <span>Capítulo</span>
         <select id="dashboardChapterSelect" class="form-control" aria-label="Seleccionar capítulo">
           <option value="">Cargando capítulos...</option>
+        </select>
+      </label>
+      <label class="chapter-switcher" id="adminTutorSelectGroup" for="dashboardTutorSelect" hidden>
+        <span>Tutor</span>
+        <select id="dashboardTutorSelect" class="form-control" aria-label="Seleccionar tutor">
+          <option value="ALL">Todos los tutores</option>
         </select>
       </label>
       <button type="button" id="btnRefreshDashboard" class="btn-refresh" aria-label="Actualizar dashboard"

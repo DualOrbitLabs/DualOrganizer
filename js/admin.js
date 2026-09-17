@@ -213,6 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     dialogMemberBio: document.getElementById('dialogMemberBio'),
     dialogCloseBtn: document.getElementById('dialogCloseBtn'),
     dialogCloseFooterBtn: document.getElementById('dialogCloseFooterBtn'),
+    dialogViewCalendarBtn: document.getElementById('dialogViewCalendarBtn'),
     // Toast
     toast: document.getElementById('adminToast'),
     toastMsg: document.getElementById('adminToastMsg'),
@@ -915,6 +916,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     elements.dialogMemberBio.textContent = member.bio;
 
+    if (elements.dialogViewCalendarBtn) {
+      elements.dialogViewCalendarBtn.href = `dashboard.html?tutor=${encodeURIComponent(member.userId)}&chapter=${encodeURIComponent(activeChapterId)}`;
+    }
+
     elements.memberModal.showModal();
   };
 
@@ -1114,7 +1119,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const manageTutorButton = e.target.closest('[data-action="manage-tutor"]');
       if (manageTutorButton) {
-        openSessionManager(manageTutorButton.getAttribute('data-member-id'));
+        const tutorUserId = manageTutorButton.getAttribute('data-member-id');
+        window.location.href = `dashboard.html?tutor=${encodeURIComponent(tutorUserId)}&chapter=${encodeURIComponent(activeChapterId)}`;
       }
     });
   }

@@ -1262,3 +1262,56 @@ dialog.modal-dialog::backdrop {
 @keyframes spin-refresh {
     to { transform: rotate(360deg); }
 }
+
+/* ==========================================================================
+   Admin View Mode Banner & Tutor Switcher
+   ========================================================================== */
+.admin-view-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 16px;
+    background: var(--slate-800);
+    color: var(--slate-50);
+    border: 1px solid var(--slate-700);
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-card);
+}
+
+.admin-view-banner[hidden] {
+    display: none !important;
+}
+
+.admin-view-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-view-icon {
+    font-size: 1.1rem;
+}
+
+.btn-admin-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--slate-700);
+    color: var(--slate-100);
+    border: 1px solid var(--slate-600);
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition-micro);
+}
+
+.btn-admin-back:hover {
+    background: var(--slate-600);
+    color: #ffffff;
+    border-color: var(--slate-500);
+}

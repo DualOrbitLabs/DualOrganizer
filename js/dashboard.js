@@ -282,6 +282,15 @@ if (typeof document !== 'undefined') {
     }
 
     let sessionsData = [];
+    let allSessionsRaw = [];
+    let isAdminUser = false;
+    let selectedTutorId = new URLSearchParams(window.location.search).get('tutor') || null;
+
+    const adminTutorSelectGroup = document.getElementById('adminTutorSelectGroup');
+    const dashboardTutorSelect = document.getElementById('dashboardTutorSelect');
+    const adminViewBanner = document.getElementById('adminViewBanner');
+    const adminViewTutorName = document.getElementById('adminViewTutorName');
+    const btnBackToAdmin = document.getElementById('btnBackToAdmin');
 
     const mapSession = (session) => ({
         id: session.id,
@@ -292,8 +301,94 @@ if (typeof document !== 'undefined') {
         time: String(session.start_time).slice(0, 5),
         evidence: session.evidence_path,
         createdAt: session.created_at,
-        status: session.status
+        status: session.status,
+        tutorId: session.tutor_id
     });
+
+    async function checkAdminStatus() {
+        if (!currentUser || !activeChapterId) return false;
+        const { data, error } = await supabase
+            .from('chapter_members')
+            .select('role')
+            .eq('chapter_id', activeChapterId)
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+        if (error) return false;
+        return data?.role === 'ADMIN';
+    }
+
+    async function updateAdminView() {
+        isAdminUser = await checkAdminStatus();
+
+        if (isAdminUser) {
+            await loadAdminTutorOptions();
+        } else {
+            if (adminTutorSelectGroup) adminTutorSelectGroup.hidden = true;
+            if (adminViewBanner) adminViewBanner.hidden = true;
+            selectedTutorId = currentUser.id;
+        }
+    }
+
+    async function loadAdminTutorOptions() {
+        if (!isAdminUser || !dashboardTutorSelect) return;
+
+        const { data: memberships, error } = await supabase
+            .from('chapter_members')
+            .select('user_id, role')
+            .eq('chapter_id', activeChapterId);
+        if (error || !memberships) return;
+
+        const userIds = memberships.map(m => m.user_id);
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', userIds.length ? userIds : ['00000000-0000-0000-0000-000000000000']);
+
+        const profileMap = new Map((profiles || []).map(p => [p.id, p.full_name || 'Sin nombre']));
+
+        dashboardTutorSelect.innerHTML = '';
+        const allOpt = document.createElement('option');
+        allOpt.value = 'ALL';
+        allOpt.textContent = 'Todos los tutores del capítulo';
+        dashboardTutorSelect.appendChild(allOpt);
+
+        memberships.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.user_id;
+            opt.textContent = profileMap.get(m.user_id) || m.user_id;
+            dashboardTutorSelect.appendChild(opt);
+        });
+
+        if (adminTutorSelectGroup) adminTutorSelectGroup.hidden = false;
+
+        if (selectedTutorId) {
+            dashboardTutorSelect.value = selectedTutorId;
+        } else {
+            selectedTutorId = 'ALL';
+            dashboardTutorSelect.value = 'ALL';
+        }
+
+        if (selectedTutorId && selectedTutorId !== 'ALL') {
+            const tName = profileMap.get(selectedTutorId) || 'Tutor';
+            if (adminViewTutorName) adminViewTutorName.textContent = tName;
+            if (btnBackToAdmin) btnBackToAdmin.href = `admin.html?chapter=${encodeURIComponent(activeChapterId)}`;
+            if (adminViewBanner) adminViewBanner.hidden = false;
+        } else {
+            if (adminViewBanner) adminViewBanner.hidden = true;
+        }
+    }
+
+    function filterSessionsForActiveView() {
+        if (isAdminUser) {
+            if (selectedTutorId && selectedTutorId !== 'ALL') {
+                sessionsData = allSessionsRaw.filter(s => s.tutorId === selectedTutorId);
+            } else {
+                sessionsData = [...allSessionsRaw];
+            }
+        } else {
+            sessionsData = allSessionsRaw.filter(s => s.tutorId === currentUser.id);
+        }
+    }
 
     async function loadSessions() {
         if (!activeChapterId) {
@@ -309,13 +404,16 @@ if (typeof document !== 'undefined') {
 
         if (!activeChapterId) return;
 
+        await updateAdminView();
+
         const { data, error } = await supabase
             .from('tutoring_sessions')
             .select('*')
             .eq('chapter_id', activeChapterId)
             .order('session_date', { ascending: false });
         if (error) throw error;
-        sessionsData = (data || []).map(mapSession);
+        allSessionsRaw = (data || []).map(mapSession);
+        filterSessionsForActiveView();
     }
 
     async function refreshDashboard({ silent = false, isAuto = false } = {}) {
@@ -371,9 +469,13 @@ if (typeof document !== 'undefined') {
     }
 
     async function persistSession(session, editingId) {
+        const targetTutorId = (isAdminUser && selectedTutorId && selectedTutorId !== 'ALL')
+            ? selectedTutorId
+            : currentUser.id;
+
         const payload = {
             chapter_id: activeChapterId,
-            tutor_id: currentUser.id,
+            tutor_id: targetTutorId,
             student_name: session.studentName,
             subject: session.subject,
             session_date: session.date,
@@ -1080,6 +1182,30 @@ if (typeof document !== 'undefined') {
         dashboardChapterSelect?.addEventListener('change', () => {
             const chapterId = dashboardChapterSelect.value;
             if (chapterId) window.location.href = `dashboard.html?chapter=${encodeURIComponent(chapterId)}`;
+        });
+
+        dashboardTutorSelect?.addEventListener('change', () => {
+            selectedTutorId = dashboardTutorSelect.value;
+            const url = new URL(window.location.href);
+            if (selectedTutorId && selectedTutorId !== 'ALL') {
+                url.searchParams.set('tutor', selectedTutorId);
+            } else {
+                url.searchParams.delete('tutor');
+            }
+            window.history.replaceState({}, '', url.toString());
+
+            const selectedOptionText = dashboardTutorSelect.options[dashboardTutorSelect.selectedIndex]?.text;
+            if (selectedTutorId && selectedTutorId !== 'ALL') {
+                if (adminViewTutorName) adminViewTutorName.textContent = selectedOptionText;
+                if (btnBackToAdmin) btnBackToAdmin.href = `admin.html?chapter=${encodeURIComponent(activeChapterId)}`;
+                if (adminViewBanner) adminViewBanner.hidden = false;
+            } else {
+                if (adminViewBanner) adminViewBanner.hidden = true;
+            }
+
+            filterSessionsForActiveView();
+            updateKPIs();
+            renderWeeklyCalendar();
         });
     });
 }
