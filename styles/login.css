@@ -119,30 +119,29 @@ body {
   margin-bottom: 24px;
 }
 
-.login-brand {
+.login-logo-main {
+  height: 72px;
+  width: auto;
+  display: block;
+  margin: 0 auto 12px;
+  object-fit: contain;
+}
+
+.login-back-link {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 5px;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
   text-decoration: none;
-  color: var(--slate-900);
-  margin-bottom: 8px;
+  transition: color var(--transition-fast);
+  letter-spacing: 0.01em;
 }
 
-.login-logo {
-  height: 44px;
-  width: auto;
-  transition: transform var(--transition-fast);
-}
-
-.login-brand:hover .login-logo {
-  transform: scale(1.03);
-}
-
-.login-title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--slate-900);
+.login-back-link:hover {
+  color: var(--slate-700);
 }
 
 .login-subtitle {

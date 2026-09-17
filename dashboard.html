@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="./styles/navbar.css">
   <link rel="stylesheet" href="./styles/dashboard.css">
   <script>
-    (function() {
+    (function () {
       try {
         const stored = localStorage.getItem('dualorganizer_ui_config') || localStorage.getItem('dualorganizer_preferences');
         if (stored) {
@@ -17,7 +17,7 @@
           if (p.density) document.documentElement.setAttribute('data-density', p.density);
           if (p.animations) document.documentElement.setAttribute('data-animations', p.animations);
         }
-      } catch (e) {}
+      } catch (e) { }
     })();
   </script>
 </head>
@@ -28,7 +28,8 @@
     <nav class="navbar-global" aria-label="Navegación principal">
       <!-- Zona Izquierda: Logo + Nombre -->
       <a href="hub.html" class="navbar-brand" style="display: flex; align-items: center; gap: 10px;">
-        <img src="global/DualOrganizer Logo Concepts/6.png" alt="Logo de DualOrganizer" style="height: 32px; object-fit: contain;">
+        <img src="global/DualOrganizer Logo Concepts/6.png" alt="Logo de DualOrganizer"
+          style="height: 42px; object-fit: contain;">
       </a>
 
       <!-- Zona Centro: Links de Navegación -->
@@ -50,7 +51,8 @@
           </svg>
           <span>Exportar CSV</span>
         </button>
-        <button type="button" id="btnExportEvidenceReport" class="btn-export btn-export-pdf" title="Exportar reporte de evidencias a PDF">
+        <button type="button" id="btnExportEvidenceReport" class="btn-export btn-export-pdf"
+          title="Exportar reporte de evidencias a PDF">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -103,7 +105,8 @@
           <option value="">Cargando capítulos...</option>
         </select>
       </label>
-      <button type="button" id="btnRefreshDashboard" class="btn-refresh" aria-label="Actualizar dashboard" title="Actualizar datos">
+      <button type="button" id="btnRefreshDashboard" class="btn-refresh" aria-label="Actualizar dashboard"
+        title="Actualizar datos">
         <span aria-hidden="true">↻</span>
         <span>Actualizar</span>
       </button>
@@ -198,18 +201,15 @@
 
         <div class="form-group">
           <label for="studentName">Alumno:</label>
-          <input type="text" id="studentName" class="form-control" 
-                 placeholder="Nombre completo del alumno" 
-                 required minlength="3" maxlength="80" 
-                 pattern="^[A-Za-zÀ-ÿ\u00f1\u00d1\s\.\-]+$"
-                 title="Solo letras, espacios, puntos o guiones. Entre 3 y 80 caracteres.">
+          <input type="text" id="studentName" class="form-control" placeholder="Nombre completo del alumno" required
+            minlength="3" maxlength="80" pattern="^[A-Za-zÀ-ÿ\u00f1\u00d1\s\.\-]+$"
+            title="Solo letras, espacios, puntos o guiones. Entre 3 y 80 caracteres.">
         </div>
 
         <div class="form-group">
           <label for="subject">Materia:</label>
-          <input type="text" id="subject" class="form-control" 
-                 placeholder="Ej. Cálculo Diferencial" 
-                 required minlength="2" maxlength="60">
+          <input type="text" id="subject" class="form-control" placeholder="Ej. Cálculo Diferencial" required
+            minlength="2" maxlength="60">
         </div>
 
         <div class="form-group">
@@ -220,13 +220,17 @@
 
         <div class="form-group">
           <label for="evidenceFile">Evidencia adjunta (Opcional):</label>
-          <input type="file" id="evidenceFile" class="form-control" accept=".jpg,.jpeg,.png,.webp,.avif,.gif,.pdf,image/jpeg,image/png,image/webp,image/avif,image/gif,application/pdf">
-          <span class="form-hint" style="font-size: 0.775rem; color: var(--slate-500); margin-top: 2px;">Formatos soportados: JPG, PNG, WebP, AVIF, GIF, PDF. Máximo 5 MB.</span>
+          <input type="file" id="evidenceFile" class="form-control"
+            accept=".jpg,.jpeg,.png,.webp,.avif,.gif,.pdf,image/jpeg,image/png,image/webp,image/avif,image/gif,application/pdf">
+          <span class="form-hint" style="font-size: 0.775rem; color: var(--slate-500); margin-top: 2px;">Formatos
+            soportados: JPG, PNG, WebP, AVIF, GIF, PDF. Máximo 5 MB.</span>
         </div>
 
         <div class="modal-actions">
           <button type="button" class="btn-modal-cancel" id="btnCancelModal">Cancelar</button>
-          <button type="button" class="btn-modal-cancel" id="btnDeleteModal" style="display: none; background-color: #fef2f2; color: #dc2626; border-color: #fca5a5;">Eliminar Sesión</button>
+          <button type="button" class="btn-modal-cancel" id="btnDeleteModal"
+            style="display: none; background-color: #fef2f2; color: #dc2626; border-color: #fca5a5;">Eliminar
+            Sesión</button>
           <button type="submit" class="btn-primary">Guardar Sesión</button>
         </div>
       </form>
