@@ -616,6 +616,61 @@ body {
     border-color: rgba(25, 42, 136, 0.35);
 }
 
+/* Temas de Colores Vivos y Vibrantes por Materia / Tutor */
+.session-item.vibrant-theme-0 {
+    background-color: rgba(16, 185, 129, 0.14);
+    border-color: #059669;
+    color: #064e3b;
+}
+.session-item.vibrant-theme-0:hover {
+    background-color: rgba(16, 185, 129, 0.22);
+}
+
+.session-item.vibrant-theme-1 {
+    background-color: rgba(37, 99, 235, 0.14);
+    border-color: #2563eb;
+    color: #1e3a8a;
+}
+.session-item.vibrant-theme-1:hover {
+    background-color: rgba(37, 99, 235, 0.22);
+}
+
+.session-item.vibrant-theme-2 {
+    background-color: rgba(245, 158, 11, 0.16);
+    border-color: #d97706;
+    color: #78350f;
+}
+.session-item.vibrant-theme-2:hover {
+    background-color: rgba(245, 158, 11, 0.24);
+}
+
+.session-item.vibrant-theme-3 {
+    background-color: rgba(139, 92, 246, 0.16);
+    border-color: #7c3aed;
+    color: #4c1d95;
+}
+.session-item.vibrant-theme-3:hover {
+    background-color: rgba(139, 92, 246, 0.24);
+}
+
+.session-item.vibrant-theme-4 {
+    background-color: rgba(6, 182, 212, 0.16);
+    border-color: #0891b2;
+    color: #164e63;
+}
+.session-item.vibrant-theme-4:hover {
+    background-color: rgba(6, 182, 212, 0.24);
+}
+
+.session-item.vibrant-theme-5 {
+    background-color: rgba(244, 63, 94, 0.16);
+    border-color: #e11d48;
+    color: #881337;
+}
+.session-item.vibrant-theme-5:hover {
+    background-color: rgba(244, 63, 94, 0.24);
+}
+
 /* Continuidad Visual Multi-Hora */
 .session-item.session-item--span-start {
     border-bottom-left-radius: 0;

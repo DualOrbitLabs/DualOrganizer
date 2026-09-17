@@ -330,10 +330,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const refreshManagerVisibility = () => {
     const operation = elements.managerOperation?.value;
-    const needsSession = operation !== 'add' && operation !== 'clear';
-    const needsTarget = operation === 'swap' || operation === 'send';
+    const needsSession = operation === 'edit' || operation === 'delete' || operation === 'swap' || operation === 'send';
+    const needsTarget = operation === 'swap' || operation === 'send' || operation === 'reassign_subject';
     const needsTargetSession = operation === 'swap';
-    const needsDetails = operation === 'add' || operation === 'edit';
+    const needsDetails = operation === 'add' || operation === 'edit' || operation === 'block_slot' || operation === 'reassign_subject';
     const copy = {
       add: {
         title: 'Agregar sesión',
@@ -349,6 +349,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         title: 'Eliminar sesión',
         hint: 'La sesión se eliminará del calendario de forma permanente.',
         submit: 'Eliminar sesión'
+      },
+      duplicate_week: {
+        title: 'Duplicar semana anterior',
+        hint: 'Copia automáticamente las sesiones de la semana previa para este tutor sumando 7 días.',
+        submit: 'Duplicar semana'
+      },
+      reassign_subject: {
+        title: 'Reasignar materia',
+        hint: 'Mueve todas las sesiones de una materia de este tutor hacia un tutor destino.',
+        submit: 'Reasignar materia'
+      },
+      block_slot: {
+        title: 'Bloquear horario / Indisponibilidad',
+        hint: 'Registra una reserva o bloqueo de horario institucional en la fecha especificada.',
+        submit: 'Bloquear horario'
       },
       clear: {
         title: 'Limpiar calendario del tutor',
@@ -1000,7 +1015,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     const selectedId = elements.managerSession.value;
     const selected = calendarSessions.find(session => session.id === selectedId);
 
-    if (operation !== 'add' && !selected) throw new Error('Selecciona una sesión.');
+    const requiresSelectedSession = operation === 'edit' || operation === 'delete' || operation === 'swap' || operation === 'send';
+    if (requiresSelectedSession && !selected) throw new Error('Selecciona una sesión.');
+
+    if (operation === 'duplicate_week') {
+      const tutorSessions = calendarSessions.filter(session => session.tutor_id === tutorId);
+      if (!tutorSessions.length) throw new Error('El tutor no tiene sesiones registradas para duplicar.');
+      
+      const newSessions = tutorSessions.map(session => {
+        const origDate = new Date(session.session_date + 'T00:00:00');
+        origDate.setDate(origDate.getDate() + 7);
+        const yyyy = origDate.getFullYear();
+        const mm = String(origDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(origDate.getDate()).padStart(2, '0');
+        return {
+          chapter_id: activeChapterId,
+          tutor_id: tutorId,
+          student_name: session.student_name,
+          subject: session.subject,
+          session_date: `${yyyy}-${mm}-${dd}`,
+          start_time: session.start_time,
+          hours: session.hours,
+          status: 'PENDING'
+        };
+      });
+
+      const { error } = await supabase.from('tutoring_sessions').insert(newSessions);
+      if (error) throw error;
+      return;
+    }
+
+    if (operation === 'reassign_subject') {
+      const targetTutorId = elements.managerTargetTutor.value;
+      if (!targetTutorId || targetTutorId === tutorId) throw new Error('Selecciona un tutor destino diferente.');
+      const subjectToReassign = elements.managerSubject.value.trim();
+      if (!subjectToReassign) throw new Error('Ingresa el nombre de la materia a reasignar.');
+
+      const { error } = await supabase
+        .from('tutoring_sessions')
+        .update({ tutor_id: targetTutorId })
+        .eq('chapter_id', activeChapterId)
+        .eq('tutor_id', tutorId)
+        .ilike('subject', subjectToReassign);
+      if (error) throw error;
+      return;
+    }
+
+    if (operation === 'block_slot') {
+      const payload = {
+        chapter_id: activeChapterId,
+        tutor_id: tutorId,
+        student_name: 'Horario Bloqueado',
+        subject: 'BLOQUEADO / INDISPONIBLE',
+        session_date: elements.managerDate.value,
+        start_time: elements.managerTime.value,
+        hours: Number(elements.managerHours.value) || 1,
+        status: 'APPROVED'
+      };
+      if (!payload.session_date || !payload.start_time) {
+        throw new Error('Ingresa la fecha y hora a bloquear.');
+      }
+      const { error } = await supabase.from('tutoring_sessions').insert(payload);
+      if (error) throw error;
+      return;
+    }
 
     if (operation === 'edit') {
       const payload = {
