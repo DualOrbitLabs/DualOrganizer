@@ -108,10 +108,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         subject: session.subject,
         date: session.session_date,
         hours: Number(session.hours),
-        status: session.status === 'APPROVED' ? 'Aprobada' : session.status === 'REJECTED' ? 'Rechazada' : 'Pendiente'
-        , tutorId: session.tutor_id,
+        status: session.status === 'APPROVED' ? 'Aprobada' : session.status === 'REJECTED' ? 'Rechazada' : 'Pendiente',
+        tutorId: session.tutor_id,
         startTime: String(session.start_time).slice(0, 5),
-        studentName: session.student_name
+        studentName: session.student_name,
+        evidencePath: session.evidence_path
       };
     });
 
@@ -742,6 +743,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       manageButton.textContent = 'Gestionar';
       tdActions.appendChild(manageButton);
 
+      if (rec.evidencePath) {
+        const evidenceBtn = document.createElement('button');
+        evidenceBtn.type = 'button';
+        evidenceBtn.className = 'btn btn--outline-action';
+        evidenceBtn.setAttribute('data-action', 'view-evidence');
+        evidenceBtn.setAttribute('data-path', rec.evidencePath);
+        evidenceBtn.style.marginLeft = '6px';
+        evidenceBtn.textContent = '📎 Evidencia';
+        tdActions.appendChild(evidenceBtn);
+      }
+
       row.append(tdMatricula, tdTutor, tdSubject, tdDate, tdHours, tdStatus, tdActions);
       fragment.appendChild(row);
     });
@@ -1210,6 +1222,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.recordsTable.addEventListener('click', (event) => {
       const button = event.target.closest('[data-action="manage-session"]');
       if (button) openSessionManager('', button.getAttribute('data-session-id'));
+
+      const evidenceBtn = event.target.closest('[data-action="view-evidence"]');
+      if (evidenceBtn) {
+        const path = evidenceBtn.getAttribute('data-path');
+        if (path) {
+          const { data } = supabase.storage.from('session-evidence').getPublicUrl(path);
+          if (data?.publicUrl) {
+            window.open(data.publicUrl, '_blank');
+          } else {
+            showToast('No se pudo obtener la URL de la evidencia.');
+          }
+        }
+      }
     });
   }
 

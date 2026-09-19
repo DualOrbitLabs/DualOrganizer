@@ -1,5 +1,6 @@
 import { getAuthenticatedUser, getCurrentProfile, signOut, supabase } from './supabaseClient.js';
 import { APP_CONFIG, isDateInCurrentMonth } from './config.js';
+import { exportEvidenceReport } from './evidenceUtils.js';
 
 // ==========================================================================
 // Lógica para el Perfil del Tutor - DualOrganizer
@@ -548,9 +549,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================================================
     const btnReport = document.getElementById('btnDownloadReport');
     if (btnReport) {
-        btnReport.addEventListener('click', (e) => {
+        btnReport.addEventListener('click', async (e) => {
             e.preventDefault();
-            showToast('Generando constancia y reporte en formato PDF...');
+            try {
+                showToast('Generando constancia y reporte en formato PDF...');
+                const { data: sessions } = await supabase
+                    .from('tutoring_sessions')
+                    .select('*')
+                    .eq('tutor_id', currentUser.id)
+                    .order('session_date', { ascending: false });
+                const mapped = (sessions || []).map(s => ({
+                    id: s.id,
+                    studentName: s.student_name,
+                    subject: s.subject,
+                    hours: Number(s.hours),
+                    date: s.session_date,
+                    time: String(s.start_time).slice(0, 5),
+                    evidence: s.evidence_path
+                }));
+                const name = document.getElementById('profileDisplayName')?.textContent || currentUser.email;
+                exportEvidenceReport(mapped, { tutorName: name, chapterName: 'Capítulo Dual' });
+            } catch (err) {
+                console.error('Error al exportar reporte PDF:', err);
+            }
         });
     }
 

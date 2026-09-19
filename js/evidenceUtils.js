@@ -19,7 +19,25 @@ export const SUPPORTED_MIME_TYPES = Object.freeze([
   'image/webp',
   'image/avif',
   'image/gif',
-  'application/pdf'
+  'image/svg+xml',
+  'image/bmp',
+  'image/tiff',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/plain',
+  'text/csv',
+  'application/rtf',
+  'application/zip',
+  'application/x-zip-compressed',
+  'application/x-rar-compressed',
+  'application/x-7z-compressed',
+  'application/vnd.oasis.opendocument.text',
+  'application/vnd.oasis.opendocument.spreadsheet'
 ]);
 
 /** Extensiones admitidas para validación por extensión */
@@ -30,7 +48,44 @@ export const SUPPORTED_EXTENSIONS = Object.freeze([
   '.webp',
   '.avif',
   '.gif',
-  '.pdf'
+  '.svg',
+  '.bmp',
+  '.tif',
+  '.tiff',
+  '.pdf',
+  '.doc',
+  '.docx',
+  '.xls',
+  '.xlsx',
+  '.ppt',
+  '.pptx',
+  '.txt',
+  '.csv',
+  '.rtf',
+  '.zip',
+  '.rar',
+  '.7z',
+  '.odt',
+  '.ods'
+]);
+
+/** Extensiones estrictamente prohibidas por seguridad */
+export const DANGEROUS_EXTENSIONS = Object.freeze([
+  '.exe',
+  '.bat',
+  '.cmd',
+  '.sh',
+  '.php',
+  '.js',
+  '.vbs',
+  '.py',
+  '.ps1',
+  '.msi',
+  '.dll',
+  '.com',
+  '.scr',
+  '.htm',
+  '.html'
 ]);
 
 /**
@@ -83,6 +138,17 @@ export function validateEvidenceFile(file, maxBytes = APP_CONFIG?.uploads?.maxBy
     };
   }
 
+  // Rechazo explícito de ejecutables y scripts peligrosos
+  if (DANGEROUS_EXTENSIONS.includes(extension)) {
+    return {
+      valid: false,
+      error: `Formato peligroso bloqueado (${extension}). No se admiten ejecutables ni scripts por razones de seguridad.`,
+      isImage: false,
+      isPdf: false,
+      extension
+    };
+  }
+
   // Validación de tipo MIME o extensión
   const mimeAllowed = SUPPORTED_MIME_TYPES.includes(fileType);
   const extAllowed = SUPPORTED_EXTENSIONS.includes(extension);
@@ -90,7 +156,7 @@ export function validateEvidenceFile(file, maxBytes = APP_CONFIG?.uploads?.maxBy
   if (!mimeAllowed && !extAllowed) {
     return {
       valid: false,
-      error: 'Formato no permitido. Solo se aceptan imágenes (JPG, PNG, WebP, AVIF, GIF) y documentos PDF.',
+      error: 'Formato no permitido. Se aceptan imágenes, documentos PDF/Office, texto y archivos comprimidos seguros.',
       isImage: false,
       isPdf: false,
       extension

@@ -481,31 +481,38 @@ body {
 
 /* Encabezados de Columna (Días) - Escala Neutra Slate/Zinc Elegante */
 .grid-cell.header {
-    background-color: var(--bg-header);
+    background-color: #f1f5f9 !important;
     color: var(--slate-700);
     text-align: center;
     padding: 8px 4px;
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: 2px solid var(--border-default);
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 100 !important;
     user-select: none;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08);
 }
 
 .grid-cell.header.corner {
-    background-color: var(--bg-header);
-    color: var(--slate-400);
+    background-color: #f1f5f9 !important;
+    color: var(--slate-500);
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 120 !important;
+    border-right: 1px solid var(--border-default);
+    border-bottom: 2px solid var(--border-default);
 }
 
 .grid-cell.header.today {
-    background-color: var(--brand-navy-subtle);
+    background-color: #e0e7ff !important;
     border-bottom: 2px solid var(--brand-navy);
 }
 
@@ -537,17 +544,20 @@ body {
 
 /* Columna de Horas */
 .grid-cell.time-label {
-    background-color: var(--slate-50);
+    background-color: #f8fafc !important;
     color: var(--slate-500);
     font-size: clamp(0.685rem, 0.8vw, 0.75rem);
     font-family: 'Avenir', ui-monospace, SFMono-Regular, monospace;
-    font-weight: 500;
+    font-weight: 600;
     display: flex;
     align-items: flex-start;
     justify-content: center;
     padding-top: 6px;
     border-right: 1px solid var(--border-default);
     user-select: none;
+    position: sticky;
+    left: 0;
+    z-index: 10 !important;
 }
 
 /* Slots Interactivos para Agendar */

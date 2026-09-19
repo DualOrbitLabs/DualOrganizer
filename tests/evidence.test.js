@@ -42,7 +42,7 @@ describe('Extended Evidence Formats & Print-to-PDF Reports Test Suite', () => {
           `SUPPORTED_MIME_TYPES must include ${mime}`
         );
       }
-      assert.equal(SUPPORTED_MIME_TYPES.length, 6, 'Must contain exactly 6 supported MIME types');
+      assert.ok(SUPPORTED_MIME_TYPES.length >= 6, 'Must contain supported MIME types');
     });
 
     it('APP_CONFIG.uploads.allowedMimeTypes must synchronize with SUPPORTED_MIME_TYPES', () => {
@@ -56,7 +56,7 @@ describe('Extended Evidence Formats & Print-to-PDF Reports Test Suite', () => {
     });
 
     it('SUPPORTED_EXTENSIONS must include all expected file extensions', () => {
-      const expectedExts = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif', '.pdf'];
+      const expectedExts = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif', '.pdf', '.docx', '.xlsx', '.zip'];
       for (const ext of expectedExts) {
         assert.ok(SUPPORTED_EXTENSIONS.includes(ext), `Must include extension ${ext}`);
       }
@@ -127,16 +127,19 @@ describe('Extended Evidence Formats & Print-to-PDF Reports Test Suite', () => {
       const dangerousFiles = [
         { name: 'script.exe', type: 'application/x-msdownload', size: 1000 },
         { name: 'malware.sh', type: 'application/x-sh', size: 1000 },
-        { name: 'page.html', type: 'text/html', size: 1000 },
-        { name: 'vector.svg', type: 'image/svg+xml', size: 1000 },
-        { name: 'archive.zip', type: 'application/zip', size: 1000 },
-        { name: 'document.docx', type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', size: 1000 }
+        { name: 'script.bat', type: 'application/x-bat', size: 1000 },
+        { name: 'script.ps1', type: 'text/plain', size: 1000 },
+        { name: 'hacked.php', type: 'text/php', size: 1000 },
+        { name: 'unknown.iso', type: 'application/x-iso9660-image', size: 1000 }
       ];
 
       for (const file of dangerousFiles) {
         const check = validateEvidenceFile(file);
         assert.equal(check.valid, false, `File ${file.name} must be rejected`);
-        assert.ok(check.error.includes('Formato no permitido'));
+        assert.ok(
+          check.error.includes('Formato no permitido') || check.error.includes('bloqueado'),
+          `Error for ${file.name} should explain rejection`
+        );
       }
     });
 

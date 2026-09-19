@@ -743,6 +743,9 @@ if (typeof document !== 'undefined') {
     // --------------------------------------------------------------------------
     // 5. Delegación de Eventos en la Cuadrícula del Calendario
     // --------------------------------------------------------------------------
+    const currentEvidenceContainer = document.getElementById('currentEvidenceContainer');
+    const btnOpenCurrentEvidence = document.getElementById('btnOpenCurrentEvidence');
+
     function openEditModal(session) {
         if (!sessionModal || !session) return;
         modalDateInput.value = session.date;
@@ -750,6 +753,16 @@ if (typeof document !== 'undefined') {
         studentNameInput.value = session.studentName;
         subjectInput.value = session.subject;
         hoursInput.value = session.hours;
+
+        if (session.evidence) {
+            const { data } = supabase.storage.from('session-evidence').getPublicUrl(session.evidence);
+            if (data?.publicUrl && btnOpenCurrentEvidence && currentEvidenceContainer) {
+                btnOpenCurrentEvidence.href = data.publicUrl;
+                currentEvidenceContainer.style.display = 'block';
+            }
+        } else if (currentEvidenceContainer) {
+            currentEvidenceContainer.style.display = 'none';
+        }
 
         sessionForm.dataset.editingId = session.id;
         if (btnDeleteModal) btnDeleteModal.style.display = 'block';
