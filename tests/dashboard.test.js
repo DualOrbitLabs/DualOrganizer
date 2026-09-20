@@ -389,6 +389,13 @@ describe('Dashboard Multi-Hour Booking & 1-Hour Auto-Refresh Suite (Milestone 2)
             const css = fs.readFileSync(dashboardCssPath, 'utf8');
             assert.ok(!css.includes('calc(var(--session-duration, 1) * var(--calendar-row-height, 54px) - 8px)'), 'El hack de desbordamiento debe haber sido eliminado');
         });
+
+        it('debe definir z-indexes de prioridad sticky correctos en .grid-cell.header, .corner y .time-label', () => {
+            const css = fs.readFileSync(dashboardCssPath, 'utf8');
+            assert.ok(css.includes('z-index: 100'), 'Los encabezados de día deben tener z-index 100');
+            assert.ok(css.includes('z-index: 120'), 'La celda de esquina debe tener z-index 120');
+            assert.ok(css.includes('z-index: 10'), 'La columna de horas debe tener z-index 10');
+        });
     });
 
     describe('5. Consumo de Preferencias de Usuario (getUIPreferences)', () => {
@@ -447,6 +454,28 @@ describe('Dashboard Multi-Hour Booking & 1-Hour Auto-Refresh Suite (Milestone 2)
             const prefs = getUIPreferences(storage);
             assert.equal(prefs.defaultSessionHours, '1.0');
             assert.equal(prefs.sessionAutoRefresh, true);
+        });
+    });
+
+    describe('6. Auditoría de Botones e Interactividad HTML', () => {
+        it('todos los botones de dashboard.html, admin.html y profile.html deben tener IDs o atributos data-action explícitos', () => {
+            const rootDir = path.resolve(__dirname, '..');
+            const files = ['dashboard.html', 'admin.html', 'profile.html', 'config.html', 'hub.html', 'login.html'];
+            
+            files.forEach(file => {
+                const filePath = path.join(rootDir, file);
+                if (fs.existsSync(filePath)) {
+                    const html = fs.readFileSync(filePath, 'utf8');
+                    const buttonMatches = html.match(/<button[^>]*>/g) || [];
+                    buttonMatches.forEach(btn => {
+                        const hasId = /id=["'].+?["']/.test(btn);
+                        const hasAction = /data-action=["'].+?["']/.test(btn);
+                        const hasType = /type=["'].+?["']/.test(btn);
+                        const isCloseOrTab = /class=["'].*?(close|tab).*?["']/.test(btn);
+                        assert.ok(hasId || hasAction || isCloseOrTab || hasType, `El botón en ${file} [${btn}] debe tener un identificador explícito.`);
+                    });
+                }
+            });
         });
     });
 });

@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="./styles/navbar.css">
   <link rel="stylesheet" href="./styles/dashboard.css">
   <link rel="stylesheet" href="./styles/footer.css">
+  <script type="module" src="./js/navbar.js"></script>
   <script>
     (function () {
       try {
@@ -241,9 +242,14 @@
         <div class="form-group">
           <label for="evidenceFile">Evidencia adjunta (Opcional):</label>
           <input type="file" id="evidenceFile" class="form-control"
-            accept=".jpg,.jpeg,.png,.webp,.avif,.gif,.pdf,image/jpeg,image/png,image/webp,image/avif,image/gif,application/pdf">
+            accept=".jpg,.jpeg,.png,.webp,.avif,.gif,.svg,.bmp,.tif,.tiff,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.rtf,.zip,.rar,.7z,.odt,.ods">
           <span class="form-hint" style="font-size: 0.775rem; color: var(--slate-500); margin-top: 2px;">Formatos
-            soportados: JPG, PNG, WebP, AVIF, GIF, PDF. Máximo 5 MB.</span>
+            soportados: Imágenes, PDF, Word, Excel, PowerPoint, Texto, ZIP. Máximo 5 MB.</span>
+          <div id="currentEvidenceContainer" style="margin-top: 6px; display: none;">
+            <a id="btnOpenCurrentEvidence" href="#" target="_blank" class="btn-export" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 4px 10px; font-size: 0.78rem;">
+              <span>📎 Ver archivo de evidencia adjunto</span>
+            </a>
+          </div>
         </div>
 
         <div class="modal-actions">

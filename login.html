@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="./styles/login.css">
   <link rel="stylesheet" href="./styles/footer.css">
 </head>
+
 <body>
   <!-- Contenedor Principal de Autenticación -->
   <div class="login-wrapper">
@@ -110,7 +111,7 @@
         </button>
 
         <button type="button" id="btnOpenRegister" class="btn-demo">
-          Crear cuenta de tutor
+          Crear cuenta
         </button>
 
       </form>
@@ -159,7 +160,8 @@
         <header class="dialog-header">
           <h3 id="registerTitle">Crear cuenta de tutor</h3>
           <button type="button" id="btnCloseRegister" class="btn-close-dialog" aria-label="Cerrar registro">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -171,15 +173,18 @@
         <form id="registerForm" class="login-form" novalidate>
           <div class="form-group">
             <label for="registerNameInput" class="form-label">Nombre completo</label>
-            <input type="text" id="registerNameInput" class="form-control" required minlength="3" maxlength="80" autocomplete="name">
+            <input type="text" id="registerNameInput" class="form-control" required minlength="3" maxlength="80"
+              autocomplete="name">
           </div>
           <div class="form-group">
             <label for="registerEmailInput" class="form-label">Correo institucional</label>
-            <input type="email" id="registerEmailInput" class="form-control" required maxlength="100" autocomplete="email">
+            <input type="email" id="registerEmailInput" class="form-control" required maxlength="100"
+              autocomplete="email">
           </div>
           <div class="form-group">
             <label for="registerPasswordInput" class="form-label">Contraseña</label>
-            <input type="password" id="registerPasswordInput" class="form-control" required minlength="8" maxlength="128" autocomplete="new-password">
+            <input type="password" id="registerPasswordInput" class="form-control" required minlength="8"
+              maxlength="128" autocomplete="new-password">
           </div>
           <div class="dialog-actions">
             <button type="button" id="btnCancelRegister" class="btn-demo">Cancelar</button>
@@ -194,7 +199,8 @@
         <header class="dialog-header">
           <h3 id="resetTitle">Crear Nueva Contraseña</h3>
           <button type="button" id="btnCloseResetDialog" class="btn-close-dialog" aria-label="Cerrar modal">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -211,7 +217,8 @@
           <div class="form-group">
             <label for="newPasswordInput" class="form-label">Nueva Contraseña</label>
             <div class="input-wrapper">
-              <input type="password" id="newPasswordInput" class="form-control input-with-toggle" required minlength="8" maxlength="128" autocomplete="new-password">
+              <input type="password" id="newPasswordInput" class="form-control input-with-toggle" required minlength="8"
+                maxlength="128" autocomplete="new-password">
             </div>
             <span class="help-text">Mínimo 8 caracteres, mayúsculas, minúsculas, números y símbolos.</span>
           </div>

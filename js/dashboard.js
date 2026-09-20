@@ -329,6 +329,15 @@ if (typeof document !== 'undefined') {
         }
     }
 
+    function getVibrantThemeIndex(str) {
+        if (!str) return 0;
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return Math.abs(hash) % 6;
+    }
+
     async function loadAdminTutorOptions() {
         if (!isAdminUser || !dashboardTutorSelect) return;
 
@@ -336,7 +345,7 @@ if (typeof document !== 'undefined') {
             .from('chapter_members')
             .select('user_id, role')
             .eq('chapter_id', activeChapterId);
-        if (error || !memberships) return;
+        if (error || !memberships || !memberships.length) return;
 
         const userIds = memberships.map(m => m.user_id);
         const { data: profiles } = await supabase
@@ -347,10 +356,6 @@ if (typeof document !== 'undefined') {
         const profileMap = new Map((profiles || []).map(p => [p.id, p.full_name || 'Sin nombre']));
 
         dashboardTutorSelect.innerHTML = '';
-        const allOpt = document.createElement('option');
-        allOpt.value = 'ALL';
-        allOpt.textContent = 'Todos los tutores del capítulo';
-        dashboardTutorSelect.appendChild(allOpt);
 
         memberships.forEach(m => {
             const opt = document.createElement('option');
@@ -361,14 +366,14 @@ if (typeof document !== 'undefined') {
 
         if (adminTutorSelectGroup) adminTutorSelectGroup.hidden = false;
 
-        if (selectedTutorId) {
-            dashboardTutorSelect.value = selectedTutorId;
-        } else {
-            selectedTutorId = 'ALL';
-            dashboardTutorSelect.value = 'ALL';
+        const validIds = memberships.map(m => m.user_id);
+        if (!selectedTutorId || selectedTutorId === 'ALL' || !validIds.includes(selectedTutorId)) {
+            selectedTutorId = validIds[0] || currentUser.id;
         }
 
-        if (selectedTutorId && selectedTutorId !== 'ALL') {
+        dashboardTutorSelect.value = selectedTutorId;
+
+        if (selectedTutorId) {
             const tName = profileMap.get(selectedTutorId) || 'Tutor';
             if (adminViewTutorName) adminViewTutorName.textContent = tName;
             if (btnBackToAdmin) btnBackToAdmin.href = `admin.html?chapter=${encodeURIComponent(activeChapterId)}`;
@@ -379,12 +384,8 @@ if (typeof document !== 'undefined') {
     }
 
     function filterSessionsForActiveView() {
-        if (isAdminUser) {
-            if (selectedTutorId && selectedTutorId !== 'ALL') {
-                sessionsData = allSessionsRaw.filter(s => s.tutorId === selectedTutorId);
-            } else {
-                sessionsData = [...allSessionsRaw];
-            }
+        if (isAdminUser && selectedTutorId) {
+            sessionsData = allSessionsRaw.filter(s => s.tutorId === selectedTutorId);
         } else {
             sessionsData = allSessionsRaw.filter(s => s.tutorId === currentUser.id);
         }
@@ -687,12 +688,14 @@ if (typeof document !== 'undefined') {
                            </span>` 
                         : '';
 
+                    const themeIdx = getVibrantThemeIndex(session.subject || session.tutorId);
+
                     if (match.role === 'start') {
                         slot.classList.add('slot--span-start');
                         slot.setAttribute('aria-label', `${days[i]} ${slotDate} a las ${hourString} - Sesión: ${session.subject}, Alumno: ${session.studentName} (${session.hours}h)`);
 
                         const sessionItem = document.createElement('div');
-                        sessionItem.className = 'session-item session-item--span-start';
+                        sessionItem.className = `session-item session-item--span-start vibrant-theme-${themeIdx}`;
                         sessionItem.dataset.id = session.id;
                         sessionItem.title = `${session.subject} - Alumno: ${session.studentName} (${session.hours} hrs)`;
 
@@ -716,7 +719,7 @@ if (typeof document !== 'undefined') {
                         slot.setAttribute('aria-label', `${days[i]} ${slotDate} a las ${hourString} - Continuación: ${session.subject} (Bloque ${match.slotIndex} de ${match.totalSlots})`);
 
                         const sessionItem = document.createElement('div');
-                        sessionItem.className = 'session-item is-continuation session-item--continuation';
+                        sessionItem.className = `session-item is-continuation session-item--continuation vibrant-theme-${themeIdx}`;
                         if (match.isLast) sessionItem.classList.add('session-item--span-end');
                         sessionItem.dataset.id = session.id;
                         sessionItem.title = `${session.subject} (Continuación) - Alumno: ${session.studentName} (Bloque ${match.slotIndex}/${match.totalSlots})`;
@@ -740,6 +743,9 @@ if (typeof document !== 'undefined') {
     // --------------------------------------------------------------------------
     // 5. Delegación de Eventos en la Cuadrícula del Calendario
     // --------------------------------------------------------------------------
+    const currentEvidenceContainer = document.getElementById('currentEvidenceContainer');
+    const btnOpenCurrentEvidence = document.getElementById('btnOpenCurrentEvidence');
+
     function openEditModal(session) {
         if (!sessionModal || !session) return;
         modalDateInput.value = session.date;
@@ -747,6 +753,16 @@ if (typeof document !== 'undefined') {
         studentNameInput.value = session.studentName;
         subjectInput.value = session.subject;
         hoursInput.value = session.hours;
+
+        if (session.evidence) {
+            const { data } = supabase.storage.from('session-evidence').getPublicUrl(session.evidence);
+            if (data?.publicUrl && btnOpenCurrentEvidence && currentEvidenceContainer) {
+                btnOpenCurrentEvidence.href = data.publicUrl;
+                currentEvidenceContainer.style.display = 'block';
+            }
+        } else if (currentEvidenceContainer) {
+            currentEvidenceContainer.style.display = 'none';
+        }
 
         sessionForm.dataset.editingId = session.id;
         if (btnDeleteModal) btnDeleteModal.style.display = 'block';
