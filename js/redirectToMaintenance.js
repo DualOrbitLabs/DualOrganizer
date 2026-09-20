@@ -9,7 +9,7 @@ addEventListener("DOMContentLoaded", async() => {
     if (user.id != undefined) {
         for (let value in whiteListArray) {
             if (user.id === whiteListArray[value]) {
-    //            isOnWhiteList = true;
+                isOnWhiteList = true;
                 break;
             }
         }
