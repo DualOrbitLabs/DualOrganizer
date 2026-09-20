@@ -1459,3 +1459,17 @@ th[aria-sort="descending"] .sort-indicator {
   border-color: #b91c1c;
   background: #b91c1c;
 }
+
+.danger {
+  background-color: brown;
+  color: white;
+  transition: filter 0.1s ease-in-out;
+}
+
+.danger:hover{
+  filter: brightness(0.9);
+}
+
+.danger:active {
+  filter: brightness(0.8); 
+}

@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .select('hours, status, session_date')
                     .eq('tutor_id', currentUser.id),
                 getCurrentProfile(currentUser.id)
+
             ]);
             if (sessionError) throw sessionError;
             if (!userProfile) return;
@@ -77,15 +78,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             const inputStudentId = document.getElementById('inputStudentId');
             const initials = document.getElementById("avatarInitials");
 
-            if(initials){
-                const name = (userProfile.full_name).toUpperCase();
-                if(name && name != "DUAL ORBIT LABS"){
-                    if(name.includes(' ')){
-                        initials.textContent = name[0] + name[name.indexOf(' ')+1];
+            if (initials) {
+                let name;
+                if (!userProfile.full_name) {
+                    name = "JUAN PÉREZ";
+                } else {
+                    name = (userProfile.full_name).toUpperCase();
+                }
+
+                if (name && name != "DUAL ORBIT LABS") {
+                    if (name.includes(' ')) {
+                        initials.textContent = name[0] + name[name.indexOf(' ') + 1];
                     } else {
                         initials.textContent = name[0] + name[1];
                     }
-                } else if(name === "DUAL ORBIT LABS") {
+                } else if (name === "DUAL ORBIT LABS") {
                     initials.textContent = "DOL"
                 }
             }

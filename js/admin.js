@@ -922,7 +922,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (elements.dialogViewCalendarBtn) {
       elements.dialogViewCalendarBtn.href = `dashboard.html?tutor=${encodeURIComponent(member.userId)}&chapter=${encodeURIComponent(activeChapterId)}`;
     }
-
+    
+    addEventListener("click", )
     elements.memberModal.showModal();
   };
 
