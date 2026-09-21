@@ -740,6 +740,15 @@ if (typeof document !== 'undefined') {
                         sessionItem.dataset.id = session.id;
                         sessionItem.title = `${session.subject} - Alumno: ${session.studentName} (${session.hours} hrs)`;
 
+                        let statusBadge = '';
+                        if (session.status === 'APPROVED') {
+                            statusBadge = '<span class="badge-semantic green" title="Aprobada">✓</span>';
+                        } else if (session.status === 'REJECTED') {
+                            statusBadge = '<span class="badge-semantic red" title="Rechazada">✕</span>';
+                        } else {
+                            statusBadge = '<span class="badge-semantic amber" title="Pendiente">...</span>';
+                        }
+
                         sessionItem.innerHTML = `
                             <div class="session-title-row">
                                 <span class="session-title">${escapeHTML(session.subject)}</span>
@@ -747,6 +756,7 @@ if (typeof document !== 'undefined') {
                             <div class="session-meta">
                                 <span class="session-student">${escapeHTML(session.studentName)}</span>
                                 <div class="session-badge-group">
+                                    ${statusBadge}
                                     ${evidenceBadge}
                                     <span class="badge-semantic blue tabular-nums">${session.hours}h</span>
                                 </div>
@@ -807,6 +817,40 @@ if (typeof document !== 'undefined') {
 
         sessionForm.dataset.editingId = session.id;
         if (btnDeleteModal) btnDeleteModal.style.display = 'block';
+
+        const btnApproveAdmin = document.getElementById('btnApproveAdmin');
+        const btnRejectAdmin = document.getElementById('btnRejectAdmin');
+        const btnSaveSession = document.getElementById('btnSaveSession');
+
+        if (isAdminUser && selectedTutorId && selectedTutorId !== 'ALL') {
+            if (btnApproveAdmin && btnRejectAdmin) {
+                if (session.status === 'PENDING') {
+                    btnApproveAdmin.style.display = 'block';
+                    btnRejectAdmin.style.display = 'block';
+                } else {
+                    btnApproveAdmin.style.display = 'none';
+                    btnRejectAdmin.style.display = 'none';
+                }
+            }
+            if (btnSaveSession) btnSaveSession.style.display = 'none';
+            studentNameInput.readOnly = true;
+            subjectInput.readOnly = true;
+            hoursInput.readOnly = true;
+            modalDateInput.readOnly = true;
+            modalTimeInput.readOnly = true;
+            if (evidenceFileInput) evidenceFileInput.disabled = true;
+        } else {
+            if (btnApproveAdmin) btnApproveAdmin.style.display = 'none';
+            if (btnRejectAdmin) btnRejectAdmin.style.display = 'none';
+            if (btnSaveSession) btnSaveSession.style.display = 'block';
+            studentNameInput.readOnly = false;
+            subjectInput.readOnly = false;
+            hoursInput.readOnly = false;
+            modalDateInput.readOnly = false;
+            modalTimeInput.readOnly = false;
+            if (evidenceFileInput) evidenceFileInput.disabled = false;
+        }
+
         sessionModal.showModal();
         setTimeout(() => studentNameInput?.focus(), 50);
     }
@@ -905,6 +949,22 @@ if (typeof document !== 'undefined') {
             currentEvidenceContainer.style.display = 'none';
         }
 
+        const btnApproveAdmin = document.getElementById('btnApproveAdmin');
+        const btnRejectAdmin = document.getElementById('btnRejectAdmin');
+        const btnSaveSession = document.getElementById('btnSaveSession');
+        
+        if (btnApproveAdmin) btnApproveAdmin.style.display = 'none';
+        if (btnRejectAdmin) btnRejectAdmin.style.display = 'none';
+        if (btnDeleteModal) btnDeleteModal.style.display = 'none';
+        if (btnSaveSession) btnSaveSession.style.display = 'block';
+
+        studentNameInput.readOnly = false;
+        subjectInput.readOnly = false;
+        hoursInput.readOnly = false;
+        modalDateInput.readOnly = false;
+        modalTimeInput.readOnly = false;
+        if (evidenceFileInput) evidenceFileInput.disabled = false;
+
         sessionModal.showModal();
         setTimeout(() => studentNameInput?.focus(), 50);
     }
@@ -938,6 +998,52 @@ if (typeof document !== 'undefined') {
                         showToast('No se pudo cancelar la sesión.', 'warning');
                     }
                 }
+            }
+        });
+    }
+
+    const btnApproveAdmin = document.getElementById('btnApproveAdmin');
+    const btnRejectAdmin = document.getElementById('btnRejectAdmin');
+
+    if (btnApproveAdmin) {
+        btnApproveAdmin.addEventListener('click', async () => {
+            const editingId = sessionForm.dataset.editingId;
+            if (!editingId) return;
+            try {
+                const { error } = await supabase.from('tutoring_sessions').update({ status: 'APPROVED' }).eq('id', editingId);
+                if (error) throw error;
+                const idx = sessionsData.findIndex(s => s.id === editingId);
+                if (idx !== -1) sessionsData[idx].status = 'APPROVED';
+                showToast('Sesión aprobada exitosamente');
+                closeModal();
+                updateKPIs();
+                renderWeeklyCalendar();
+            } catch (error) {
+                console.error('Error al aprobar:', error);
+                showToast('Hubo un error al aprobar la sesión', 'error');
+            }
+        });
+    }
+
+    if (btnRejectAdmin) {
+        btnRejectAdmin.addEventListener('click', async () => {
+            const editingId = sessionForm.dataset.editingId;
+            if (!editingId) return;
+            const reason = window.prompt("Motivo de rechazo (opcional):");
+            if (reason === null) return; // User cancelled prompt
+            
+            try {
+                const { error } = await supabase.from('tutoring_sessions').update({ status: 'REJECTED' }).eq('id', editingId);
+                if (error) throw error;
+                const idx = sessionsData.findIndex(s => s.id === editingId);
+                if (idx !== -1) sessionsData[idx].status = 'REJECTED';
+                showToast('Sesión rechazada');
+                closeModal();
+                updateKPIs();
+                renderWeeklyCalendar();
+            } catch (error) {
+                console.error('Error al rechazar:', error);
+                showToast('Hubo un error al rechazar la sesión', 'error');
             }
         });
     }

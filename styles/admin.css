@@ -311,12 +311,10 @@ body {
 @keyframes adminFadeIn {
   from {
     opacity: 0;
-    transform: translateY(2px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -1743,16 +1741,36 @@ th[aria-sort="descending"] .sort-indicator {
   .announcements-form { padding: var(--space-3); }
 }
 
-.danger {
-  background-color: brown;
-  color: white;
-  transition: filter 0.1s ease-in-out;
+.btn--danger {
+  border-color: #dc2626;
+  background-color: #dc2626;
+  color: #ffffff;
 }
 
-.danger:hover{
-  filter: brightness(0.9);
+.btn--danger:hover {
+  border-color: #b91c1c;
+  background-color: #b91c1c;
 }
 
-.danger:active {
-  filter: brightness(0.8); 
+.btn--danger-subtle {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.btn--danger-subtle:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.btn--success {
+  border-color: #059669;
+  background-color: #059669;
+  color: #ffffff;
+}
+
+.btn--success:hover {
+  border-color: #047857;
+  background-color: #047857;
 }
