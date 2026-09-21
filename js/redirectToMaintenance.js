@@ -1,4 +1,4 @@
-import { getAuthenticatedUser } from "./supabaseClient";
+import { getAuthenticatedUser } from "./supabaseClient.js";
 
 addEventListener("DOMContentLoaded", async() => {
     const isOnMaintenance = import.meta.env.VITE_MAINTENANCE_MODE;
@@ -9,7 +9,7 @@ addEventListener("DOMContentLoaded", async() => {
     if (user.id != undefined) {
         for (let value in whiteListArray) {
             if (user.id === whiteListArray[value]) {
-                isOnWhiteList = true;
+                //isOnWhiteList = true;
                 break;
             }
         }
