@@ -1,10 +1,8 @@
 import { getMaintenance } from "./maintenanceState.js";
 import { getAuthenticatedUser } from "./supabaseClient.js";
 
-const intervalId = setInterval(async () => {
+/*const intervalId = setInterval(async () => {
   const isOnMaintenance = getMaintenance();
-  console.log("interval: ", getMaintenance());
-  console.log("clock3: ", getMaintenance())
   const rawWhiteList = import.meta.env.VITE_WHITELIST;
   const whiteListArray = rawWhiteList.split(",");
   const user = await getAuthenticatedUser();
@@ -21,7 +19,7 @@ const intervalId = setInterval(async () => {
     globalThis.location.href = "/login.html";
     return;
   }
-  /*if (isOnMaintenance === true) {
+  if (isOnMaintenance === true) {
     if (
       globalThis.location.pathname === "/maintenance.html" && isOnWhiteList
     ) {
@@ -38,5 +36,6 @@ const intervalId = setInterval(async () => {
   ) {
     console.log("is false now");
     globalThis.location.href = "/hub.html";
-  }*/
+  }
 }, 1000);
+*/

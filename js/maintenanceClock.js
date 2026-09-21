@@ -51,7 +51,6 @@ class CountdownClock {
       clearInterval(this.timerId);
       if(this.element) this.element.textContent = "00:00:00 - Time's up!";
       setMaintenance(false);
-      console.log("clock2: ", getMaintenance());
       return;
     }
 
@@ -72,7 +71,6 @@ class CountdownClock {
 addEventListener("DOMContentLoaded", (event) => {
   const rawStart = getMaintenance();
   const rawDuration = import.meta.env.VITE_ESTIMATED_TIME;
-  console.log("clock1: ", rawStart)
 
   const myClock = new CountdownClock(rawStart, rawDuration, "clock");
   myClock.start();
