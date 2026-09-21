@@ -2,6 +2,10 @@ import { getAuthenticatedUser, getCurrentProfile, supabase, signOut } from './su
 import { APP_CONFIG, isDateInCurrentMonth } from './config.js';
 import { serializeChapterCSV, downloadCSV, parseCSV, validateImportedSessions } from './csvUtils.js';
 import { initLogicalTimer } from './logicalTimer.js';
+import { initRequestsTab } from './adminRequests.js';
+import { initEvidenceTab } from './adminEvidence.js';
+import { initAnalyticsTab } from './adminAnalytics.js';
+import { initSettingsTab } from './adminSettings.js';
 
 // ==========================================================================
 // DualOrganizer - Lógica del Panel de Administración y Gestor de Datos
@@ -74,11 +78,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (profileError) throw profileError;
     if (sessionError) throw sessionError;
 
+    const isUuid = (val) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
     const profileById = new Map(profiles.map(profile => [profile.id, profile]));
-    const members = memberships.map((membership) => {
+    const members = memberships.map((membership, index) => {
       const profile = profileById.get(membership.user_id) || {};
+      const friendlyId = profile.institutional_id || `#TUT-${String(index + 1).padStart(2, '0')}`;
       return {
-        id: profile.institutional_id || profile.id,
+        id: friendlyId,
+        rawId: profile.institutional_id || profile.id,
         userId: profile.id,
         name: profile.full_name || 'Sin nombre',
         initials: getInitials(profile.full_name || ''),
@@ -103,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       return {
         id: session.id,
-        matricula: member?.id || session.tutor_id,
+        matricula: member?.id || (isUuid(session.tutor_id) ? '#TUT-EXT' : session.tutor_id),
         tutorName: member?.name || 'Tutor sin perfil',
         subject: session.subject,
         date: session.session_date,
@@ -330,10 +337,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const refreshManagerVisibility = () => {
     const operation = elements.managerOperation?.value;
-    const needsSession = operation === 'edit' || operation === 'delete' || operation === 'swap' || operation === 'send';
-    const needsTarget = operation === 'swap' || operation === 'send' || operation === 'reassign_subject';
-    const needsTargetSession = operation === 'swap';
-    const needsDetails = operation === 'add' || operation === 'edit' || operation === 'block_slot' || operation === 'reassign_subject';
+    const needsSession = operation === 'edit' || operation === 'delete';
+    const needsDetails = operation === 'add' || operation === 'edit';
     const copy = {
       add: {
         title: 'Agregar sesión',
@@ -349,42 +354,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         title: 'Eliminar sesión',
         hint: 'La sesión se eliminará del calendario de forma permanente.',
         submit: 'Eliminar sesión'
-      },
-      duplicate_week: {
-        title: 'Duplicar semana anterior',
-        hint: 'Copia automáticamente las sesiones de la semana previa para este tutor sumando 7 días.',
-        submit: 'Duplicar semana'
-      },
-      reassign_subject: {
-        title: 'Reasignar materia',
-        hint: 'Mueve todas las sesiones de una materia de este tutor hacia un tutor destino.',
-        submit: 'Reasignar materia'
-      },
-      block_slot: {
-        title: 'Bloquear horario / Indisponibilidad',
-        hint: 'Registra una reserva o bloqueo de horario institucional en la fecha especificada.',
-        submit: 'Bloquear horario'
-      },
-      clear: {
-        title: 'Limpiar calendario del tutor',
-        hint: 'Borra todas las sesiones del tutor seleccionado dentro del capítulo activo.',
-        submit: 'Limpiar calendario'
-      },
-      swap: {
-        title: 'Intercambiar horario',
-        hint: 'Selecciona otra sesión para intercambiar sus tutores y horarios.',
-        submit: 'Intercambiar'
-      },
-      send: {
-        title: 'Enviar sesión',
-        hint: 'La sesión se moverá al horario libre más cercano del tutor destino.',
-        submit: 'Enviar sesión'
       }
     }[operation] || {};
 
     if (elements.managerSessionGroup) elements.managerSessionGroup.hidden = !needsSession;
-    if (elements.managerTargetGroup) elements.managerTargetGroup.hidden = !needsTarget;
-    if (elements.managerTargetSessionGroup) elements.managerTargetSessionGroup.hidden = !needsTargetSession;
     if (elements.managerNewSessionFields) {
       elements.managerNewSessionFields.hidden = !needsDetails;
     }
@@ -399,10 +372,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     detailFields.forEach(field => {
       if (field) field.disabled = !needsDetails;
     });
-    [elements.managerSession, elements.managerTargetTutor, elements.managerTargetSession].forEach(field => {
-      if (field) field.disabled = field === elements.managerSession ? !needsSession : !needsTarget && field !== elements.managerTargetSession;
-    });
-    if (elements.managerTargetSession) elements.managerTargetSession.disabled = !needsTargetSession;
+    if (elements.managerSession) elements.managerSession.disabled = !needsSession;
 
     const title = document.getElementById('sessionManagerTitle');
     const hint = document.getElementById('sessionManagerHint');
@@ -425,15 +395,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const openSessionManager = (tutorId = '', sessionId = '') => {
     if (!elements.sessionManagerModal) return;
-    [elements.managerTutor, elements.managerTargetTutor].forEach((select) => {
-      select.innerHTML = '';
-      state.members.forEach(member => {
-        const option = document.createElement('option');
-        option.value = member.userId;
-        option.textContent = member.name;
-        select.appendChild(option);
-      });
+    
+    elements.managerTutor.innerHTML = '';
+    state.members.forEach(member => {
+      const option = document.createElement('option');
+      option.value = member.userId;
+      option.textContent = member.name;
+      elements.managerTutor.appendChild(option);
     });
+    
     if (tutorId) elements.managerTutor.value = tutorId;
     if (sessionId) {
       const session = calendarSessions.find(item => item.id === sessionId);
@@ -1379,6 +1349,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   let adminLogicalTimer = null;
+  let extensionTabs = { requests: null, evidence: null, analytics: null, settings: null };
   try {
     await init();
     adminLogicalTimer = initLogicalTimer({
@@ -1387,6 +1358,43 @@ document.addEventListener('DOMContentLoaded', async () => {
       chapterId: activeChapterId
     });
     adminLogicalTimer.start();
+
+    // --------------------------------------------------------------------------
+    // 12. Inicialización de Módulos de Extensión (Pestañas Nuevas)
+    // --------------------------------------------------------------------------
+    if (activeChapterId) {
+      const panelRequests = document.getElementById('panel-requests');
+      const panelAnalytics = document.getElementById('panel-analytics');
+      const panelSettings = document.getElementById('panel-settings');
+      const evidenceReviewGrid = document.getElementById('evidenceReviewGrid');
+
+      const sharedOpts = {
+        supabase,
+        chapterId: activeChapterId,
+        adminId: currentAdmin.id,
+        showToast,
+        state,
+        reloadRemoteData
+      };
+      
+      if (panelRequests) {
+        extensionTabs.requests = initRequestsTab({ ...sharedOpts, elements: { container: panelRequests } });
+      }
+      if (evidenceReviewGrid || panelRequests) {
+        extensionTabs.evidence = initEvidenceTab({ ...sharedOpts, elements: { container: evidenceReviewGrid || panelRequests } });
+      }
+      if (panelAnalytics) {
+        extensionTabs.analytics = initAnalyticsTab({
+          ...sharedOpts,
+          elements: { container: panelAnalytics },
+          sessions: state.records,
+          members: state.members
+        });
+      }
+      if (panelSettings) {
+        extensionTabs.settings = initSettingsTab({ ...sharedOpts, elements: { container: panelSettings } });
+      }
+    }
   } catch (error) {
     console.error('Error cargando administración desde Supabase:', error);
     showToast('No se pudieron cargar los datos del capítulo.');

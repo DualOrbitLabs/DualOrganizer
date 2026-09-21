@@ -582,6 +582,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // ==========================================================================
+    // 5. Gestión del Modo Claro / Oscuro (Sincronizado con dualorganizer_ui_config)
+    // ==========================================================================
+    const toggleDarkMode = document.getElementById('toggleDarkMode');
+    const themeModeDescription = document.getElementById('themeModeDescription');
+    const STORAGE_KEY = 'dualorganizer_ui_config';
+
+    const getCurrentTheme = () => {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('dualorganizer_preferences');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                return parsed.theme || 'default-zinc';
+            }
+        } catch { }
+        return 'default-zinc';
+    };
+
+    const setTheme = (themeName) => {
+        document.documentElement.setAttribute('data-theme', themeName);
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY) || '{}';
+            let current = {};
+            try { current = JSON.parse(raw); } catch { }
+            current.theme = themeName;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+            localStorage.setItem('dualorganizer_preferences', JSON.stringify(current));
+        } catch { }
+
+        if (toggleDarkMode) {
+            toggleDarkMode.checked = (themeName === 'cool-slate');
+        }
+        if (themeModeDescription) {
+            themeModeDescription.textContent = themeName === 'cool-slate'
+                ? 'Paleta oscura Slate activa'
+                : 'Paleta clara Zinc activa';
+        }
+    };
+
+    if (toggleDarkMode) {
+        const initialTheme = getCurrentTheme();
+        toggleDarkMode.checked = (initialTheme === 'cool-slate');
+        if (themeModeDescription) {
+            themeModeDescription.textContent = toggleDarkMode.checked
+                ? 'Paleta oscura Slate activa'
+                : 'Paleta clara Zinc activa';
+        }
+
+        toggleDarkMode.addEventListener('change', () => {
+            const newTheme = toggleDarkMode.checked ? 'cool-slate' : 'default-zinc';
+            setTheme(newTheme);
+            showToast(toggleDarkMode.checked ? 'Modo oscuro activado' : 'Modo claro activado');
+        });
+    }
+
     document.querySelectorAll('[data-action="logout"]').forEach((button) => {
         button.addEventListener('click', (event) => {
             event.preventDefault();
