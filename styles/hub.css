@@ -626,3 +626,74 @@ body {
         padding: 1px 6px;
     }
 }
+
+/* ============================================
+   EXTENSIÓN: Banner de Anuncios en Hub
+   ============================================ */
+
+.announcements-banner {
+  background: var(--slate-50, #f8fafc);
+  border: 1px solid var(--hub-border, #e2e8f0);
+  border-left: 3px solid var(--hub-navy, #192a88);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.announcements-banner[hidden] { display: none !important; }
+
+.announcements-banner__icon {
+  flex-shrink: 0;
+  color: var(--hub-navy, #192a88);
+  margin-top: 2px;
+}
+
+.announcements-banner__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.announcement-banner-item {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #475569);
+  line-height: 1.4;
+}
+.announcement-banner-item strong {
+  color: var(--text-primary, #0f172a);
+  font-weight: 600;
+}
+.announcement-banner-item .announcement-date {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  font-variant-numeric: tabular-nums;
+  margin-left: 8px;
+}
+
+.announcements-banner__close {
+  background: none;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 2px;
+  flex-shrink: 0;
+  transition: color 150ms ease;
+}
+.announcements-banner__close:hover {
+  color: var(--text-primary, #0f172a);
+}
+
+@media (max-width: 640px) {
+  .announcements-banner {
+    margin: 0 -16px 16px;
+    border-radius: 0;
+    border-left: none;
+    border-top: 3px solid var(--hub-navy, #192a88);
+  }
+}

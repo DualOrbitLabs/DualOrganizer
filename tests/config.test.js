@@ -233,16 +233,16 @@ describe('Centralized UI Configuration Suite (Milestone 2)', () => {
             assert.ok(navbarCss.includes('rotate(25deg)'), 'Debe incluir micro-interacción de rotación en hover');
         });
 
-        it('dashboard.html debe contener el enlace hacia config.html', () => {
+        it('dashboard.html debe contener el enlace hacia configuración o perfil', () => {
             const dashboardHtml = fs.readFileSync(path.join(rootDir, 'dashboard.html'), 'utf8');
-            assert.ok(dashboardHtml.includes('href="config.html"'), 'dashboard.html debe enlazar a config.html');
-            assert.ok(dashboardHtml.includes('class="btn-config"'), 'dashboard.html debe incluir botón .btn-config');
+            assert.ok(dashboardHtml.includes('href="config.html"') || dashboardHtml.includes('href="profile.html"'), 'dashboard.html debe enlazar a configuración o perfil');
+            assert.ok(dashboardHtml.includes('class="btn-config"') || dashboardHtml.includes('class="btn-profile"'), 'dashboard.html debe incluir botón de acción');
         });
 
-        it('hub.html debe contener el enlace hacia config.html', () => {
+        it('hub.html debe contener el enlace hacia configuración o perfil', () => {
             const hubHtml = fs.readFileSync(path.join(rootDir, 'hub.html'), 'utf8');
-            assert.ok(hubHtml.includes('href="config.html"'), 'hub.html debe enlazar a config.html');
-            assert.ok(hubHtml.includes('class="btn-config"'), 'hub.html debe incluir botón .btn-config');
+            assert.ok(hubHtml.includes('href="config.html"') || hubHtml.includes('href="profile.html"'), 'hub.html debe enlazar a configuración o perfil');
+            assert.ok(hubHtml.includes('class="btn-config"') || hubHtml.includes('class="btn-profile"'), 'hub.html debe incluir botón de acción');
         });
     });
 });

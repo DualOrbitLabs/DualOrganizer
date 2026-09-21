@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="./styles/footer.css">
   <script type="module" src="./js/navbar.js"></script>
   <script>
-    (function() {
+    (function () {
       try {
         const stored = localStorage.getItem('dualorganizer_ui_config') || localStorage.getItem('dualorganizer_preferences');
         if (stored) {
@@ -19,7 +19,7 @@
           if (p.density) document.documentElement.setAttribute('data-density', p.density);
           if (p.animations) document.documentElement.setAttribute('data-animations', p.animations);
         }
-      } catch (e) {}
+      } catch (e) { }
     })();
   </script>
   <script type="module" src="/js/redirectToMaintenance.js"></script>
@@ -31,7 +31,8 @@
     <nav class="navbar-global" aria-label="Navegación principal">
       <!-- Zona Izquierda: Logo + Nombre -->
       <a href="hub.html" class="navbar-brand" style="display: flex; align-items: center; gap: 10px;">
-        <img src="global/DualOrganizer Logo Concepts/6.png" alt="Logo de DualOrganizer" style="height: 42px; object-fit: contain;">
+        <img src="global/DualOrganizer Logo Concepts/6.png" alt="Logo de DualOrganizer"
+          style="height: 42px; object-fit: contain;">
       </a>
 
       <!-- Zona Centro: Enlaces de navegación -->
@@ -39,20 +40,10 @@
         <li><a href="hub.html" class="nav-link active" aria-current="page">Mis Capítulos</a></li>
         <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
         <li><a href="admin.html" class="nav-link">Administración</a></li>
-        <li><a href="config.html" class="nav-link">Configuración</a></li>
       </ul>
 
       <!-- Zona Derecha: Acciones -->
       <div class="navbar-actions">
-        <a href="config.html" class="btn-config" title="Configuración" aria-label="Configuración">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-            </path>
-          </svg>
-        </a>
         <a href="profile.html" class="btn-profile" title="Mi Perfil" aria-label="Mi Perfil">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -60,8 +51,7 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </a>
-        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión"
-          data-action="logout">
+        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión" data-action="logout">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -81,6 +71,20 @@
       <p>Selecciona un capítulo activo para gestionar asesorías o crea un nuevo espacio institucional.</p>
     </header>
 
+    <!-- Banner de Anuncios de Capítulos -->
+    <aside id="hubAnnouncementsBanner" class="announcements-banner" role="complementary"
+      aria-label="Avisos de tus capítulos" hidden>
+      <div class="announcements-banner__icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      <div class="announcements-banner__content" id="hubAnnouncementsList"></div>
+      <button type="button" id="btnDismissHubAnnouncements" class="announcements-banner__close"
+        data-action="dismiss-announcements" aria-label="Cerrar avisos">×</button>
+    </aside>
+
     <!-- Cuadrícula Dinámica de Capítulos -->
     <div class="hub-grid" id="hubGrid" role="region" aria-label="Lista de capítulos y espacios activos">
       <!-- Inyectado dinámicamente mediante js/hub.js -->
@@ -92,8 +96,7 @@
     <div class="dialog-surface">
       <header class="dialog-header">
         <h2 class="dialog-title" id="createDialogTitle">Crear Nuevo Capítulo</h2>
-        <button type="button" class="dialog-close-btn" data-action="close-create-dialog"
-          aria-label="Cerrar modal">
+        <button type="button" class="dialog-close-btn" data-action="close-create-dialog" aria-label="Cerrar modal">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -140,7 +143,8 @@
       <header class="dialog-header">
         <h2 class="dialog-title" id="joinDialogTitle">Unirse a un Capítulo Existente</h2>
         <button type="button" class="dialog-close-btn" data-action="close-join-dialog" aria-label="Cerrar modal">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -173,7 +177,8 @@
   <!-- Notificación Toast Accesible -->
   <div id="hubToast" class="hub-toast" role="status" aria-live="polite">
     <span class="hub-toast-icon" aria-hidden="true">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round">
         <polyline points="20 6 9 17 4 12"></polyline>
       </svg>
     </span>

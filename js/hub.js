@@ -122,6 +122,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnSubmitJoin = document.getElementById('btnSubmitJoin');
   const hubToast = document.getElementById('hubToast');
   const hubToastMsg = document.getElementById('hubToastMsg');
+  const hubAnnouncementsBanner = document.getElementById('hubAnnouncementsBanner');
+  const hubAnnouncementsList = document.getElementById('hubAnnouncementsList');
+  const btnDismissHubAnnouncements = document.getElementById('btnDismissHubAnnouncements');
 
   let activeTriggerElement = null;
 
@@ -151,17 +154,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 3200);
   }
 
-  function generateChapterCode(name) {
-    const clean = String(name || '').replace(/[^A-Za-zÀ-ÿ0-9\s]/g, '').trim();
-    const words = clean.split(/\s+/).filter(w => w.length >= 2);
-    let prefix = 'CAP';
-    if (words.length >= 2) {
-      prefix = (words[0][0] + words[1][0] + (words[2] ? words[2][0] : words[1][1] || 'X')).toUpperCase();
-    } else if (words.length === 1 && words[0].length >= 3) {
-      prefix = words[0].substring(0, 3).toUpperCase();
+  function generateChapterCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const length = Math.floor(Math.random() * (16 - 12 + 1)) + 12; // 12 to 16 characters
+    let code = '';
+    for (let i = 0; i < length; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    const rand = Math.floor(100 + Math.random() * 900);
-    return `${prefix}-2026-${rand}`;
+    return code;
   }
 
   // --------------------------------------------------------------------------
@@ -432,6 +432,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  async function loadHubAnnouncements() {
+    if (!hubAnnouncementsBanner || !hubAnnouncementsList || !userChapters.length) return;
+    const chapterIds = userChapters.map(c => c.id).filter(Boolean);
+    if (!chapterIds.length) return;
+
+    try {
+      const { data: announcements, error } = await supabase
+        .from('announcements')
+        .select('id, title, body, created_at, chapter_id, chapters(name)')
+        .in('chapter_id', chapterIds)
+        .eq('is_pinned', true)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error || !announcements || !announcements.length) {
+        hubAnnouncementsBanner.hidden = true;
+        return;
+      }
+
+      hubAnnouncementsList.innerHTML = announcements.map(a => `
+        <div class="announcement-banner-item">
+          <strong>[${escapeHtml(a.chapters?.name || 'Aviso')}]:</strong>
+          <span>${escapeHtml(a.title)}</span> — <span>${escapeHtml(a.body || '')}</span>
+          <span class="announcement-date">${new Date(a.created_at).toLocaleDateString('es-MX')}</span>
+        </div>
+      `).join('');
+      hubAnnouncementsBanner.hidden = false;
+    } catch (err) {
+      console.warn('No se pudieron cargar los anuncios del hub:', err);
+      hubAnnouncementsBanner.hidden = true;
+    }
+  }
+
+  btnDismissHubAnnouncements?.addEventListener('click', () => {
+    if (hubAnnouncementsBanner) hubAnnouncementsBanner.hidden = true;
+  });
+
   if (joinChapterForm) {
     joinChapterForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -446,20 +483,44 @@ document.addEventListener('DOMContentLoaded', async () => {
           .eq('code', rawCode)
           .single();
         if (findError) throw findError;
-        const { error } = await supabase.from('chapter_members').insert({
-          chapter_id: found.id,
-          user_id: currentUser.id,
-          role: 'TUTOR',
-          is_primary: userChapters.length === 0
-        });
-        if (error) throw error;
-        userChapters = await loadUserChapters();
-        renderHubGrid();
-        closeJoinDialog();
-        showToast(`¡Te has unido con éxito a "${found.name}"!`);
+
+        // Comprobar si el capítulo requiere aprobación previa
+        const { data: settings } = await supabase
+          .from('chapter_settings')
+          .select('require_approval')
+          .eq('chapter_id', found.id)
+          .maybeSingle();
+
+        const requireApproval = Boolean(settings?.require_approval);
+
+        if (requireApproval) {
+          // Flujo con Aprobación del Administrador: Inserta en join_requests
+          const { error: reqError } = await supabase.from('join_requests').insert({
+            chapter_id: found.id,
+            user_id: currentUser.id,
+            status: 'PENDING'
+          });
+          if (reqError) throw reqError;
+          closeJoinDialog();
+          showToast(`Solicitud enviada a "${found.name}". Pendiente de aprobación.`);
+        } else {
+          // Flujo Directo Estándar: Inserta directamente en chapter_members
+          const { error } = await supabase.from('chapter_members').insert({
+            chapter_id: found.id,
+            user_id: currentUser.id,
+            role: 'TUTOR',
+            is_primary: userChapters.length === 0
+          });
+          if (error) throw error;
+          userChapters = await loadUserChapters();
+          renderHubGrid();
+          loadHubAnnouncements();
+          closeJoinDialog();
+          showToast(`¡Te has unido con éxito a "${found.name}"!`);
+        }
       } catch (error) {
         console.error('Error al unirse al capítulo:', error);
-        showToast('No se pudo unir al capítulo. Comprueba el código o si ya perteneces.');
+        showToast('No se pudo procesar la solicitud. Comprueba el código o si ya perteneces.');
       }
     });
   }
@@ -496,6 +557,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   renderHubGrid();
+  loadHubAnnouncements();
 });
 
 function UncacheChapters() {
