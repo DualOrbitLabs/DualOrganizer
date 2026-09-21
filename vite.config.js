@@ -7,7 +7,6 @@ export default defineConfig({
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
         admin: resolve(import.meta.dirname, 'admin.html'),
-        config: resolve(import.meta.dirname, 'config.html'),
         dashboard: resolve(import.meta.dirname, 'dashboard.html'),
         hub: resolve(import.meta.dirname, 'hub.html'),
         profile: resolve(import.meta.dirname, 'profile.html'),
