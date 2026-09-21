@@ -37,23 +37,13 @@
 
       <!-- Zona Centro: Links de Navegación -->
       <ul class="navbar-nav">
-        <li><a href="hub.html" class="nav-link">Hub</a></li>
+        <li><a href="hub.html" class="nav-link">Mis Capítulos</a></li>
         <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
         <li><a href="admin.html" class="nav-link active" aria-current="page">Administración</a></li>
-        <li><a href="config.html" class="nav-link">Configuración</a></li>
       </ul>
 
       <!-- Zona Derecha: Acciones -->
       <div class="navbar-actions">
-        <a href="config.html" class="btn-config" title="Configuración" aria-label="Configuración">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-            </path>
-          </svg>
-        </a>
         <a href="profile.html" class="btn-profile" title="Mi Perfil" aria-label="Mi Perfil">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -137,10 +127,32 @@
           <line x1="16" y1="17" x2="8" y2="17"></line>
           <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
-        Bitácora de Sesiones y Horas
+        Bitácora de Sesiones
       </button>
-      <button type="button" class="admin-tab-btn" role="tab" id="tab-btn-config" aria-selected="false"
-        aria-controls="panel-config" data-tab-target="config">
+
+      <button type="button" class="admin-tab-btn" role="tab" id="tab-btn-requests" aria-selected="false"
+        aria-controls="panel-requests" data-tab-target="requests">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <polyline points="9 12 11 14 15 10"></polyline>
+        </svg>
+        Solicitudes y Permisos
+      </button>
+
+      <button type="button" class="admin-tab-btn" role="tab" id="tab-btn-analytics" aria-selected="false"
+        aria-controls="panel-analytics" data-tab-target="analytics">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        Analítica e Informes
+      </button>
+
+      <button type="button" class="admin-tab-btn" role="tab" id="tab-btn-settings" aria-selected="false"
+        aria-controls="panel-settings" data-tab-target="settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="3"></circle>
@@ -148,7 +160,7 @@
             d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
           </path>
         </svg>
-        Configuración
+        Ajustes del Capítulo
       </button>
     </nav>
 
@@ -269,7 +281,178 @@
           </tbody>
         </table>
       </div>
+    </section>
 
+    <!-- PANEL 3: Solicitudes y Permisos -->
+    <section class="admin-panel" id="panel-requests" role="tabpanel" aria-labelledby="tab-btn-requests">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Solicitudes y Permisos</h2>
+          <p class="panel-desc">Gestión de roles de equipo, revisión de evidencias y peticiones pendientes.</p>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card__header">
+          <h3>Solicitudes Pendientes</h3>
+          <p>Nuevos usuarios que desean unirse a este capítulo.</p>
+        </div>
+        <div class="settings-card__body">
+          <div id="requestsTableContainer">
+            <p style="color: var(--text-muted); font-size: 0.85rem;">No hay solicitudes pendientes en este momento.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card__header">
+          <h3>Gestión de Roles del Equipo</h3>
+          <p>Administra quién tiene permisos de Coordinador / Administrador.</p>
+        </div>
+        <div class="settings-card__body">
+          <div id="rolesTableContainer"></div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card__header">
+          <h3>Bandeja de Revisión de Evidencias</h3>
+          <p>Documentos subidos por los tutores que requieren tu aprobación manual para contabilizar las horas.</p>
+        </div>
+        <div class="settings-card__body" style="background-color: var(--slate-50); border-radius: 6px; padding: 16px;">
+          <div id="evidenceReviewGrid" class="evidence-review-grid">
+            <div style="text-align: center; padding: 30px 10px; color: var(--slate-500);">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px; opacity: 0.5;">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <p style="margin: 0; font-size: 0.9rem; font-weight: 500;">Bandeja limpia</p>
+              <p style="margin: 4px 0 0; font-size: 0.8rem;">No hay evidencias pendientes de revisión.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: Analítica e Informes -->
+    <section class="admin-panel" id="panel-analytics" role="tabpanel" aria-labelledby="tab-btn-analytics">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Analítica e Informes Ejecutivos</h2>
+          <p class="panel-desc">Métricas clave e indicadores de rendimiento del programa de tutorías.</p>
+        </div>
+      </div>
+
+      <div class="analytics-kpis">
+        <div class="kpi-card">
+          <h4>Tasa de Aprobación</h4>
+          <p id="kpiApprovalRate" class="tabular-nums">--%</p>
+        </div>
+        <div class="kpi-card">
+          <h4>Rechazos Totales</h4>
+          <p id="kpiRejections" class="tabular-nums">--</p>
+        </div>
+        <div class="kpi-card">
+          <h4>Promedio Hrs/Tutor</h4>
+          <p id="kpiAvgHoursTutor" class="tabular-nums">--</p>
+        </div>
+      </div>
+
+      <div id="chartSubjects"></div>
+      <div id="chartTutorHours"></div>
+      <div id="chartAttendance"></div>
+    </section>
+
+    <!-- PANEL 5: Ajustes del Capítulo -->
+    <section class="admin-panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-btn-settings">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Ajustes del Capítulo</h2>
+          <p class="panel-desc">Configuración global del entorno de DualOrganizer.</p>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card__header">
+          <h3>Información General</h3>
+          <p>Datos principales de la organización y metas.</p>
+        </div>
+        <div class="settings-card__body">
+          <form id="chapterSettingsForm" class="settings-grid">
+            <div class="form-group">
+              <label for="settingChapterName">Nombre del Capítulo</label>
+              <input type="text" id="settingChapterName" placeholder="Ej: DualOrbit Labs" class="form-control">
+              <small class="form-help">Este nombre aparecerá en los reportes PDF.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="settingChapterCode">Código del Capítulo</label>
+              <input type="text" id="settingChapterCode" readonly class="form-control" value="DOL-2024">
+              <small class="form-help">Identificador único para invitaciones.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="settingTargetHours">Horas Meta por Tutor</label>
+              <input type="number" id="settingTargetHours" min="1" max="500" step="1" value="80"
+                class="form-control tabular-nums">
+              <small class="form-help">Meta mensual u obligatoria que los tutores deben alcanzar.</small>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="modern-toggle-label" for="settingRequireApproval">
+                <div class="toggle-text">
+                  <span class="toggle-title">Aprobación Manual de Evidencias</span>
+                  <span class="toggle-desc">Si está activo, las horas no se suman al total del tutor hasta que el
+                    coordinador apruebe su archivo de evidencia.</span>
+                </div>
+                <div class="modern-toggle">
+                  <input type="checkbox" id="settingRequireApproval" class="toggle-checkbox">
+                  <div class="toggle-switch"></div>
+                </div>
+              </label>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card__header">
+          <h3>Catálogo de Materias</h3>
+          <p>Asignaturas que los tutores pueden seleccionar al crear una sesión.</p>
+        </div>
+        <div class="settings-card__body">
+          <div id="subjectsCatalog"></div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card__header">
+          <h3>Muro de Anuncios Institucionales</h3>
+          <p>Publica avisos globales que todos los miembros del capítulo verán en su Hub.</p>
+        </div>
+        <div class="settings-card__body">
+          <form class="announcement-form inline-form">
+            <div class="form-group">
+              <input type="text" id="announcementTitle" placeholder="Título del aviso" required maxlength="120"
+                class="form-control">
+            </div>
+            <div class="form-group">
+              <textarea id="announcementBody" placeholder="Contenido del aviso..." rows="2" maxlength="500"
+                class="form-control"></textarea>
+            </div>
+            <button type="button" id="btnPublishAnnouncement" class="btn btn--primary">Publicar Aviso</button>
+          </form>
+          <div id="announcementsList"></div>
+        </div>
+      </div>
+
+      <div id="settingsUnsavedBar" class="settings-unsaved-bar">
+        <span class="dirty-indicator">Cambios sin guardar</span>
+        <div class="settings-actions">
+          <button type="button" id="btnDiscardSettings" class="btn btn--secondary">Descartar</button>
+          <button type="button" id="btnSaveSettings" class="btn btn--primary">Guardar Cambios</button>
+        </div>
+      </div>
     </section>
 
   </main>
@@ -292,12 +475,6 @@
             <option value="add">Agregar sesión</option>
             <option value="edit">Editar sesión</option>
             <option value="delete">Eliminar sesión</option>
-            <option value="duplicate_week">Duplicar semana anterior</option>
-            <option value="reassign_subject">Reasignar materia a otro tutor</option>
-            <option value="block_slot">Bloquear horario / Indisponibilidad</option>
-            <option value="clear">Limpiar calendario del tutor</option>
-            <option value="swap">Intercambiar horario</option>
-            <option value="send">Enviar al tutor</option>
           </select>
         </div>
         <div class="form-group">
@@ -308,14 +485,7 @@
           <label for="managerSession">Sesión</label>
           <select id="managerSession" class="form-control"></select>
         </div>
-        <div class="form-group" id="managerTargetGroup">
-          <label for="managerTargetTutor">Tutor destino</label>
-          <select id="managerTargetTutor" class="form-control"></select>
-        </div>
-        <div class="form-group" id="managerTargetSessionGroup">
-          <label for="managerTargetSession">Sesión destino para intercambio</label>
-          <select id="managerTargetSession" class="form-control"></select>
-        </div>
+
         <div class="form-grid" id="managerNewSessionFields">
           <div class="form-group"><label for="managerDate">Fecha</label><input id="managerDate" class="form-control"
               type="date"></div>
@@ -330,6 +500,8 @@
         </div>
         <footer class="admin-dialog__footer">
           <button type="button" class="btn btn--secondary" id="sessionManagerCancel">Cancelar</button>
+          <button type="button" class="btn btn--danger-subtle" style="display: none;" id="btnSessionManagerReject">Rechazar</button>
+          <button type="button" class="btn btn--success" style="display: none;" id="btnSessionManagerApprove">Aprobar Horas</button>
           <button type="submit" class="btn btn--primary" id="sessionManagerSubmit">Aplicar operación</button>
         </footer>
       </form>
@@ -412,22 +584,27 @@
         </section>
       </div>
 
-      <footer class="admin-dialog__footer" style="display: flex; gap: 10px; justify-content: flex-end; margin: auto;">
-        <button type="button" class="btn danger" id="dialogDeleteButton" style="background-color: brown; color: white; text-decoration: underline;">Eliminar del Capítulo</button>
-        <a id="dialogViewCalendarBtn" style="text-decoration: none;" href="#" class="btn btn--primary">Gestionar Calendario</a>
+      <footer class="admin-dialog__footer">
+        <button type="button" class="btn btn--danger-subtle" id="dialogDeleteButton">Eliminar del Capítulo</button>
+        <a id="dialogViewCalendarBtn" href="#" class="btn btn--primary">Gestionar Calendario</a>
         <button type="button" class="btn btn--secondary" id="dialogCloseFooterBtn">Cerrar Ficha</button>
       </footer>
     </div>
   </dialog>
 
-  <dialog class="admin-dialog" id="onDeleteConfirmation">
-    <div class="admin-dialog_surface">
-      <div class="admin-dialog_body">
-        <footer class="admin-dialog__footer" style="display: flex; gap: 10px; justify-content: flex-end; margin: auto;">
-        <button type="button" class="btn danger" id="confirmDeletion" style="background-color: brown; color: white; text-decoration: underline;">Eliminar del Capítulo</button>
-        <button type="button" class="btn btn--primary" style="background-color: #6FC276; color: white; text-decoration: underline;" id="cancelDeletion">Cancelar</button>
-      </footer>
+  <dialog class="admin-dialog admin-dialog--compact" id="onDeleteConfirmation" aria-labelledby="deleteConfirmationTitle">
+    <div class="admin-dialog__surface">
+      <header class="admin-dialog__header">
+        <h2 class="admin-dialog__title" id="deleteConfirmationTitle">Confirmar Eliminación</h2>
+        <button type="button" class="admin-dialog__close" id="cancelDeletionClose" aria-label="Cerrar">×</button>
+      </header>
+      <div class="admin-dialog__body">
+        <p style="margin: 0; font-size: 0.9rem; color: var(--slate-700);">¿Estás seguro de que deseas desvincular a este mentor del capítulo? Perderá acceso inmediato a la bitácora y sesiones de este capítulo.</p>
       </div>
+      <footer class="admin-dialog__footer">
+        <button type="button" class="btn btn--secondary" id="cancelDeletion">Cancelar</button>
+        <button type="button" class="btn btn--danger" id="confirmDeletion">Eliminar Miembro</button>
+      </footer>
     </div>
   </dialog>
 
@@ -457,6 +634,107 @@
       <footer class="admin-dialog__footer">
         <button type="button" class="btn btn--secondary" id="csvImportCancel">Cancelar</button>
         <button type="button" class="btn btn--primary" id="csvImportConfirm" disabled>Importar 0 Sesiones</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 1: Revisión de Evidencias -->
+  <dialog class="admin-dialog admin-dialog--wide" id="evidenceReviewModal" aria-labelledby="evidenceReviewTitle">
+    <div class="admin-dialog__surface">
+      <header class="admin-dialog__header">
+        <div>
+          <span class="admin-badge">Auditoría de Evidencias</span>
+          <h2 class="admin-dialog__title" id="evidenceReviewTitle">Revisión de Evidencia</h2>
+        </div>
+        <button type="button" class="admin-dialog__close" id="evidenceReviewClose" aria-label="Cerrar diálogo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="admin-dialog__body">
+        <div id="evidencePreviewContainer" class="evidence-preview-large"></div>
+        <dl class="dialog-meta-grid">
+          <div>
+            <dt>Tutor</dt>
+            <dd id="evidenceReviewTutor"></dd>
+          </div>
+          <div>
+            <dt>Materia</dt>
+            <dd id="evidenceReviewSubject"></dd>
+          </div>
+          <div>
+            <dt>Fecha</dt>
+            <dd id="evidenceReviewDate" class="tabular-nums"></dd>
+          </div>
+          <div>
+            <dt>Horas</dt>
+            <dd id="evidenceReviewHours" class="tabular-nums"></dd>
+          </div>
+        </dl>
+        <div class="form-group">
+          <label for="evidenceObservations">Observaciones (requeridas para rechazo)</label>
+          <textarea id="evidenceObservations" rows="3" maxlength="500" class="form-control"></textarea>
+        </div>
+      </div>
+      <footer class="admin-dialog__footer">
+        <button type="button" class="btn btn--secondary" id="btnRejectEvidence">Rechazar con Observaciones</button>
+        <button type="button" class="btn btn--primary" id="btnApproveEvidence">Aprobar Evidencia</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 2: Confirmar Cambio de Rol -->
+  <dialog class="admin-dialog admin-dialog--compact" id="changeRoleModal" aria-labelledby="changeRoleTitle">
+    <div class="admin-dialog__surface">
+      <header class="admin-dialog__header">
+        <h2 class="admin-dialog__title" id="changeRoleTitle">Confirmar Cambio de Rol</h2>
+        <button type="button" class="admin-dialog__close" id="changeRoleClose" aria-label="Cerrar diálogo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="admin-dialog__body">
+        <p id="changeRoleMessage"></p>
+        <div class="form-group">
+          <label for="changeRoleSelect">Nuevo Rol</label>
+          <select id="changeRoleSelect" class="form-control">
+            <option value="Tutor">Tutor</option>
+            <option value="Coordinador">Coordinador</option>
+          </select>
+        </div>
+      </div>
+      <footer class="admin-dialog__footer">
+        <button type="button" class="btn btn--secondary" id="btnCancelRoleChange">Cancelar</button>
+        <button type="button" class="btn btn--primary" id="btnConfirmRoleChange">Confirmar Cambio</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- DIALOG 3: Confirmar Acción -->
+  <dialog class="admin-dialog admin-dialog--compact" id="confirmActionModal" aria-labelledby="confirmActionTitle">
+    <div class="admin-dialog__surface">
+      <header class="admin-dialog__header">
+        <h2 class="admin-dialog__title" id="confirmActionTitle">Confirmar Acción</h2>
+        <button type="button" class="admin-dialog__close" id="confirmActionClose" aria-label="Cerrar diálogo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="admin-dialog__body">
+        <p id="confirmActionMessage"></p>
+      </div>
+      <footer class="admin-dialog__footer">
+        <button type="button" class="btn btn--secondary" id="btnCancelAction">Cancelar</button>
+        <button type="button" class="btn btn--primary btn--danger" id="btnConfirmAction">Confirmar</button>
       </footer>
     </div>
   </dialog>

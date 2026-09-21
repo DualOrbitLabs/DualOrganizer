@@ -1,16 +1,18 @@
+import {getMaintenance, setMaintenance, } from "./maintenanceState.js";
+
 class CountdownClock {
   constructor(startTimestamp, isoDuration, elementId) {
     this.element = document.getElementById(elementId);
-    
+
     // 1. Convert the starting timestamp to milliseconds
     const startMs = new Date(startTimestamp).getTime();
-    
+
     // 2. Parse the ISO duration into milliseconds
     const durationMs = this.parseISODuration(isoDuration);
-    
+
     // 3. Calculate the absolute end time
     this.endTime = startMs + durationMs;
-    
+
     this.timerId = null;
   }
 
@@ -20,8 +22,10 @@ class CountdownClock {
     const matches = isoString.match(regex);
     if (!matches) return 0;
 
-    const [_, days, hours, minutes, seconds] = matches.map(num => parseInt(num || 0, 10));
-    
+    const [_, days, hours, minutes, seconds] = matches.map((num) =>
+      parseInt(num || 0, 10)
+    );
+
     return (
       (days * 24 * 60 * 60 * 1000) +
       (hours * 60 * 60 * 1000) +
@@ -32,8 +36,10 @@ class CountdownClock {
 
   start() {
     // Run immediately so there is no 1-second delay on load
-    this.update(); 
-    this.timerId = setInterval(() => this.update(), 1000);
+    if(getMaintenance()){
+      this.update();
+      this.timerId = setInterval(() => this.update(), 1000);
+    }
   }
 
   update() {
@@ -43,26 +49,29 @@ class CountdownClock {
     // If the clock hits zero, stop the interval
     if (timeRemaining <= 0) {
       clearInterval(this.timerId);
-      this.element.textContent = "00:00:00 - Time's up!";
+      if(this.element) this.element.textContent = "00:00:00 - Time's up!";
+      setMaintenance(false);
       return;
     }
 
     // Convert milliseconds back into display units
     const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
-    const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+    const minutes = Math.floor(
+      (timeRemaining % (1000 * 60 * 60)) / (1000 * 60),
+    );
     const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
 
     // Format with leading zeros (e.g., 03:05:09)
     this.element.textContent = [hours, minutes, seconds]
-      .map(unit => String(unit).padStart(2, '0'))
-      .join(':');
+      .map((unit) => String(unit).padStart(2, "0"))
+      .join(":");
   }
 }
 
-addEventListener("DOMContentLoaded", (event)=>{
-    const rawStart = import.meta.env.VITE_STARTED_MAINTENANCE;
-    const rawDuration = import.meta.env.VITE_ESTIMATED_TIME;
+addEventListener("DOMContentLoaded", (event) => {
+  const rawStart = getMaintenance();
+  const rawDuration = import.meta.env.VITE_ESTIMATED_TIME;
 
-    const myClock = new CountdownClock(rawStart, rawDuration, "clock");
-    myClock.start();
-})
+  const myClock = new CountdownClock(rawStart, rawDuration, "clock");
+  myClock.start();
+});

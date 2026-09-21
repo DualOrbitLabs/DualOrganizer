@@ -2,119 +2,200 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DualOrganizer - Plataforma de Gestión Académica y Tutorías</title>
-  <link rel="stylesheet" href="styles/navbar.css">
-  <link rel="stylesheet" href="styles/index.css">
-  <link rel="stylesheet" href="./styles/footer.css">
-  <script type="module" src="/js/redirectToMaintenance.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DualOrganizer - Plataforma de Gestión Académica y Tutorías</title>
+    <link rel="stylesheet" href="styles/navbar.css">
+    <link rel="stylesheet" href="styles/index.css">
+    <link rel="stylesheet" href="./styles/footer.css">
+    <link rel="stylesheet" href="/styles/supportModal.css">
 </head>
 
 <body>
-  <header>
-    <nav class="navbar-global" aria-label="Navegación pública">
-      <!-- Zona Izquierda: Logo -->
-      <a href="index.html" class="navbar-brand" style="display: flex; align-items: center; gap: 10px;">
-        <img src="global/DualOrganizer Logo Concepts/6.png" alt="Logo de DualOrganizer"
-          style="height: 42px; object-fit: contain;">
-      </a>
-      <a href="https://www.dualorbitlabs.com">
-        <img src="/global/DOLFNBB.png" alt="dualorbitlabs logo" style="width: 18vh;" title="Contacta el equipo de DualOrbitLabs">
-      </a>
-      <!-- Zona Derecha: Acciones públicas -->
-    </nav>
-  </header>
+    <header>
+        <meta name="description" content="DualOrganizer — Plataforma institucional de gestión académica y tutorías. Actualmente en mantenimiento programado.">
+        <nav class="navbar-global" aria-label="Navegación pública">
+            <!-- Zona Izquierda: Logo -->
+            <a href="index.html" class="navbar-brand" style="display: flex; align-items: center; gap: 10px;">
+                <img src="global/DualOrganizer Logo Concepts/6.png" alt="Logo de DualOrganizer"
+                    style="height: 42px; object-fit: contain;">
+            </a>
+            <a href="https://www.dualorbitlabs.com">
+                <img src="/global/DOLFNBB.png" alt="dualorbitlabs logo" style="width: 18vh;"
+                    title="Contacta el equipo de DualOrbitLabs">
+            </a>
+            <!-- Zona Derecha: Acciones públicas -->
+        </nav>
+    </header>
 
-  <!-- Contenido Principal -->
-  <main class="landing-main">
+    <!-- Contenido Principal -->
+    <main class="landing-main">
 
-    <!-- Hero Section -->
-    <section class="hero-section" aria-label="Introducción a DualOrganizer">
-      <div class="hero-badge">
-        <span class="hero-badge-red-dot"></span>
-        <span>Dual organizer está fuera</span>
-      </div>
-      <h1 class="hero-title">¡Estamos en mantenimiento!</h1>
-      <p class="hero-subtitle">
-        Estamos trabajando arduamente para regresar el servicio al aire lo más rapido posible, si eres parte del equipo de desarrollo, inicia sesión.
-      </p>
-      <div class="hero-actions">
-        <a href="login.html" class="btn-primary-action">
-          <span>Ingresar a la plataforma</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
-        </a>
-      </div>
-    </section>
+        <!-- Hero Section -->
+        <section class="hero-section" aria-label="Introducción a DualOrganizer">
+            <div class="hero-badge">
+                <span class="hero-badge-red-dot"></span>
+                <span>Dual organizer está fuera</span>
+            </div>
+            <h1 class="hero-title">¡Estamos en mantenimiento!</h1>
+            <p class="hero-subtitle">
+                Estamos trabajando arduamente para regresar el servicio al aire lo más rapido posible, si eres parte del
+                equipo de desarrollo, inicia sesión.
+            </p>
+            <div class="hero-actions">
+                <a href="login.html" class="btn-primary-action">
+                    <span>Ingresar a la plataforma</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+        </section>
 
-    <!-- Grid de Características -->
-    <section id="caracteristicas" class="features-section" aria-label="Características principales">
-      <div class="section-container">
-        <header class="section-header">
-          <span class="section-label">Tiempo estimado: </span>
-          <h2 class="section-title" id="clock">00:00:00</h2>
-          <p class="section-subtitle">Por favor, sé paciente.</p>
-        </header>
-    </section>
+        <!-- Grid de Características -->
+        <section id="caracteristicas" class="features-section" aria-label="Características principales">
+            <div class="section-container">
+                <header class="section-header">
+                    <span class="section-label">Tiempo estimado: </span>
+                    <h2 class="section-title" id="clock">00:00:00</h2>
+                    <p class="section-subtitle">Por favor, sé paciente.</p>
+                </header>
+        </section>
 
-  
-    <!-- Flujo de Acreditación (#flujo) -->
-    <section id="flujo" class="workflow-section" aria-label="Flujo de trabajo de acreditación">
-      <div class="section-container">
-        <header class="section-header">
-          <h2 class="section-title">¿Qué estamos haciendo?</h2>
-        </header>
 
-        <div class="workflow-grid">
-          <div class="step-card">
-            <span class="step-number tabular-nums">01</span>
-            <h3>Trabajamos en la base de datos</h3>
-            <p>Estamos refinando nuestra base de datos para almacenar y manejar tu información de manera más eficiente, rápida y segura.</p>
-          </div>
+        <!-- Flujo de Acreditación (#flujo) -->
+        <section id="flujo" class="workflow-section" aria-label="Flujo de trabajo de acreditación">
+            <div class="section-container">
+                <header class="section-header">
+                    <h2 class="section-title">¿Qué estamos haciendo?</h2>
+                </header>
 
-          <div class="step-card">
-            <span class="step-number tabular-nums">02</span>
-            <h3>Evitamos pérdidas de datos</h3>
-            <p>Algunas veces nos damos cuenta de errores que ocasionan pérdidas de datos si no son resueltos a tiempo.</p>
-          </div>
+                <div class="workflow-grid">
+                    <div class="step-card">
+                        <span class="step-number tabular-nums">01</span>
+                        <h3>Trabajamos en la base de datos</h3>
+                        <p>Estamos refinando nuestra base de datos para almacenar y manejar tu información de manera más
+                            eficiente, rápida y segura.</p>
+                    </div>
 
-          <div class="step-card">
-            <span class="step-number tabular-nums">03</span>
-            <h3>Mejoramos nuestros servidores</h3>
-            <p>La página vive en un servidor, si no lo mejoramos periódicamente, nos arriesgamos a sobreesforzarlo</p>
-          </div>
+                    <div class="step-card">
+                        <span class="step-number tabular-nums">02</span>
+                        <h3>Evitamos pérdidas de datos</h3>
+                        <p>Algunas veces nos damos cuenta de errores que ocasionan pérdidas de datos si no son resueltos
+                            a tiempo.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <span class="step-number tabular-nums">03</span>
+                        <h3>Mejoramos nuestros servidores</h3>
+                        <p>La página vive en un servidor, si no lo mejoramos periódicamente, nos arriesgamos a
+                            sobreesforzarlo</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Banner Call-to-Action -->
+        <section class="cta-section" aria-label="Llamado a la acción">
+            <div class="cta-container">
+                <h2 class="cta-title">¿Tienes alguna duda o sugerencia?</h2>
+                <p class="cta-subtitle">
+                    Contáctanos directamente
+                </p>
+                <div class="cta-actions">
+                    <button type="button" id="btnContactSupport" class="btn-cta-primary">Contactar</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal: Contactar a soporte -->
+        <div id="supportModal" class="support-modal" role="dialog" aria-modal="true" aria-labelledby="supportModalTitle"
+            aria-hidden="true">
+            <div class="support-modal__backdrop" data-close-modal></div>
+
+            <div class="support-modal__panel" role="document">
+                <header class="support-modal__header">
+                    <h2 id="supportModalTitle">Contactar a soporte</h2>
+                    <button type="button" class="support-modal__close" aria-label="Cerrar" data-close-modal>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+
+                <div class="support-modal__body">
+                    <div class="support-field">
+                        <label class="support-label">Motivo</label>
+                        <div class="support-presets" role="radiogroup" aria-label="Motivo de contacto">
+                            <button type="button" class="preset-chip active" data-preset="suggestion" role="radio"
+                                aria-checked="true">Sugerencia</button>
+                            <button type="button" class="preset-chip" data-preset="bug" role="radio"
+                                aria-checked="false">Reporte de error</button>
+                            <button type="button" class="preset-chip" data-preset="question" role="radio"
+                                aria-checked="false">Pregunta</button>
+                            <button type="button" class="preset-chip" data-preset="account" role="radio"
+                                aria-checked="false">Cuenta / Acceso</button>
+                            <button type="button" class="preset-chip" data-preset="other" role="radio"
+                                aria-checked="false">Otro</button>
+                        </div>
+                    </div>
+
+                    <div class="support-field">
+                        <label for="supportName" class="support-label">Tu nombre</label>
+                        <input type="text" id="supportName" class="support-input" placeholder="Ej. Nahum Naranjo"
+                            autocomplete="name">
+                    </div>
+
+                    <div class="support-field">
+                        <label for="supportEmail" class="support-label">Tu correo</label>
+                        <input type="email" id="supportEmail" class="support-input" placeholder="tu@correo.com"
+                            autocomplete="email">
+                    </div>
+
+                    <div class="support-field">
+                        <label for="supportMessage" class="support-label">Mensaje</label>
+                        <textarea id="supportMessage" class="support-input support-textarea" rows="5"
+                            placeholder="Cuéntanos con detalle..."></textarea>
+                        <p class="support-counter"><span id="supportCharCount">0</span> / 1000</p>
+                    </div>
+
+                    <details class="support-preview">
+                        <summary>Vista previa del correo</summary>
+                        <pre id="supportPreview">—</pre>
+                    </details>
+                </div>
+
+                <footer class="support-modal__footer">
+                    <button type="button" class="btn-ghost" data-close-modal>Cancelar</button>
+                    <button type="button" class="btn-primary" id="btnSendSupport">
+                        Enviar por correo
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </footer>
+            </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Banner Call-to-Action -->
-    <section class="cta-section" aria-label="Llamado a la acción">
-      <div class="cta-container">
-        <h2 class="cta-title">¿Tienes alguna duda o sugerencia?</h2>
-        <p class="cta-subtitle">
-          Contáctanos directamente
-        </p>
-        <div class="cta-actions">
-          <a href="mailto:dualorbitlabs@gmail.com" class="btn-cta-primary">Contactar</a>
+    </main>
+
+    <!-- Footer Institucional -->
+    <footer class="login-footer">
+        <p>© 2026 DualOrganizer. Sistema Institucional de Gestión de Tutorías Académicas.</p>
+        <div class="footer-links">
+            <a class="footer-link" href="terms.html">Términos y Aviso de Privacidad</a>
+            <a href="#" class="footer-link" data-open-support>Contacta a soporte</a>
         </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Footer Institucional -->
-  <footer class="login-footer">
-    <p>© 2026 DualOrganizer. Sistema Institucional de Gestión de Tutorías Académicas.</p>
-    <div class="footer-links">
-      <a class="footer-link" href="terms.html">Términos y Aviso de Privacidad</a>
-      <a class="footer-link" href="https://dualorbitlabs.com">Contacta a soporte</a>
-    </div>
-</footer>
-<script type="module" src="/js/maintenanceClock.js"></script>
+    </footer>
+    <script type="module" src="/js/maintenanceClock.js"></script>
+    <script type="module" src="/js/redirectToMaintenance.js"></script>
+    <script type="module" src="/js/supportModal.js"></script>
 </body>
 
 </html>

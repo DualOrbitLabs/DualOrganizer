@@ -632,6 +632,7 @@ body {
     border-color: #059669;
     color: #064e3b;
 }
+
 .session-item.vibrant-theme-0:hover {
     background-color: rgba(16, 185, 129, 0.22);
 }
@@ -641,6 +642,7 @@ body {
     border-color: #2563eb;
     color: #1e3a8a;
 }
+
 .session-item.vibrant-theme-1:hover {
     background-color: rgba(37, 99, 235, 0.22);
 }
@@ -650,6 +652,7 @@ body {
     border-color: #d97706;
     color: #78350f;
 }
+
 .session-item.vibrant-theme-2:hover {
     background-color: rgba(245, 158, 11, 0.24);
 }
@@ -659,6 +662,7 @@ body {
     border-color: #7c3aed;
     color: #4c1d95;
 }
+
 .session-item.vibrant-theme-3:hover {
     background-color: rgba(139, 92, 246, 0.24);
 }
@@ -668,6 +672,7 @@ body {
     border-color: #0891b2;
     color: #164e63;
 }
+
 .session-item.vibrant-theme-4:hover {
     background-color: rgba(6, 182, 212, 0.24);
 }
@@ -677,6 +682,7 @@ body {
     border-color: #e11d48;
     color: #881337;
 }
+
 .session-item.vibrant-theme-5:hover {
     background-color: rgba(244, 63, 94, 0.24);
 }
@@ -1310,12 +1316,12 @@ dialog.modal-dialog::backdrop {
     background: var(--brand-navy-subtle);
 }
 
-.btn-refresh > span:first-child {
+.btn-refresh>span:first-child {
     font-size: 1rem;
     line-height: 1;
 }
 
-.btn-refresh.is-loading > span:first-child {
+.btn-refresh.is-loading>span:first-child {
     animation: spin-refresh 700ms linear infinite;
 }
 
@@ -1325,7 +1331,9 @@ dialog.modal-dialog::backdrop {
 }
 
 @keyframes spin-refresh {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ==========================================================================
@@ -1379,4 +1387,82 @@ dialog.modal-dialog::backdrop {
     background: var(--slate-600);
     color: #ffffff;
     border-color: var(--slate-500);
+}
+
+/* ============================================
+   EXTENSIÓN: Banner de Anuncios Institucionales
+   ============================================ */
+
+.announcements-banner {
+    background: var(--slate-50, #f8fafc);
+    border: 1px solid var(--border-subtle, #e2e8f0);
+    border-left: 3px solid var(--brand-navy, #192a88);
+    border-radius: var(--radius-md, 6px);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: adminFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.announcements-banner[hidden] {
+    display: none !important;
+}
+
+.announcements-banner__icon {
+    flex-shrink: 0;
+    color: var(--brand-navy, #192a88);
+    margin-top: 2px;
+}
+
+.announcements-banner__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.announcement-banner-item {
+    font-size: 0.8125rem;
+    color: var(--text-secondary, #475569);
+    line-height: 1.4;
+}
+
+.announcement-banner-item strong {
+    color: var(--text-primary, #0f172a);
+    font-weight: 600;
+}
+
+.announcement-banner-item .announcement-date {
+    font-size: 0.75rem;
+    color: var(--text-muted, #94a3b8);
+    font-variant-numeric: tabular-nums;
+    margin-left: 8px;
+}
+
+.announcements-banner__close {
+    background: none;
+    border: none;
+    color: var(--text-muted, #94a3b8);
+    cursor: pointer;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 2px;
+    flex-shrink: 0;
+    transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.announcements-banner__close:hover {
+    color: var(--text-primary, #0f172a);
+}
+
+@media (max-width: 640px) {
+    .announcements-banner {
+        margin: 0 -12px 12px;
+        border-radius: 0;
+        border-left: none;
+        border-top: 3px solid var(--brand-navy, #192a88);
+    }
 }

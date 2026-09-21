@@ -335,7 +335,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 600);
       } catch (err) {
         console.error('Error en proceso de login:', err);
-        showAlert(err.message || 'Ocurrió un error inesperado. Inténtalo nuevamente.');
+        const rawMsg = String(err?.message || '').toLowerCase();
+        let userFacingError = 'Ocurrió un error inesperado al iniciar sesión. Inténtalo nuevamente.';
+        if (rawMsg.includes('invalid login credentials') || rawMsg.includes('invalid_credentials') || rawMsg.includes('invalid grant')) {
+          userFacingError = 'El correo o la contraseña que ingresaste no coinciden. Verifica tus datos o utiliza "¿Olvidaste tu contraseña?".';
+        } else if (rawMsg.includes('email not confirmed')) {
+          userFacingError = 'Tu correo aún no ha sido confirmado. Por favor revisa tu bandeja de entrada.';
+        } else if (rawMsg.includes('rate limit') || rawMsg.includes('too many requests')) {
+          userFacingError = 'Demasiados intentos de acceso. Por seguridad, espera un momento antes de reintentar.';
+        } else if (err?.message) {
+          userFacingError = err.message;
+        }
+        showAlert(userFacingError);
         isLoginSubmitting = false;
         btnSubmitLogin.disabled = false;
         btnSubmitLogin.removeAttribute('aria-busy');

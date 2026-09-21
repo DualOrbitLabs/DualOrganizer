@@ -37,10 +37,9 @@
 
       <!-- Zona Centro: Links de Navegación -->
       <ul class="navbar-nav">
-        <li><a href="hub.html" class="nav-link">Hub</a></li>
+        <li><a href="hub.html" class="nav-link">Mis Capítulos</a></li>
         <li><a href="dashboard.html" class="nav-link active" aria-current="page">Dashboard</a></li>
         <li><a href="admin.html" class="nav-link">Administración</a></li>
-        <li><a href="config.html" class="nav-link">Configuración</a></li>
       </ul>
 
       <!-- Zona Derecha: Acciones -->
@@ -66,15 +65,6 @@
           </svg>
           <span>Reporte PDF</span>
         </button>
-        <a href="config.html" class="btn-config" title="Configuración" aria-label="Configuración">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-            </path>
-          </svg>
-        </a>
         <a href="profile.html" class="btn-profile" title="Mi Perfil" aria-label="Mi Perfil">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -133,6 +123,20 @@
       </button>
       <a href="hub.html" class="switch-chapter-link">Cambiar capítulo &rarr;</a>
     </div>
+
+    <!-- Banner de Anuncios Institucionales -->
+    <aside id="announcementsBanner" class="announcements-banner" role="complementary"
+      aria-label="Avisos institucionales" hidden>
+      <div class="announcements-banner__icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      <div class="announcements-banner__content" id="dashboardAnnouncementsList"></div>
+      <button type="button" id="btnDismissAnnouncements" class="announcements-banner__close"
+        data-action="dismiss-announcements" aria-label="Cerrar avisos">×</button>
+    </aside>
 
     <!-- Tira de Métricas KPI con Tipografía Tabular y Escala Neutra -->
     <section class="kpi-strip" aria-label="Métricas clave de tutoría">
@@ -210,14 +214,15 @@
       </div>
 
       <form id="sessionForm" autocomplete="off">
-        <div class="form-group">
-          <label for="date">Fecha:</label>
-          <input type="date" id="date" class="form-control tabular-nums" required readonly>
-        </div>
-
-        <div class="form-group">
-          <label for="time">Hora de inicio:</label>
-          <input type="time" id="time" class="form-control tabular-nums" required>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="date">Fecha:</label>
+            <input type="date" id="date" class="form-control tabular-nums" required readonly>
+          </div>
+          <div class="form-group">
+            <label for="time">Hora de inicio:</label>
+            <input type="time" id="time" class="form-control tabular-nums" required>
+          </div>
         </div>
 
         <div class="form-group">
@@ -227,16 +232,17 @@
             title="Solo letras, espacios, puntos o guiones. Entre 3 y 80 caracteres.">
         </div>
 
-        <div class="form-group">
-          <label for="subject">Materia:</label>
-          <input type="text" id="subject" class="form-control" placeholder="Ej. Cálculo Diferencial" required
-            minlength="2" maxlength="60">
-        </div>
-
-        <div class="form-group">
-          <label for="hours">Duración (Horas):</label>
-          <input type="number" id="hours" class="form-control tabular-nums" min="0.5" max="8" step="0.5" value="1.0"
-            required>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="subject">Materia:</label>
+            <input type="text" id="subject" class="form-control" placeholder="Ej. Cálculo Diferencial" required
+              minlength="2" maxlength="60">
+          </div>
+          <div class="form-group">
+            <label for="hours">Duración (Horas):</label>
+            <input type="number" id="hours" class="form-control tabular-nums" min="0.5" max="8" step="0.5" value="1.0"
+              required>
+          </div>
         </div>
 
         <div class="form-group">
@@ -246,7 +252,8 @@
           <span class="form-hint" style="font-size: 0.775rem; color: var(--slate-500); margin-top: 2px;">Formatos
             soportados: Imágenes, PDF, Word, Excel, PowerPoint, Texto, ZIP. Máximo 5 MB.</span>
           <div id="currentEvidenceContainer" style="margin-top: 6px; display: none;">
-            <a id="btnOpenCurrentEvidence" href="#" target="_blank" class="btn-export" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 4px 10px; font-size: 0.78rem;">
+            <a id="btnOpenCurrentEvidence" href="#" target="_blank" class="btn-export"
+              style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 4px 10px; font-size: 0.78rem;">
               <span>📎 Ver archivo de evidencia adjunto</span>
             </a>
           </div>
@@ -257,7 +264,11 @@
           <button type="button" class="btn-modal-cancel" id="btnDeleteModal"
             style="display: none; background-color: #fef2f2; color: #dc2626; border-color: #fca5a5;">Eliminar
             Sesión</button>
-          <button type="submit" class="btn-primary">Guardar Sesión</button>
+          <button type="button" class="btn-modal-cancel" id="btnRejectAdmin"
+            style="display: none; background-color: #fef2f2; color: #dc2626; border-color: #fca5a5;">Rechazar</button>
+          <button type="button" class="btn-primary" id="btnApproveAdmin"
+            style="display: none; background-color: #059669; border-color: #059669;">Aprobar Horas</button>
+          <button type="submit" class="btn-primary" id="btnSaveSession">Guardar Sesión</button>
         </div>
       </form>
     </div>
@@ -274,7 +285,7 @@
       <a class="footer-link" href="terms.html">Términos y Aviso de Privacidad</a>
       <a class="footer-link" href="https://dualorbitlabs.com">Contacta a soporte</a>
     </div>
-</footer>
+  </footer>
   <script type="module" src="js/dashboard.js"></script>
 </body>
 

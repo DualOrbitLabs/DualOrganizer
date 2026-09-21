@@ -248,6 +248,9 @@ if (typeof document !== 'undefined') {
     let activeChapterId = new URLSearchParams(window.location.search).get('chapter');
     const dashboardChapterSelect = document.getElementById('dashboardChapterSelect');
     const btnRefreshDashboard = document.getElementById('btnRefreshDashboard');
+    const announcementsBanner = document.getElementById('announcementsBanner');
+    const dashboardAnnouncementsList = document.getElementById('dashboardAnnouncementsList');
+    const btnDismissAnnouncements = document.getElementById('btnDismissAnnouncements');
 
     function getStartOfWeek(date) {
         const d = new Date(date);
@@ -426,6 +429,7 @@ if (typeof document !== 'undefined') {
             await loadChapterOptions();
             await loadSessions();
             await initActiveChapter();
+            await loadDashboardAnnouncements();
             updateKPIs();
             renderWeeklyCalendar();
             if (!silent) {
@@ -443,6 +447,41 @@ if (typeof document !== 'undefined') {
             }
         }
     }
+
+    async function loadDashboardAnnouncements() {
+        if (!announcementsBanner || !dashboardAnnouncementsList || !activeChapterId) return;
+
+        try {
+            const { data: announcements, error } = await supabase
+                .from('announcements')
+                .select('id, title, body, created_at')
+                .eq('chapter_id', activeChapterId)
+                .eq('is_pinned', true)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            if (error || !announcements || !announcements.length) {
+                announcementsBanner.hidden = true;
+                return;
+            }
+
+            dashboardAnnouncementsList.innerHTML = announcements.map(a => `
+                <div class="announcement-banner-item">
+                    <strong>${escapeHTML(a.title)}:</strong>
+                    <span>${escapeHTML(a.body || '')}</span>
+                    <span class="announcement-date">${new Date(a.created_at).toLocaleDateString('es-MX')}</span>
+                </div>
+            `).join('');
+            announcementsBanner.hidden = false;
+        } catch (err) {
+            console.warn('No se pudieron cargar los anuncios del dashboard:', err);
+            announcementsBanner.hidden = true;
+        }
+    }
+
+    btnDismissAnnouncements?.addEventListener('click', () => {
+        if (announcementsBanner) announcementsBanner.hidden = true;
+    });
 
     async function loadChapterOptions() {
         if (!dashboardChapterSelect) return;
@@ -535,8 +574,6 @@ if (typeof document !== 'undefined') {
     const kpiTotalHours = document.getElementById('kpiTotalHours');
     const kpiTotalSessions = document.getElementById('kpiTotalSessions');
     const kpiWeeklyAvg = document.getElementById('kpiWeeklyAvg');
-
-    // Filtro colapsable (Eliminado)
 
     // Modal
     const sessionModal = document.getElementById('sessionModal');
@@ -680,13 +717,17 @@ if (typeof document !== 'undefined') {
                     slot.classList.add('slot--occupied');
                     slot.dataset.sessionId = session.id;
 
-                    const evidenceBadge = session.evidence 
-                        ? `<span class="badge-semantic green" title="Evidencia adjunta">
-                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                               <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                             </svg>
-                           </span>` 
-                        : '';
+                    let evidenceBadge = '';
+                    if (session.evidence) {
+                        const { data } = supabase.storage.from('session-evidence').getPublicUrl(session.evidence);
+                        if (data?.publicUrl) {
+                            evidenceBadge = `<span class="badge-semantic green badge-evidence-link" title="Ver archivo de evidencia" data-url="${escapeHTML(data.publicUrl)}" style="cursor: pointer;">
+                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                   <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                                 </svg>
+                               </span>`;
+                        }
+                    }
 
                     const themeIdx = getVibrantThemeIndex(session.subject || session.tutorId);
 
@@ -699,6 +740,15 @@ if (typeof document !== 'undefined') {
                         sessionItem.dataset.id = session.id;
                         sessionItem.title = `${session.subject} - Alumno: ${session.studentName} (${session.hours} hrs)`;
 
+                        let statusBadge = '';
+                        if (session.status === 'APPROVED') {
+                            statusBadge = '<span class="badge-semantic green" title="Aprobada">✓</span>';
+                        } else if (session.status === 'REJECTED') {
+                            statusBadge = '<span class="badge-semantic red" title="Rechazada">✕</span>';
+                        } else {
+                            statusBadge = '<span class="badge-semantic amber" title="Pendiente">...</span>';
+                        }
+
                         sessionItem.innerHTML = `
                             <div class="session-title-row">
                                 <span class="session-title">${escapeHTML(session.subject)}</span>
@@ -706,6 +756,7 @@ if (typeof document !== 'undefined') {
                             <div class="session-meta">
                                 <span class="session-student">${escapeHTML(session.studentName)}</span>
                                 <div class="session-badge-group">
+                                    ${statusBadge}
                                     ${evidenceBadge}
                                     <span class="badge-semantic blue tabular-nums">${session.hours}h</span>
                                 </div>
@@ -766,12 +817,54 @@ if (typeof document !== 'undefined') {
 
         sessionForm.dataset.editingId = session.id;
         if (btnDeleteModal) btnDeleteModal.style.display = 'block';
+
+        const btnApproveAdmin = document.getElementById('btnApproveAdmin');
+        const btnRejectAdmin = document.getElementById('btnRejectAdmin');
+        const btnSaveSession = document.getElementById('btnSaveSession');
+
+        if (isAdminUser && selectedTutorId && selectedTutorId !== 'ALL') {
+            if (btnApproveAdmin && btnRejectAdmin) {
+                if (session.status === 'PENDING') {
+                    btnApproveAdmin.style.display = 'block';
+                    btnRejectAdmin.style.display = 'block';
+                } else {
+                    btnApproveAdmin.style.display = 'none';
+                    btnRejectAdmin.style.display = 'none';
+                }
+            }
+            if (btnSaveSession) btnSaveSession.style.display = 'none';
+            studentNameInput.readOnly = true;
+            subjectInput.readOnly = true;
+            hoursInput.readOnly = true;
+            modalDateInput.readOnly = true;
+            modalTimeInput.readOnly = true;
+            if (evidenceFileInput) evidenceFileInput.disabled = true;
+        } else {
+            if (btnApproveAdmin) btnApproveAdmin.style.display = 'none';
+            if (btnRejectAdmin) btnRejectAdmin.style.display = 'none';
+            if (btnSaveSession) btnSaveSession.style.display = 'block';
+            studentNameInput.readOnly = false;
+            subjectInput.readOnly = false;
+            hoursInput.readOnly = false;
+            modalDateInput.readOnly = false;
+            modalTimeInput.readOnly = false;
+            if (evidenceFileInput) evidenceFileInput.disabled = false;
+        }
+
         sessionModal.showModal();
         setTimeout(() => studentNameInput?.focus(), 50);
     }
 
     if (weeklyCalendarGrid) {
         weeklyCalendarGrid.addEventListener('click', (e) => {
+            // Caso especial: Clic en el botón de evidencia
+            const evidenceBadge = e.target.closest('.badge-evidence-link');
+            if (evidenceBadge) {
+                e.stopPropagation();
+                window.open(evidenceBadge.dataset.url, '_blank');
+                return;
+            }
+
             // Caso A: Clic en una sesión agendada (inicio o continuación)
             const sessionEl = e.target.closest('.session-item');
             if (sessionEl) {
@@ -852,6 +945,25 @@ if (typeof document !== 'undefined') {
         modalTimeInput.value = time;
         hoursInput.value = prefs.defaultSessionHours || '1.0';
         if (evidenceFileInput) evidenceFileInput.value = '';
+        if (typeof currentEvidenceContainer !== 'undefined' && currentEvidenceContainer) {
+            currentEvidenceContainer.style.display = 'none';
+        }
+
+        const btnApproveAdmin = document.getElementById('btnApproveAdmin');
+        const btnRejectAdmin = document.getElementById('btnRejectAdmin');
+        const btnSaveSession = document.getElementById('btnSaveSession');
+        
+        if (btnApproveAdmin) btnApproveAdmin.style.display = 'none';
+        if (btnRejectAdmin) btnRejectAdmin.style.display = 'none';
+        if (btnDeleteModal) btnDeleteModal.style.display = 'none';
+        if (btnSaveSession) btnSaveSession.style.display = 'block';
+
+        studentNameInput.readOnly = false;
+        subjectInput.readOnly = false;
+        hoursInput.readOnly = false;
+        modalDateInput.readOnly = false;
+        modalTimeInput.readOnly = false;
+        if (evidenceFileInput) evidenceFileInput.disabled = false;
 
         sessionModal.showModal();
         setTimeout(() => studentNameInput?.focus(), 50);
@@ -886,6 +998,52 @@ if (typeof document !== 'undefined') {
                         showToast('No se pudo cancelar la sesión.', 'warning');
                     }
                 }
+            }
+        });
+    }
+
+    const btnApproveAdmin = document.getElementById('btnApproveAdmin');
+    const btnRejectAdmin = document.getElementById('btnRejectAdmin');
+
+    if (btnApproveAdmin) {
+        btnApproveAdmin.addEventListener('click', async () => {
+            const editingId = sessionForm.dataset.editingId;
+            if (!editingId) return;
+            try {
+                const { error } = await supabase.from('tutoring_sessions').update({ status: 'APPROVED' }).eq('id', editingId);
+                if (error) throw error;
+                const idx = sessionsData.findIndex(s => s.id === editingId);
+                if (idx !== -1) sessionsData[idx].status = 'APPROVED';
+                showToast('Sesión aprobada exitosamente');
+                closeModal();
+                updateKPIs();
+                renderWeeklyCalendar();
+            } catch (error) {
+                console.error('Error al aprobar:', error);
+                showToast('Hubo un error al aprobar la sesión', 'error');
+            }
+        });
+    }
+
+    if (btnRejectAdmin) {
+        btnRejectAdmin.addEventListener('click', async () => {
+            const editingId = sessionForm.dataset.editingId;
+            if (!editingId) return;
+            const reason = window.prompt("Motivo de rechazo (opcional):");
+            if (reason === null) return; // User cancelled prompt
+            
+            try {
+                const { error } = await supabase.from('tutoring_sessions').update({ status: 'REJECTED' }).eq('id', editingId);
+                if (error) throw error;
+                const idx = sessionsData.findIndex(s => s.id === editingId);
+                if (idx !== -1) sessionsData[idx].status = 'REJECTED';
+                showToast('Sesión rechazada');
+                closeModal();
+                updateKPIs();
+                renderWeeklyCalendar();
+            } catch (error) {
+                console.error('Error al rechazar:', error);
+                showToast('Hubo un error al rechazar la sesión', 'error');
             }
         });
     }
@@ -1098,6 +1256,11 @@ if (typeof document !== 'undefined') {
     } catch (error) {
         console.error('Error al cargar sesiones:', error);
         showToast('No se pudieron cargar las sesiones del servidor.', 'warning');
+    }
+    try {
+        await loadDashboardAnnouncements();
+    } catch (annError) {
+        console.warn('Advertencia al cargar anuncios:', annError);
     }
     updateKPIs();
     renderWeeklyCalendar();
