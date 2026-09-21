@@ -1,2 +1,16 @@
 *.json
+!/package.json
+!/package-lock.json
 /node_modules
+/dist
+.env
+.env.*
+!.env.example
+skills-lock.json
+
+PROJECT.md
+AGENTS.md
+GEMINI.md
+ARQUITECTURA.md
+BUG_REPORT_TEMPLATES.md
+CONFIGURAR-SUPABASE.md

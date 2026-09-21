@@ -1,0 +1,267 @@
+:root {
+  /* Escala Slate para fondos y bordes */
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  /* Superficies & Fondos */
+  --bg-page: var(--slate-50);
+  --bg-surface: #ffffff;
+  --border-color: var(--slate-200);
+  --border-hover: var(--slate-300);
+
+  /* Texto */
+  --text-primary: var(--slate-900);
+  --text-secondary: var(--slate-600);
+  --text-muted: var(--slate-400);
+
+  /* Identidad DualOrganizer */
+  --brand-navy: #192a88;
+  --brand-navy-hover: #13216e;
+  --brand-navy-subtle: rgba(25, 42, 136, 0.06);
+
+  /* Tipografía */
+  --font-family: 'Avenir', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Layout y espaciado */
+  --max-width: 1000px;
+  --sidebar-width: 250px;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   Layout Principal
+   -------------------------------------------------------------------------- */
+.legal-layout {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.legal-header {
+  margin-bottom: 3rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.legal-header h1 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.legal-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.legal-container {
+  display: flex;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
+/* --------------------------------------------------------------------------
+   Barra Lateral (Navegación / Índice)
+   -------------------------------------------------------------------------- */
+.legal-sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  position: sticky;
+  top: 6rem;
+  /* Deja espacio para el navbar */
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.toc-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc-nav li {
+  margin-bottom: 0.5rem;
+}
+
+.toc-nav li ul {
+  padding-left: 1rem;
+  margin-top: 0.25rem;
+  border-left: 1px solid var(--border-color);
+  margin-left: 0.25rem;
+}
+
+.toc-nav a {
+  text-decoration: none;
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 150ms ease;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.toc-link {
+  font-weight: 500;
+  color: var(--text-primary) !important;
+}
+
+.toc-sublink {
+  font-size: 0.85rem !important;
+}
+
+.toc-nav a:hover,
+.toc-nav a:focus {
+  background-color: var(--brand-navy-subtle);
+  color: var(--brand-navy) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Contenido Principal del Documento
+   -------------------------------------------------------------------------- */
+.legal-content {
+  flex-grow: 1;
+  min-width: 0;
+  /* Previene desbordamiento en flex */
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 2.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.legal-section {
+  margin-bottom: 2rem;
+}
+
+.legal-section h2 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.legal-clause {
+  margin-bottom: 2rem;
+}
+
+.legal-clause h3 {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+/* Usando tabular-nums para la numeración de cláusulas */
+.legal-clause h3 {
+  font-variant-numeric: tabular-nums;
+}
+
+.legal-clause p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.legal-clause ul {
+  padding-left: 1.25rem;
+  color: var(--text-secondary);
+}
+
+.legal-clause li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.legal-clause li::marker {
+  color: var(--slate-400);
+}
+
+.legal-clause a {
+  color: var(--brand-navy);
+  text-decoration: underline;
+  text-decoration-color: var(--slate-300);
+  text-underline-offset: 2px;
+  transition: all 150ms ease;
+}
+
+.legal-clause a:hover {
+  text-decoration-color: var(--brand-navy);
+}
+
+.legal-divider {
+  border: 0;
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 3rem 0;
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+.site-footer {
+  background-color: var(--bg-surface);
+  border-top: 1px solid var(--border-color);
+  padding: 2rem 1.5rem;
+  margin-top: 4rem;
+}
+
+.footer-container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-info p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Layout (Media Queries)
+   -------------------------------------------------------------------------- */
+@media (max-width: 800px) {
+  .legal-container {
+    flex-direction: column;
+  }
+
+  .legal-sidebar {
+    width: 100%;
+    position: static;
+    margin-bottom: 2rem;
+  }
+
+  .legal-content {
+    padding: 1.5rem;
+  }
+}

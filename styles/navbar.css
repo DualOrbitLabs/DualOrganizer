@@ -1,0 +1,351 @@
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Regular/Avenir Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Medium/Avenir Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Heavy/Avenir Heavy.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Black/Avenir Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   2. Variables de Diseño
+   -------------------------------------------------------------------------- */
+:root {
+    --nav-primary-blue: #192a88;
+    --nav-primary-hover: #13216e;
+    --nav-border: #e2e8f0;
+    --nav-bg: #ffffff;
+    --nav-text-dark: #0f172a;
+    --nav-text-muted: #64748b;
+    --nav-hover-bg: #f1f5f9;
+    --nav-active-bg: #e2e8f0;
+    --nav-focus-ring: rgba(25, 42, 136, 0.12);
+
+    --nav-transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Contenedor Principal de la Navbar */
+.navbar-global {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--nav-border);
+    font-family: 'Avenir', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    cursor: pointer;
+    color: var(--nav-text-dark);
+}
+
+.navbar-logo {
+    height: 42px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar-brand:hover .navbar-logo {
+    transform: scale(1.03);
+}
+
+.navbar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--nav-text-dark);
+    letter-spacing: -0.015em;
+}
+
+/* Zona Central: Links de Navegación */
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 6px;
+    margin: 0;
+    padding: 4px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--nav-text-muted);
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: var(--nav-transition);
+}
+
+.nav-link:hover {
+    background-color: #ffffff;
+    color: var(--nav-text-dark);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.nav-link.active,
+.nav-link[aria-current="page"] {
+    background-color: #ffffff;
+    color: var(--nav-primary-blue);
+    font-weight: 700;
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+/* Zona Derecha: Acciones */
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Botón de Perfil y Botón de Configuración con Icono SVG Vectorial */
+.btn-profile,
+.btn-config {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: var(--nav-hover-bg);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--nav-text-muted);
+    transition: var(--nav-transition);
+    border: 1px solid var(--nav-border);
+}
+
+.btn-profile svg,
+.btn-config svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+    transition: color 150ms ease, transform 200ms ease;
+}
+
+.btn-profile:hover,
+.btn-config:hover {
+    background-color: var(--nav-active-bg);
+    border-color: var(--nav-primary-blue);
+    color: var(--nav-primary-blue);
+    transform: translateY(-1px);
+}
+
+.btn-config:hover svg {
+    transform: rotate(25deg);
+}
+
+.btn-profile.active,
+.btn-config.active {
+    background-color: var(--nav-hover-bg);
+    border-color: var(--nav-primary-blue);
+    color: var(--nav-primary-blue);
+    box-shadow: 0 0 0 2px var(--nav-focus-ring);
+}
+
+/* Botón de Salir / Logout */
+.btn-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: var(--nav-hover-bg);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--nav-text-muted);
+    transition: var(--nav-transition);
+    border: 1px solid var(--nav-border);
+}
+
+.btn-logout svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2;
+    transition: color 150ms ease;
+}
+
+.btn-logout:hover {
+    background-color: #fef2f2;
+    border-color: #fca5a5;
+    color: #dc2626;
+    transform: translateY(-1px);
+}
+
+.btn-logout:focus-visible {
+    outline: 2px solid #dc2626;
+    outline-offset: 1px;
+}
+
+/* Botón de exportación en Navbar */
+.btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--nav-primary-blue);
+    color: #ffffff;
+    border: 1px solid transparent;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.775rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--nav-transition);
+}
+
+.btn-export svg {
+    width: 13px;
+    height: 13px;
+    stroke-width: 2;
+}
+
+.btn-export:hover {
+    background-color: var(--nav-primary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-export:active {
+    transform: translateY(0);
+}
+
+.btn-export-pdf {
+    background-color: #334155;
+}
+
+.btn-export-pdf:hover {
+    background-color: #1e293b;
+}
+
+/* ==========================================================================
+   Responsive — Mobile First
+   Reference device: 390 × 844 px (iPhone 14 / Pixel 7)
+   ========================================================================== */
+
+/* ≤ 768px — Tablet portrait / Large phone landscape */
+@media (max-width: 768px) {
+    .navbar-global {
+        padding: 0 16px;
+        height: 52px;
+        flex-wrap: nowrap;
+    }
+
+    /* Nav links: scroll horizontal en vez de apilar */
+    .navbar-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-shrink: 1;
+        min-width: 0;
+    }
+
+    .navbar-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-link {
+        white-space: nowrap;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    .navbar-actions {
+        flex-shrink: 0;
+        margin-left: auto;
+        gap: 6px;
+    }
+}
+
+/* ≤ 640px — Teléfono portrait */
+@media (max-width: 640px) {
+    .navbar-global {
+        padding: 0 14px;
+        height: 50px;
+    }
+
+    .nav-link {
+        padding: 5px 8px;
+        font-size: 0.775rem;
+    }
+
+    /* Touch targets en botones de acción */
+    .btn-profile,
+    .btn-config,
+    .btn-logout {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ≤ 480px — Teléfono estándar portrait */
+@media (max-width: 480px) {
+    .navbar-global {
+        padding: 0 12px;
+        height: 48px;
+    }
+
+    .navbar-logo {
+        height: 26px;
+    }
+
+    .navbar-title {
+        font-size: 0.95rem;
+    }
+
+    /* En pantallas muy pequeñas, ocultar los nav links del centro —
+       solo logo + acciones */
+    .navbar-nav {
+        display: none;
+    }
+
+    /* Touch targets mínimos WCAG 2.5.5 = 44px */
+    .btn-profile,
+    .btn-config,
+    .btn-logout {
+        width: 44px;
+        height: 44px;
+    }
+
+    .btn-export {
+        padding: 8px 12px;
+        min-height: 44px;
+        font-size: 0.8rem;
+    }
+}

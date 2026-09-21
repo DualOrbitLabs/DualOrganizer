@@ -1,0 +1,1382 @@
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Regular/Avenir Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Medium/Avenir Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Heavy/Avenir Heavy.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../global/fonts/Avenir/Avenir Black/Avenir Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+:root {
+
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --slate-950: #020617;
+
+    /* Superficies */
+    --bg-page: var(--slate-50);
+    --bg-card: #ffffff;
+    --bg-header: var(--slate-100);
+    --bg-subtle: var(--slate-100);
+    --bg-hover: var(--slate-50);
+
+    /* Bordes Finitos de 1px */
+    --border-subtle: var(--slate-200);
+    --border-default: var(--slate-300);
+    --border-strong: var(--slate-400);
+
+    /* Tipografía */
+    --text-primary: var(--slate-900);
+    --text-secondary: var(--slate-700);
+    --text-muted: var(--slate-500);
+    --text-inverse: var(--slate-50);
+
+    /* Identidad DualOrganizer (Navy Institucional sobrio, sin violetas) */
+    --brand-navy: #192a88;
+    --brand-navy-hover: #13216e;
+    --brand-navy-subtle: rgba(25, 42, 136, 0.06);
+    --brand-navy-border: rgba(25, 42, 136, 0.2);
+
+    /* Badges y Estados Semánticos Suaves (Baja opacidad + 1px border) */
+    --semantic-blue-bg: rgba(25, 42, 136, 0.06);
+    --semantic-blue-border: rgba(25, 42, 136, 0.22);
+    --semantic-blue-text: var(--brand-navy);
+
+    --semantic-green-bg: rgba(5, 150, 105, 0.08);
+    --semantic-green-border: rgba(5, 150, 105, 0.25);
+    --semantic-green-text: #065f46;
+
+    --semantic-amber-bg: rgba(217, 119, 6, 0.08);
+    --semantic-amber-border: rgba(217, 119, 6, 0.25);
+    --semantic-amber-text: #92400e;
+
+    /* Micro-interacciones Sutiles */
+    --transition-micro: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Sombras Suaves y Elegantes */
+    --shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.03);
+    --shadow-modal: 0 12px 32px -4px rgba(15, 23, 42, 0.22), 0 4px 12px -2px rgba(15, 23, 42, 0.12);
+
+    /* Radios Precisos */
+    --radius-xs: 3px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   3. Reset y Reglas Base
+   -------------------------------------------------------------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Avenir', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Tipografía Tabular Estricta para Cifras y Métricas */
+.tabular-nums,
+.kpi-value,
+.grid-cell.time-label,
+.day-date,
+.session-meta,
+.badge-semantic,
+.form-control[type="time"],
+.form-control[type="date"],
+.form-control[type="number"] {
+    font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   4. Estructura de Contenedores y Layout Fluido
+   -------------------------------------------------------------------------- */
+.dashboard-shell {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: clamp(12px, 2vw, 20px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Tira de Identificación de Capítulo Activo */
+.active-chapter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    box-shadow: var(--shadow-soft);
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.active-chapter-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.active-chapter-pill {
+    font-size: 0.725rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--slate-700);
+    background-color: var(--slate-100);
+    border: 1px solid var(--slate-300);
+    padding: 2px 7px;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.03em;
+}
+
+.active-chapter-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slate-900);
+}
+
+.switch-chapter-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--brand-navy);
+    text-decoration: none;
+    transition: color 150ms ease;
+}
+
+.switch-chapter-link:hover {
+    color: var(--brand-navy-hover);
+    text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   5. Barra / Cajón de Filtro Superior Colapsable
+   -------------------------------------------------------------------------- */
+.calendar-wrapper {
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-soft);
+    transition: max-height 200ms var(--ease-standard);
+    overflow: hidden;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 24px;
+    background-color: var(--slate-50);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.calendar-header h3 {
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: var(--slate-700);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.btn-toggle-calendar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    color: var(--slate-700);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: var(--transition-micro);
+}
+
+.btn-toggle-calendar:hover {
+    background-color: var(--slate-100);
+    border-color: var(--slate-400);
+    color: var(--text-primary);
+}
+
+.calendar-content {
+    padding: 10px 24px;
+    max-height: 120px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: max-height 200ms var(--ease-standard), padding 200ms var(--ease-standard);
+}
+
+.calendar-wrapper.collapsed .calendar-content {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+}
+
+.filter-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--slate-600);
+}
+
+.date-filter-input {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    background-color: #ffffff;
+    transition: var(--transition-micro);
+}
+
+.date-filter-input:focus {
+    outline: none;
+    border-color: var(--brand-navy);
+    box-shadow: 0 0 0 2px var(--brand-navy-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   6. Tira de Tarjetas KPI con Tipografía Tabular
+   -------------------------------------------------------------------------- */
+.kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.kpi-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: var(--transition-micro);
+}
+
+.kpi-card:hover {
+    border-color: var(--border-default);
+    box-shadow: var(--shadow-soft);
+}
+
+.kpi-label {
+    font-size: 0.725rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.kpi-value-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.kpi-value {
+    font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+.kpi-unit {
+    font-size: 0.775rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   7. Badges con Colores Semánticos Suaves
+   -------------------------------------------------------------------------- */
+.badge-semantic {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: var(--radius-xs);
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.2;
+    border: 1px solid transparent;
+}
+
+.badge-semantic.blue {
+    background-color: var(--semantic-blue-bg);
+    border-color: var(--semantic-blue-border);
+    color: var(--semantic-blue-text);
+}
+
+.badge-semantic.green {
+    background-color: var(--semantic-green-bg);
+    border-color: var(--semantic-green-border);
+    color: var(--semantic-green-text);
+}
+
+.badge-semantic.amber {
+    background-color: var(--semantic-amber-bg);
+    border-color: var(--semantic-amber-border);
+    color: var(--semantic-amber-text);
+}
+
+.badge-semantic.neutral {
+    background-color: var(--slate-100);
+    border-color: var(--slate-200);
+    color: var(--slate-700);
+}
+
+/* --------------------------------------------------------------------------
+   8. Contenedor Principal del Calendario Semanal
+   -------------------------------------------------------------------------- */
+.calendar-main {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: clamp(12px, 1.8vw, 18px);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Controles Superiores de la Semana */
+.calendar-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.calendar-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.current-week-heading {
+    font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+    font-weight: 700;
+    color: var(--slate-900);
+    letter-spacing: -0.01em;
+}
+
+.calendar-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-default);
+    color: var(--slate-700);
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.775rem;
+    font-weight: 600;
+    transition: var(--transition-micro);
+    user-select: none;
+}
+
+.btn-nav svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+}
+
+.btn-nav:hover {
+    background-color: var(--slate-100);
+    border-color: var(--slate-400);
+    color: var(--text-primary);
+}
+
+.btn-nav:active {
+    transform: translateY(1px);
+}
+
+.btn-today {
+    background-color: var(--slate-100);
+    border-color: var(--slate-300);
+    color: var(--brand-navy);
+}
+
+/* --------------------------------------------------------------------------
+   9. Cuadrícula del Calendario Semanal con CSS Grid Fraccional
+   - Columna fija para horas (56px) + 7 columnas perfectamente fraccionales (1fr)
+   - Sin azul saturado: encabezados en escala Slate neutra técnica
+   ========================================================================== */
+.weekly-calendar-grid {
+    display: grid;
+    grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+    grid-auto-rows: var(--calendar-row-height, 54px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-card);
+    overflow-y: auto;
+    max-height: calc(100vh - 250px);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Celdas Genéricas del Grid */
+.grid-cell {
+    border-right: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+    position: relative;
+}
+
+/* Encabezados de Columna (Días) - Escala Neutra Slate/Zinc Elegante */
+.grid-cell.header {
+    background-color: #f1f5f9 !important;
+    color: var(--slate-700);
+    text-align: center;
+    padding: 8px 4px;
+    border-bottom: 2px solid var(--border-default);
+    position: sticky;
+    top: 0;
+    z-index: 100 !important;
+    user-select: none;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08);
+}
+
+.grid-cell.header.corner {
+    background-color: #f1f5f9 !important;
+    color: var(--slate-500);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 120 !important;
+    border-right: 1px solid var(--border-default);
+    border-bottom: 2px solid var(--border-default);
+}
+
+.grid-cell.header.today {
+    background-color: #e0e7ff !important;
+    border-bottom: 2px solid var(--brand-navy);
+}
+
+.grid-cell.header .day-name {
+    display: block;
+    font-size: clamp(0.725rem, 0.85vw, 0.785rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--slate-700);
+    margin-bottom: 2px;
+}
+
+.grid-cell.header.today .day-name {
+    color: var(--brand-navy);
+}
+
+.grid-cell.header .day-date {
+    display: inline-block;
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: var(--slate-500);
+}
+
+.grid-cell.header.today .day-date {
+    color: var(--brand-navy);
+    font-weight: 700;
+}
+
+/* Columna de Horas */
+.grid-cell.time-label {
+    background-color: #f8fafc !important;
+    color: var(--slate-500);
+    font-size: clamp(0.685rem, 0.8vw, 0.75rem);
+    font-family: 'Avenir', ui-monospace, SFMono-Regular, monospace;
+    font-weight: 600;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 6px;
+    border-right: 1px solid var(--border-default);
+    user-select: none;
+    position: sticky;
+    left: 0;
+    z-index: 10 !important;
+}
+
+/* Slots Interactivos para Agendar */
+.grid-cell.slot {
+    padding: 3px;
+    cursor: pointer;
+    background-color: var(--bg-card);
+    transition: var(--transition-micro);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 54px;
+}
+
+.grid-cell.slot:hover {
+    background-color: var(--slate-100);
+}
+
+/* Slots Ocupados y Continuidad Visual */
+.grid-cell.slot.slot--occupied {
+    background-color: var(--bg-card);
+}
+
+.grid-cell.slot.slot--span-start {
+    border-bottom-color: transparent;
+}
+
+.grid-cell.slot.slot--span-cont {
+    border-top-color: transparent;
+    padding-top: 0;
+}
+
+.grid-cell.slot.slot--span-cont:not(.slot--span-end) {
+    border-bottom-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   10. Tarjetas de Sesión (Micro-Interacciones & Colores Semánticos)
+   - Sin bloques rígidos monocromáticos; aspecto ligero de producto de diseño
+   -------------------------------------------------------------------------- */
+.session-item {
+    background-color: var(--semantic-blue-bg);
+    border: 1px solid var(--semantic-blue-border);
+    color: var(--semantic-blue-text);
+    padding: 4px 6px;
+    border-radius: var(--radius-xs);
+    font-size: 0.7rem;
+    line-height: 1.25;
+    transition: var(--transition-micro);
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+    height: 100%;
+    min-height: calc(var(--calendar-row-height, 54px) - 8px);
+    box-sizing: border-box;
+    position: relative;
+    user-select: none;
+}
+
+.session-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+    background-color: rgba(25, 42, 136, 0.09);
+    border-color: rgba(25, 42, 136, 0.35);
+}
+
+/* Temas de Colores Vivos y Vibrantes por Materia / Tutor */
+.session-item.vibrant-theme-0 {
+    background-color: rgba(16, 185, 129, 0.14);
+    border-color: #059669;
+    color: #064e3b;
+}
+.session-item.vibrant-theme-0:hover {
+    background-color: rgba(16, 185, 129, 0.22);
+}
+
+.session-item.vibrant-theme-1 {
+    background-color: rgba(37, 99, 235, 0.14);
+    border-color: #2563eb;
+    color: #1e3a8a;
+}
+.session-item.vibrant-theme-1:hover {
+    background-color: rgba(37, 99, 235, 0.22);
+}
+
+.session-item.vibrant-theme-2 {
+    background-color: rgba(245, 158, 11, 0.16);
+    border-color: #d97706;
+    color: #78350f;
+}
+.session-item.vibrant-theme-2:hover {
+    background-color: rgba(245, 158, 11, 0.24);
+}
+
+.session-item.vibrant-theme-3 {
+    background-color: rgba(139, 92, 246, 0.16);
+    border-color: #7c3aed;
+    color: #4c1d95;
+}
+.session-item.vibrant-theme-3:hover {
+    background-color: rgba(139, 92, 246, 0.24);
+}
+
+.session-item.vibrant-theme-4 {
+    background-color: rgba(6, 182, 212, 0.16);
+    border-color: #0891b2;
+    color: #164e63;
+}
+.session-item.vibrant-theme-4:hover {
+    background-color: rgba(6, 182, 212, 0.24);
+}
+
+.session-item.vibrant-theme-5 {
+    background-color: rgba(244, 63, 94, 0.16);
+    border-color: #e11d48;
+    color: #881337;
+}
+.session-item.vibrant-theme-5:hover {
+    background-color: rgba(244, 63, 94, 0.24);
+}
+
+/* Continuidad Visual Multi-Hora */
+.session-item.session-item--span-start {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 1px dashed var(--semantic-blue-border);
+}
+
+.session-item.session-item--continuation,
+.session-item.is-continuation {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top: none;
+    background-color: rgba(25, 42, 136, 0.04);
+}
+
+.session-item.session-item--continuation:not(.session-item--span-end),
+.session-item.is-continuation:not(.session-item--span-end) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 1px dashed var(--semantic-blue-border);
+}
+
+/* Contenido de Bloque Continuación */
+.session-continuation-inner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.685rem;
+    color: var(--slate-700);
+    height: 100%;
+}
+
+.session-continuation-arrow {
+    color: var(--brand-navy);
+    font-weight: 700;
+    font-size: 0.8rem;
+    line-height: 1;
+}
+
+.session-continuation-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.session-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.session-badge-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.session-item .session-title {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--slate-900);
+}
+
+.session-item .session-meta {
+    font-size: 0.65rem;
+    color: var(--slate-600);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.session-item .session-student {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   11. Modal Nativo (<dialog>) Accesible de Registro de Sesiones
+   -------------------------------------------------------------------------- */
+dialog.modal-dialog {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: auto;
+    max-width: 90vw;
+}
+
+dialog.modal-dialog::backdrop {
+    background-color: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    animation: modalFadeIn 150ms var(--ease-standard);
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 16px;
+    animation: modalFadeIn 150ms var(--ease-standard);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background-color: var(--bg-card);
+    padding: 20px 24px;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    width: 440px;
+    max-width: 100%;
+    position: relative;
+    box-shadow: var(--shadow-modal);
+    animation: modalSlideIn 150ms var(--ease-standard);
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(8px) scale(0.98);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.modal-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    letter-spacing: -0.01em;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: var(--slate-400);
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    transition: var(--transition-micro);
+}
+
+.close-btn:hover {
+    color: var(--slate-800);
+    background-color: var(--slate-100);
+}
+
+/* Formularios Compactos en Modal */
+.form-group {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group label {
+    font-size: 0.775rem;
+    font-weight: 600;
+    color: var(--slate-700);
+}
+
+.form-control {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    background-color: #ffffff;
+    transition: var(--transition-micro);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--brand-navy);
+    box-shadow: 0 0 0 2px var(--brand-navy-subtle);
+}
+
+.form-control[readonly] {
+    background-color: var(--slate-100);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    border-color: var(--border-subtle);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 10px;
+    border-top: 1px solid var(--slate-100);
+}
+
+.btn-modal-cancel {
+    background: transparent;
+    border: 1px solid var(--border-default);
+    color: var(--slate-600);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-micro);
+}
+
+.btn-modal-cancel:hover {
+    background-color: var(--slate-100);
+    color: var(--slate-900);
+}
+
+.btn-primary {
+    background-color: var(--brand-navy);
+    color: #ffffff;
+    border: 1px solid transparent;
+    padding: 6px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-micro);
+}
+
+.btn-primary:hover {
+    background-color: var(--brand-navy-hover);
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+}
+
+/* --------------------------------------------------------------------------
+   12. Toast Accesible de Notificaciones del Dashboard
+   -------------------------------------------------------------------------- */
+.dashboard-toast {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background-color: var(--slate-900);
+    color: #ffffff;
+    border: 1px solid var(--slate-700);
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-modal);
+    z-index: 1100;
+    transform: translateY(14px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: var(--transition-micro);
+}
+
+.dashboard-toast.visible {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.dashboard-toast .toast-indicator {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #10b981;
+    display: inline-block;
+}
+
+/* ==========================================================================
+   13. Adaptación Responsiva — Mobile First
+   Dispositivo de referencia: 390 × 844 px
+   ========================================================================== */
+
+/* ≤ 900px — Tablet landscape: dar más espacio mínimo a columnas del calendario */
+@media (max-width: 900px) {
+    .weekly-calendar-grid {
+        grid-template-columns: 46px repeat(7, minmax(90px, 1fr));
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dashboard-shell {
+        padding: clamp(10px, 1.5vw, 16px);
+        gap: 12px;
+    }
+}
+
+/* ≤ 768px — Tablet portrait */
+@media (max-width: 768px) {
+    .dashboard-shell {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    /* Barra de capítulo activo */
+    .active-chapter-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 10px 14px;
+    }
+
+    .active-chapter-info {
+        flex-wrap: wrap;
+    }
+
+    /* KPIs: 2 columnas */
+    .kpi-strip {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .kpi-card {
+        padding: 10px 14px;
+    }
+
+    /* Controles del calendario */
+    .calendar-header-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .calendar-nav-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    /* Barra de filtro */
+    .calendar-content {
+        flex-direction: column;
+        align-items: flex-start;
+        max-height: 240px;
+        padding: 10px 16px;
+        gap: 8px;
+    }
+
+    /* Modal más ancho */
+    .modal-content {
+        padding: 16px 18px;
+    }
+}
+
+/* ≤ 640px — Teléfono portrait */
+@media (max-width: 640px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    .dashboard-shell {
+        padding: 8px 12px 80px;
+        gap: 8px;
+    }
+
+    /* Barra de capítulo */
+    .active-chapter-pill {
+        font-size: 0.7rem;
+    }
+
+    .active-chapter-name {
+        font-size: 0.825rem;
+    }
+
+    /* KPIs: 2 columnas, compacto */
+    .kpi-strip {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .kpi-value {
+        font-size: clamp(1.2rem, 6vw, 1.5rem);
+    }
+
+    .kpi-label {
+        font-size: 0.7rem;
+    }
+
+    /* Calendario principal */
+    .calendar-main {
+        padding: 10px 8px;
+        gap: 8px;
+        border-radius: 6px;
+    }
+
+    .current-week-heading {
+        font-size: 0.9rem;
+    }
+
+    /* Cuadrícula semanal: scroll horizontal siempre */
+    .weekly-calendar-grid {
+        grid-template-columns: 40px repeat(7, minmax(80px, 1fr));
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--slate-300) transparent;
+        max-height: calc(100vh - 300px);
+    }
+
+    .weekly-calendar-grid::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .weekly-calendar-grid::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .weekly-calendar-grid::-webkit-scrollbar-thumb {
+        background: var(--slate-300);
+        border-radius: 2px;
+    }
+
+    /* Celdas más compactas en móvil */
+    .grid-cell.slot {
+        min-height: 48px;
+        padding: 2px;
+    }
+
+    .grid-cell.header {
+        padding: 6px 2px;
+    }
+
+    .grid-cell.header .day-name {
+        font-size: 0.7rem;
+    }
+
+    .grid-cell.header .day-date {
+        font-size: 0.7rem;
+    }
+
+    /* Botones de navegación táctiles */
+    .btn-nav,
+    .btn-today {
+        min-height: 36px;
+        padding: 6px 10px;
+    }
+
+    /* Barra de filtro: comprimida */
+    .calendar-header {
+        padding: 6px 12px;
+    }
+
+    .btn-toggle-calendar {
+        min-height: 36px;
+        padding: 6px 10px;
+    }
+
+    /* Modal: ancho completo, desliza desde abajo */
+    .modal {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 12px 12px 0 0;
+        padding: 20px 16px;
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        animation: modalSlideUp 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .btn-modal-cancel,
+    .btn-primary {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    /* Inputs del modal más altos para touch */
+    .form-control {
+        min-height: 44px;
+        font-size: 1rem;
+        padding: 10px;
+    }
+
+    /* Toast */
+    .dashboard-toast {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        width: auto;
+    }
+}
+
+/* ≤ 480px — Teléfono estándar portrait */
+@media (max-width: 480px) {
+
+    /* KPIs a 2 columnas apretadas */
+    .kpi-strip {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .kpi-card {
+        padding: 8px 10px;
+    }
+
+    .kpi-value {
+        font-size: clamp(1.1rem, 5.5vw, 1.35rem);
+    }
+
+    /* Calendario */
+    .weekly-calendar-grid {
+        grid-template-columns: 38px repeat(7, minmax(72px, 1fr));
+    }
+
+    /* Sesiones compactas */
+    .session-item {
+        font-size: 0.7rem;
+        padding: 2px 3px;
+    }
+
+    .session-meta {
+        display: none;
+    }
+}
+
+.chapter-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.chapter-switcher .form-control {
+    min-width: 210px;
+    height: 34px;
+    padding: 6px 30px 6px 10px;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.chapter-switcher .form-control:focus {
+    outline: 2px solid var(--brand-navy-border);
+    outline-offset: 1px;
+    border-color: var(--brand-navy);
+}
+
+.chapter-switcher .form-control option {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.btn-refresh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 6px 11px;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--brand-navy);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-micro);
+}
+
+.btn-refresh:hover:not(:disabled) {
+    border-color: var(--brand-navy);
+    background: var(--brand-navy-subtle);
+}
+
+.btn-refresh > span:first-child {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.btn-refresh.is-loading > span:first-child {
+    animation: spin-refresh 700ms linear infinite;
+}
+
+.btn-refresh:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+@keyframes spin-refresh {
+    to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Admin View Mode Banner & Tutor Switcher
+   ========================================================================== */
+.admin-view-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 16px;
+    background: var(--slate-800);
+    color: var(--slate-50);
+    border: 1px solid var(--slate-700);
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-card);
+}
+
+.admin-view-banner[hidden] {
+    display: none !important;
+}
+
+.admin-view-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-view-icon {
+    font-size: 1.1rem;
+}
+
+.btn-admin-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--slate-700);
+    color: var(--slate-100);
+    border: 1px solid var(--slate-600);
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition-micro);
+}
+
+.btn-admin-back:hover {
+    background: var(--slate-600);
+    color: #ffffff;
+    border-color: var(--slate-500);
+}

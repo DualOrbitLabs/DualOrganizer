@@ -1,14 +1,281 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
+  <title>Dashboard - Registro de Sesiones | DualOrganizer</title>
+  <link rel="stylesheet" href="./styles/navbar.css">
+  <link rel="stylesheet" href="./styles/dashboard.css">
+  <link rel="stylesheet" href="./styles/footer.css">
+  <script type="module" src="./js/navbar.js"></script>
+  <script>
+    (function () {
+      try {
+        const stored = localStorage.getItem('dualorganizer_ui_config') || localStorage.getItem('dualorganizer_preferences');
+        if (stored) {
+          const p = JSON.parse(stored);
+          if (p.theme) document.documentElement.setAttribute('data-theme', p.theme);
+          if (p.density) document.documentElement.setAttribute('data-density', p.density);
+          if (p.animations) document.documentElement.setAttribute('data-animations', p.animations);
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <script type="module" src="/js/redirectToMaintenance.js"></script>
 </head>
 
 <body>
+  <!-- Navbar Global Semántica -->
+  <header>
+    <nav class="navbar-global" aria-label="Navegación principal">
+      <!-- Zona Izquierda: Logo + Nombre -->
+      <a href="hub.html" class="navbar-brand" style="display: flex; align-items: center; gap: 10px;">
+        <img src="global/DualOrganizer Logo Concepts/6.png" alt="Logo de DualOrganizer"
+          style="height: 42px; object-fit: contain;">
+      </a>
 
+      <!-- Zona Centro: Links de Navegación -->
+      <ul class="navbar-nav">
+        <li><a href="hub.html" class="nav-link">Hub</a></li>
+        <li><a href="dashboard.html" class="nav-link active" aria-current="page">Dashboard</a></li>
+        <li><a href="admin.html" class="nav-link">Administración</a></li>
+        <li><a href="config.html" class="nav-link">Configuración</a></li>
+      </ul>
+
+      <!-- Zona Derecha: Acciones -->
+      <div class="navbar-actions">
+        <button type="button" id="btnExportCSV" class="btn-export" title="Exportar sesiones a CSV">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Exportar CSV</span>
+        </button>
+        <button type="button" id="btnExportEvidenceReport" class="btn-export btn-export-pdf"
+          title="Exportar reporte de evidencias a PDF">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span>Reporte PDF</span>
+        </button>
+        <a href="config.html" class="btn-config" title="Configuración" aria-label="Configuración">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+        </a>
+        <a href="profile.html" class="btn-profile" title="Mi Perfil" aria-label="Mi Perfil">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+        <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión" data-action="logout">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Contenedor Principal Dashboard -->
+  <div class="dashboard-shell">
+    <!-- Banner de Vista de Administrador -->
+    <div class="admin-view-banner" id="adminViewBanner" hidden>
+      <div class="admin-view-banner-content">
+        <span class="admin-view-icon" aria-hidden="true"></span>
+        <span><strong>Administrador:</strong> Viendo el calendario de <strong
+            id="adminViewTutorName">Tutor</strong></span>
+      </div>
+      <a href="admin.html" id="btnBackToAdmin" class="btn-admin-back">
+        <span>&larr; Volver al Panel de Administración</span>
+      </a>
+    </div>
+
+    <!-- Tira de Identificación de Capítulo Activo -->
+    <div class="active-chapter-bar" id="activeChapterBar">
+      <div class="active-chapter-info">
+        <span class="active-chapter-pill" id="activeChapterCode">...</span>
+        <span class="active-chapter-name" id="activeChapterName">Cargando capítulo</span>
+      </div>
+      <label class="chapter-switcher" for="dashboardChapterSelect">
+        <span>Capítulo</span>
+        <select id="dashboardChapterSelect" class="form-control" aria-label="Seleccionar capítulo">
+          <option value="">Cargando capítulos...</option>
+        </select>
+      </label>
+      <label class="chapter-switcher" id="adminTutorSelectGroup" for="dashboardTutorSelect" hidden>
+        <span>Tutor</span>
+        <select id="dashboardTutorSelect" class="form-control" aria-label="Seleccionar tutor">
+          <option value="ALL">Todos los tutores</option>
+        </select>
+      </label>
+      <button type="button" id="btnRefreshDashboard" class="btn-refresh" aria-label="Actualizar dashboard"
+        title="Actualizar datos">
+        <span aria-hidden="true">↻</span>
+        <span>Actualizar</span>
+      </button>
+      <a href="hub.html" class="switch-chapter-link">Cambiar capítulo &rarr;</a>
+    </div>
+
+    <!-- Tira de Métricas KPI con Tipografía Tabular y Escala Neutra -->
+    <section class="kpi-strip" aria-label="Métricas clave de tutoría">
+      <article class="kpi-card">
+        <span class="kpi-label">Horas Acumuladas</span>
+        <div class="kpi-value-row">
+          <span class="kpi-value tabular-nums" id="kpiTotalHours">--</span>
+          <span class="badge-semantic green">Meta: 80h / mes</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <span class="kpi-label">Sesiones Totales</span>
+        <div class="kpi-value-row">
+          <span class="kpi-value tabular-nums" id="kpiTotalSessions">--</span>
+          <span class="badge-semantic blue">Registradas</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <span class="kpi-label">Promedio Semanal</span>
+        <div class="kpi-value-row">
+          <span class="kpi-value tabular-nums" id="kpiWeeklyAvg">--</span>
+          <span class="kpi-unit">hrs / sem</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- Calendario Semanal Principal -->
+    <main class="calendar-main" aria-label="Cuadrícula semanal de sesiones">
+      <div class="calendar-header-controls">
+        <div class="calendar-title-group">
+          <h2 id="currentWeekLabel" class="current-week-heading tabular-nums">Semana actual</h2>
+        </div>
+
+        <div class="calendar-nav-actions">
+          <button type="button" id="btnPrevWeek" class="btn-nav" title="Semana anterior" aria-label="Semana anterior">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            <span>Ant</span>
+          </button>
+          <button type="button" id="btnToday" class="btn-nav btn-today" title="Ir a la semana actual">Hoy</button>
+          <button type="button" id="btnNextWeek" class="btn-nav" title="Semana siguiente" aria-label="Semana siguiente">
+            <span>Sig</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cuadrícula del Calendario Semanal con CSS Grid Fraccional -->
+      <div class="weekly-calendar-grid" id="weeklyCalendarGrid" role="grid"
+        aria-label="Calendario interactivo de tutorías">
+        <!-- Generado dinámicamente mediante delegación de eventos en JS -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Nativo (<dialog>) Accesible para Registrar Sesión -->
+  <dialog id="sessionModal" class="modal-dialog" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Agendar Sesión</h2>
+        <button type="button" class="close-btn" id="closeModalBtn" aria-label="Cerrar modal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="sessionForm" autocomplete="off">
+        <div class="form-group">
+          <label for="date">Fecha:</label>
+          <input type="date" id="date" class="form-control tabular-nums" required readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="time">Hora de inicio:</label>
+          <input type="time" id="time" class="form-control tabular-nums" required>
+        </div>
+
+        <div class="form-group">
+          <label for="studentName">Alumno:</label>
+          <input type="text" id="studentName" class="form-control" placeholder="Nombre completo del alumno" required
+            minlength="3" maxlength="80" pattern="^[A-Za-zÀ-ÿ\u00f1\u00d1\s\.\-]+$"
+            title="Solo letras, espacios, puntos o guiones. Entre 3 y 80 caracteres.">
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Materia:</label>
+          <input type="text" id="subject" class="form-control" placeholder="Ej. Cálculo Diferencial" required
+            minlength="2" maxlength="60">
+        </div>
+
+        <div class="form-group">
+          <label for="hours">Duración (Horas):</label>
+          <input type="number" id="hours" class="form-control tabular-nums" min="0.5" max="8" step="0.5" value="1.0"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="evidenceFile">Evidencia adjunta (Opcional):</label>
+          <input type="file" id="evidenceFile" class="form-control"
+            accept=".jpg,.jpeg,.png,.webp,.avif,.gif,.svg,.bmp,.tif,.tiff,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.rtf,.zip,.rar,.7z,.odt,.ods">
+          <span class="form-hint" style="font-size: 0.775rem; color: var(--slate-500); margin-top: 2px;">Formatos
+            soportados: Imágenes, PDF, Word, Excel, PowerPoint, Texto, ZIP. Máximo 5 MB.</span>
+          <div id="currentEvidenceContainer" style="margin-top: 6px; display: none;">
+            <a id="btnOpenCurrentEvidence" href="#" target="_blank" class="btn-export" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 4px 10px; font-size: 0.78rem;">
+              <span>📎 Ver archivo de evidencia adjunto</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-cancel" id="btnCancelModal">Cancelar</button>
+          <button type="button" class="btn-modal-cancel" id="btnDeleteModal"
+            style="display: none; background-color: #fef2f2; color: #dc2626; border-color: #fca5a5;">Eliminar
+            Sesión</button>
+          <button type="submit" class="btn-primary">Guardar Sesión</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Toast Accesible de Notificaciones -->
+  <div id="dashboardToast" class="dashboard-toast" role="status" aria-live="polite" aria-hidden="true">
+    <span class="toast-indicator"></span>
+    <span id="dashboardToastMsg"></span>
+  </div>
+  <footer class="login-footer">
+    <p>© 2026 DualOrganizer. Sistema Institucional de Gestión de Tutorías Académicas.</p>
+    <div class="footer-links">
+      <a class="footer-link" href="terms.html">Términos y Aviso de Privacidad</a>
+      <a class="footer-link" href="https://dualorbitlabs.com">Contacta a soporte</a>
+    </div>
+</footer>
+  <script type="module" src="js/dashboard.js"></script>
 </body>
 
 </html>
