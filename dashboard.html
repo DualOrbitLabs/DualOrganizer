@@ -7,6 +7,7 @@
   <title>Dashboard - Registro de Sesiones | DualOrganizer</title>
   <link rel="stylesheet" href="./styles/navbar.css">
   <link rel="stylesheet" href="./styles/dashboard.css">
+  <link rel="stylesheet" href="./styles/footer.css">
   <script type="module" src="./js/navbar.js"></script>
   <script>
     (function () {
@@ -21,6 +22,7 @@
       } catch (e) { }
     })();
   </script>
+  <script type="module" src="/js/redirectToMaintenance.js"></script>
 </head>
 
 <body>
@@ -273,7 +275,13 @@
     <span class="toast-indicator"></span>
     <span id="dashboardToastMsg"></span>
   </div>
-
+  <footer class="login-footer">
+    <p>© 2026 DualOrganizer. Sistema Institucional de Gestión de Tutorías Académicas.</p>
+    <div class="footer-links">
+      <a class="footer-link" href="terms.html">Términos y Aviso de Privacidad</a>
+      <a class="footer-link" href="https://dualorbitlabs.com">Contacta a soporte</a>
+    </div>
+</footer>
   <script type="module" src="js/dashboard.js"></script>
 </body>
 

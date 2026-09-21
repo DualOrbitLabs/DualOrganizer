@@ -7,6 +7,7 @@
   <title>Panel de Administración - DualOrganizer</title>
   <link rel="stylesheet" href="./styles/navbar.css">
   <link rel="stylesheet" href="./styles/admin.css">
+  <link rel="stylesheet" href="./styles/footer.css">
   <script type="module" src="./js/navbar.js"></script>
   <script>
     (function () {
@@ -21,6 +22,7 @@
       } catch (e) { }
     })();
   </script>
+  <script type="module" src="/js/redirectToMaintenance.js"></script>
 </head>
 
 <body>
@@ -29,7 +31,8 @@
     <nav class="navbar-global" aria-label="Navegación principal">
       <!-- Zona Izquierda: Logo + Nombre -->
       <a href="hub.html" class="navbar-brand" style="display: flex; align-items: center; gap: 10px;">
-        <img src="global/DualOrganizer Logo Concepts/6.png" alt="Logo de DualOrganizer" style="height: 42px; object-fit: contain;">
+        <img src="global/DualOrganizer Logo Concepts/6.png" alt="Logo de DualOrganizer"
+          style="height: 42px; object-fit: contain;">
       </a>
 
       <!-- Zona Centro: Links de Navegación -->
@@ -42,13 +45,15 @@
       <!-- Zona Derecha: Acciones -->
       <div class="navbar-actions">
         <a href="profile.html" class="btn-profile" title="Mi Perfil" aria-label="Mi Perfil">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </a>
         <a href="login.html" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión" data-action="logout">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -60,13 +65,14 @@
 
   <!-- Contenedor Principal del Panel de Administración -->
   <main class="admin-container" id="adminApp">
-    
+
     <!-- Encabezado de la Vista de Administración & KPIs Rápidos -->
     <header class="admin-header">
       <div class="admin-header__content">
         <span class="admin-badge">Coordinación & Auditoría</span>
         <h1 class="admin-title">Panel de Administración</h1>
-        <p class="admin-subtitle">Supervisión integral de tutores, gestión de bitácora institucional y exportación de registros de asesorías.</p>
+        <p class="admin-subtitle">Supervisión integral de tutores, gestión de bitácora institucional y exportación de
+          registros de asesorías.</p>
       </div>
 
       <div class="chapter-switcher admin-chapter-switcher">
@@ -75,7 +81,8 @@
           <option value="">Cargando capítulos...</option>
         </select>
       </div>
-      <button type="button" id="btnRefreshAdmin" class="btn-refresh" aria-label="Actualizar administración" title="Actualizar datos">
+      <button type="button" id="btnRefreshAdmin" class="btn-refresh" aria-label="Actualizar administración"
+        title="Actualizar datos">
         <span aria-hidden="true">↻</span>
         <span>Actualizar</span>
       </button>
@@ -98,14 +105,10 @@
 
     <!-- Sistema de Pestañas Accesibles (Tabs) -->
     <nav class="admin-tabs" role="tablist" aria-label="Secciones de administración">
-      <button type="button" 
-              class="admin-tab-btn is-active" 
-              role="tab" 
-              id="tab-btn-members" 
-              aria-selected="true" 
-              aria-controls="panel-members" 
-              data-tab-target="members">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <button type="button" class="admin-tab-btn is-active" role="tab" id="tab-btn-members" aria-selected="true"
+        aria-controls="panel-members" data-tab-target="members">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
           <circle cx="9" cy="7" r="4"></circle>
           <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -114,14 +117,10 @@
         Directorio de Mentores / Equipo
       </button>
 
-      <button type="button" 
-              class="admin-tab-btn" 
-              role="tab" 
-              id="tab-btn-records" 
-              aria-selected="false" 
-              aria-controls="panel-records" 
-              data-tab-target="records">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <button type="button" class="admin-tab-btn" role="tab" id="tab-btn-records" aria-selected="false"
+        aria-controls="panel-records" data-tab-target="records">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
           <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -173,6 +172,17 @@
         </svg>
         Ajustes del Capítulo
       </button>
+      <button type="button" class="admin-tab-btn" role="tab" id="tab-btn-config" aria-selected="false"
+        aria-controls="panel-config" data-tab-target="config">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+          </path>
+        </svg>
+        Configuración
+      </button>
     </nav>
 
     <!-- SECCIÓN 1: Directorio de Mentores / Equipo -->
@@ -180,7 +190,8 @@
       <div class="panel-header">
         <div>
           <h2 class="panel-title">Equipo Docente y Tutores</h2>
-          <p class="panel-desc">Monitoreo de horas acumuladas, materias impartidas y estado de cada tutor institucional.</p>
+          <p class="panel-desc">Monitoreo de horas acumuladas, materias impartidas y estado de cada tutor institucional.
+          </p>
         </div>
       </div>
 
@@ -192,19 +203,17 @@
 
     <!-- SECCIÓN 2: Gestor de Datos (Bitácora de Sesiones) -->
     <section class="admin-panel" id="panel-records" role="tabpanel" aria-labelledby="tab-btn-records">
-      
+
       <!-- Barra de herramientas (Toolbar) -->
       <div class="toolbar" role="search" aria-label="Filtros de sesiones">
         <div class="toolbar-search">
-          <svg class="toolbar-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg class="toolbar-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="search" 
-                 id="recordSearchInput" 
-                 class="toolbar-search__input" 
-                 placeholder="Buscar por matrícula, tutor, materia o fecha..." 
-                 aria-label="Buscar sesiones">
+          <input type="search" id="recordSearchInput" class="toolbar-search__input"
+            placeholder="Buscar por matrícula, tutor, materia o fecha..." aria-label="Buscar sesiones">
         </div>
 
         <div class="toolbar-filters">
@@ -217,7 +226,8 @@
           </div>
 
           <button type="button" id="btnExportCSV" class="btn btn--outline-action" data-action="export-csv">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -226,7 +236,8 @@
           </button>
 
           <button type="button" id="btnImportCSV" class="btn btn--outline-action" data-action="import-csv">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
               <line x1="12" y1="3" x2="12" y2="15"></line>
@@ -470,7 +481,8 @@
           <h2 class="admin-dialog__name" id="sessionManagerTitle">Gestionar sesión</h2>
           <p class="session-manager__hint" id="sessionManagerHint">Selecciona una operación para comenzar.</p>
         </div>
-        <button type="button" class="admin-dialog__close" id="sessionManagerClose" aria-label="Cerrar gestión">×</button>
+        <button type="button" class="admin-dialog__close" id="sessionManagerClose"
+          aria-label="Cerrar gestión">×</button>
       </header>
       <form id="sessionManagerForm" class="dialog-form">
         <div class="form-group">
@@ -491,11 +503,16 @@
         </div>
 
         <div class="form-grid" id="managerNewSessionFields">
-          <div class="form-group"><label for="managerDate">Fecha</label><input id="managerDate" class="form-control" type="date"></div>
-          <div class="form-group"><label for="managerTime">Hora</label><input id="managerTime" class="form-control" type="time"></div>
-          <div class="form-group"><label for="managerStudent">Alumno</label><input id="managerStudent" class="form-control" type="text" maxlength="80"></div>
-          <div class="form-group"><label for="managerSubject">Materia</label><input id="managerSubject" class="form-control" type="text" maxlength="60"></div>
-          <div class="form-group"><label for="managerHours">Horas</label><input id="managerHours" class="form-control" type="number" min="0.5" max="8" step="0.5" value="1"></div>
+          <div class="form-group"><label for="managerDate">Fecha</label><input id="managerDate" class="form-control"
+              type="date"></div>
+          <div class="form-group"><label for="managerTime">Hora</label><input id="managerTime" class="form-control"
+              type="time"></div>
+          <div class="form-group"><label for="managerStudent">Alumno</label><input id="managerStudent"
+              class="form-control" type="text" maxlength="80"></div>
+          <div class="form-group"><label for="managerSubject">Materia</label><input id="managerSubject"
+              class="form-control" type="text" maxlength="60"></div>
+          <div class="form-group"><label for="managerHours">Horas</label><input id="managerHours" class="form-control"
+              type="number" min="0.5" max="8" step="0.5" value="1"></div>
         </div>
         <footer class="admin-dialog__footer">
           <button type="button" class="btn btn--secondary" id="sessionManagerCancel">Cancelar</button>
@@ -523,7 +540,8 @@
           </div>
         </div>
         <button type="button" class="admin-dialog__close" id="dialogCloseBtn" aria-label="Cerrar modal">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -539,7 +557,8 @@
               <span class="dialog-stat-box__current" id="dialogMemberHours">0</span>
               <span class="dialog-stat-box__total">/ <span id="dialogMemberTarget">80</span> hrs acumuladas</span>
             </div>
-            <div class="progress-bar-track" role="progressbar" id="dialogProgressTrack" aria-valuemin="0" aria-valuemax="80" aria-valuenow="0">
+            <div class="progress-bar-track" role="progressbar" id="dialogProgressTrack" aria-valuemin="0"
+              aria-valuemax="80" aria-valuenow="0">
               <div class="progress-bar-fill" id="dialogProgressBar" style="width: 0%;"></div>
             </div>
           </div>
@@ -554,7 +573,7 @@
               <dd id="dialogMemberSemester">-</dd>
             </div>
             <div>
-              <dt>Correo Institucional</dt>
+              <dt>Correo Electrónico</dt>
               <dd id="dialogMemberEmail">-</dd>
             </div>
             <div>
@@ -579,10 +598,22 @@
         </section>
       </div>
 
-      <footer class="admin-dialog__footer" style="display: flex; gap: 10px; justify-content: flex-end;">
-        <a id="dialogViewCalendarBtn" href="#" class="btn btn--primary">Gestionar Calendario</a>
+      <footer class="admin-dialog__footer" style="display: flex; gap: 10px; justify-content: flex-end; margin: auto;">
+        <button type="button" class="btn danger" id="dialogDeleteButton" style="background-color: brown; color: white; text-decoration: underline;">Eliminar del Capítulo</button>
+        <a id="dialogViewCalendarBtn" style="text-decoration: none;" href="#" class="btn btn--primary">Gestionar Calendario</a>
         <button type="button" class="btn btn--secondary" id="dialogCloseFooterBtn">Cerrar Ficha</button>
       </footer>
+    </div>
+  </dialog>
+
+  <dialog class="admin-dialog" id="onDeleteConfirmation">
+    <div class="admin-dialog_surface">
+      <div class="admin-dialog_body">
+        <footer class="admin-dialog__footer" style="display: flex; gap: 10px; justify-content: flex-end; margin: auto;">
+        <button type="button" class="btn danger" id="confirmDeletion" style="background-color: brown; color: white; text-decoration: underline;">Eliminar del Capítulo</button>
+        <button type="button" class="btn btn--primary" style="background-color: #6FC276; color: white; text-decoration: underline;" id="cancelDeletion">Cancelar</button>
+      </footer>
+      </div>
     </div>
   </dialog>
 
@@ -593,9 +624,11 @@
         <div>
           <span class="admin-badge">Gestor de Datos</span>
           <h2 class="admin-dialog__name" id="csvImportTitle">Importar Sesiones vía CSV</h2>
-          <p class="session-manager__hint">Sube un archivo CSV con las columnas: Alumno, Materia, Fecha (YYYY-MM-DD), Hora (HH:MM), Horas, y opcionalmente Matrícula.</p>
+          <p class="session-manager__hint">Sube un archivo CSV con las columnas: Alumno, Materia, Fecha (YYYY-MM-DD),
+            Hora (HH:MM), Horas, y opcionalmente Matrícula.</p>
         </div>
-        <button type="button" class="admin-dialog__close" id="csvImportClose" aria-label="Cerrar modal de importación">×</button>
+        <button type="button" class="admin-dialog__close" id="csvImportClose"
+          aria-label="Cerrar modal de importación">×</button>
       </header>
       <div class="admin-dialog__body">
         <div class="form-group">
@@ -715,15 +748,22 @@
   <!-- Notificación Flotante Accesible (Toast) -->
   <div id="adminToast" class="admin-toast" role="status" aria-live="polite" aria-hidden="true">
     <span class="admin-toast__icon" aria-hidden="true">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <polyline points="20 6 9 17 4 12"></polyline>
       </svg>
     </span>
     <span class="admin-toast__msg" id="adminToastMsg">Acción completada</span>
   </div>
-
   <!-- Lógica en JavaScript ES6+ Puro -->
   <script type="module" src="./js/admin.js"></script>
 </body>
+<footer class="login-footer">
+  <p>© 2026 DualOrganizer. Sistema Institucional de Gestión de Tutorías Académicas.</p>
+  <div class="footer-links">
+    <a class="footer-link" href="terms.html">Términos y Aviso de Privacidad</a>
+    <a class="footer-link" href="https://dualorbitlabs.com">Contacta a soporte</a>
+  </div>
+</footer>
 
 </html>

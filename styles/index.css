@@ -83,7 +83,6 @@ body {
   align-items: center;
   gap: 20px;
 }
-
 .hero-badge {
   display: inline-flex;
   align-items: center;
@@ -104,6 +103,13 @@ body {
   height: 6px;
   border-radius: 50%;
   background-color: var(--color-success);
+}
+
+.hero-badge-red-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: red;
 }
 
 .hero-title {
@@ -808,4 +814,5 @@ body {
   .cta-subtitle {
     font-size: 0.875rem;
   }
+
 }

@@ -65,19 +65,47 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Persistencia de Capítulos en Supabase
   // --------------------------------------------------------------------------
   async function loadUserChapters() {
-    const { data, error } = await supabase
-      .from('chapter_members')
-      .select('chapter_id, role, is_primary, chapters(id, code, name, institution, department, description)')
-      .eq('user_id', currentUser.id);
-    if (error) throw error;
-    return (data || []).map((membership) => ({
-      ...membership.chapters,
-      role: membership.role === 'ADMIN' ? 'Coordinador / Admin' : 'Tutor Académico',
-      isPrimary: membership.is_primary
-    }));
+    const cachedChapters = UncacheChapters();
+    if (!cachedChapters) {
+      const { data, error } = await supabase
+        .from('chapter_members')
+        .select('chapter_id, role, is_primary, chapters(id, code, name, institution, department, description)')
+        .eq('user_id', currentUser.id);
+      if (error) throw error;
+      const returning = (data || []).map((membership) => ({
+        ...membership.chapters,
+        role: membership.role === 'ADMIN' ? 'Coordinador / Admin' : 'Tutor Académico',
+        isPrimary: membership.is_primary
+      }));
+      CacheChapters(returning);
+      return returning; 
+    } else {
+      return cachedChapters;
+    }
+  }
+
+  async function forceLoadUserChapters() {
+    const cachedChapters = null;
+    if (!cachedChapters) {
+      const { data, error } = await supabase
+        .from('chapter_members')
+        .select('chapter_id, role, is_primary, chapters(id, code, name, institution, department, description)')
+        .eq('user_id', currentUser.id);
+      if (error) throw error;
+      const returning = (data || []).map((membership) => ({
+        ...membership.chapters,
+        role: membership.role === 'ADMIN' ? 'Coordinador / Admin' : 'Tutor Académico',
+        isPrimary: membership.is_primary
+      }));
+      CacheChapters(returning);
+      return returning; 
+    } else {
+      return cachedChapters;
+    }
   }
 
   let userChapters = await loadUserChapters();
+  let localChapters = userChapters;
 
   // --------------------------------------------------------------------------
   // 4. Selectores DOM
@@ -327,7 +355,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         if (error) throw error;
         currentUser.role = 'ADMIN';
-        userChapters = await loadUserChapters();
+        sessionStorage.setItem("userData", JSON.stringify(currentUser));
+        userChapters = await forceLoadUserChapters();
         renderHubGrid();
         closeCreateDialog();
         showToast(`¡Capítulo "${name}" creado exitosamente!`);
@@ -530,3 +559,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderHubGrid();
   loadHubAnnouncements();
 });
+
+function UncacheChapters() {
+  return JSON.parse(sessionStorage.getItem("userChapters"));
+}
+
+function CacheChapters(chapters){
+  sessionStorage.setItem("userChapters", JSON.stringify(chapters));
+}
+
+addEventListener("beforeunload", async() =>{
+  await forceSaveUserChapters();
+})

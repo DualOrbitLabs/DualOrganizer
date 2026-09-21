@@ -1467,6 +1467,7 @@ th[aria-sort="descending"] .sort-indicator {
   background: #b91c1c;
 }
 
+<<<<<<< HEAD
 /* ============================================
    EXTENSIÓN: Panel de Solicitudes y Permisos
    ============================================ */
@@ -1740,4 +1741,18 @@ th[aria-sort="descending"] .sort-indicator {
   .subjects-catalog__add { flex-direction: column; }
   .subjects-catalog__add .form-control { max-width: 100%; }
   .announcements-form { padding: var(--space-3); }
+=======
+.danger {
+  background-color: brown;
+  color: white;
+  transition: filter 0.1s ease-in-out;
+}
+
+.danger:hover{
+  filter: brightness(0.9);
+}
+
+.danger:active {
+  filter: brightness(0.8); 
+>>>>>>> 8d12adaf4956698780c10ac819b00bcce56525a0
 }
