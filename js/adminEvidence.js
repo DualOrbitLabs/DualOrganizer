@@ -2,11 +2,11 @@ import { formatEvidencePreview } from './evidenceUtils.js';
 
 async function loadSessionsForReview(supabase, chapterId) {
     const { data, error } = await supabase
-        .from('calendar_sessions')
+        .from('tutoring_sessions')
         .select(`
             id,
             subject,
-            date,
+            session_date,
             hours,
             status,
             evidence_path,
@@ -27,7 +27,7 @@ async function loadSessionsForReview(supabase, chapterId) {
 
 async function approveSessionEvidence(supabase, sessionId) {
     const { error } = await supabase
-        .from('calendar_sessions')
+        .from('tutoring_sessions')
         .update({ status: 'APPROVED' })
         .eq('id', sessionId);
     if (error) throw error;
@@ -35,7 +35,7 @@ async function approveSessionEvidence(supabase, sessionId) {
 
 async function rejectSessionEvidence(supabase, sessionId, notes) {
     const { error } = await supabase
-        .from('calendar_sessions')
+        .from('tutoring_sessions')
         .update({ status: 'REJECTED' }) // Optional: save notes in a new column if added later
         .eq('id', sessionId);
     if (error) throw error;
@@ -80,19 +80,19 @@ function renderEvidenceGrid(container, sessions, supabase) {
             </div>
             <div class="settings-card__body" style="padding: 16px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.85rem; color: var(--slate-600);">
-                    <span class="tabular-nums">📅 ${new Date(session.date).toLocaleDateString()}</span>
+                    <span class="tabular-nums">📅 ${session.session_date ? new Date(session.session_date + 'T00:00:00').toLocaleDateString() : '-'}</span>
                     <span class="tabular-nums">⏱️ ${session.hours}h</span>
                 </div>
                 
                 ${publicUrl ? `
-                <a href="${publicUrl}" target="_blank" class="btn btn--outline-action" style="display: flex; justify-content: center; width: 100%; margin-bottom: 16px;">
+                <a href="${publicUrl}" target="_blank" rel="noopener noreferrer" class="btn btn--outline-action" style="display: flex; justify-content: center; width: 100%; margin-bottom: 16px;">
                     📎 Ver Documento
                 </a>
                 ` : '<p style="font-size: 0.8rem; color: var(--danger);">Archivo no disponible</p>'}
 
                 <div style="display: flex; gap: 8px;">
-                    <button type="button" class="btn btn--primary" data-action="approve-evidence" data-id="${session.id}" style="flex: 1; background-color: #10b981; border-color: #10b981;">Aprobar</button>
-                    <button type="button" class="btn btn--secondary" data-action="reject-evidence" data-id="${session.id}" style="flex: 1; color: #ef4444; border-color: #fca5a5; background-color: #fef2f2;">Rechazar</button>
+                    <button type="button" class="btn btn--success" data-action="approve-evidence" data-id="${session.id}" style="flex: 1;">Aprobar</button>
+                    <button type="button" class="btn btn--danger-subtle" data-action="reject-evidence" data-id="${session.id}" style="flex: 1;">Rechazar</button>
                 </div>
             </div>
         `;

@@ -175,13 +175,10 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="selectSemester">Semestre / Grado</label>
-            <select id="selectSemester" name="semester" class="form-control">
-              <option value="Quinto Semestre">Quinto Semestre</option>
-              <option value="Sexto Semestre" selected>Sexto Semestre</option>
-              <option value="Séptimo Semestre">Séptimo Semestre</option>
-              <option value="Octavo Semestre">Octavo Semestre</option>
-            </select>
+            <label class="form-label" for="inputsemester">Semestre / Grado</label>
+            <input type="text" id="inputsemester" name="semester" class="form-control" minlength="3" maxlength="80"
+              pattern="^[A-Za-zÀ-ÿ\u00f1\u00d1\s\.\-]+$"
+              title="Solo letras, espacios, puntos o guiones. Entre 3 y 80 caracteres.">
           </div>
 
           <!-- Componente Chips Accesible: Materias y Temas -->
@@ -371,13 +368,13 @@
     </span>
     <span id="toastMessage"></span>
   </div>
-<footer class="login-footer">
+  <footer class="login-footer">
     <p>© 2026 DualOrganizer. Sistema Institucional de Gestión de Tutorías Académicas.</p>
     <div class="footer-links">
       <a class="footer-link" href="terms.html">Términos y Aviso de Privacidad</a>
       <a class="footer-link" href="https://dualorbitlabs.com">Contacta a soporte</a>
     </div>
-</footer>
+  </footer>
   <script type="module" src="js/profile.js"></script>
 </body>
 

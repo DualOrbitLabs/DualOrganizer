@@ -169,6 +169,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     activeTab: 'members'
   };
 
+  let extensionTabs = { requests: null, evidence: null, analytics: null, settings: null };
+
   /*
    * El código de renderizado empieza aquí; las declaraciones demo anteriores
    * fueron eliminadas para que SQL sea la única fuente de datos.
@@ -381,6 +383,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (hint && copy.hint) hint.textContent = copy.hint;
     if (submit && copy.submit) submit.textContent = copy.submit;
     if (submit) submit.classList.toggle('btn--danger', operation === 'delete' || operation === 'clear');
+
+    const btnApprove = document.getElementById('btnSessionManagerApprove');
+    const btnReject = document.getElementById('btnSessionManagerReject');
+    if (btnApprove && btnReject && submit) {
+        const session = calendarSessions.find(item => item.id === elements.managerSession?.value);
+        if (operation === 'edit' && session && session.status === 'PENDING') {
+            btnApprove.style.display = 'inline-flex';
+            btnReject.style.display = 'inline-flex';
+            submit.style.display = 'none';
+        } else {
+            btnApprove.style.display = 'none';
+            btnReject.style.display = 'none';
+            submit.style.display = 'inline-flex';
+        }
+    }
   };
 
   const loadSelectedSessionIntoForm = () => {
@@ -391,6 +408,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.managerStudent.value = session.student_name;
     elements.managerSubject.value = session.subject;
     elements.managerHours.value = session.hours;
+    refreshManagerVisibility();
   };
 
   const openSessionManager = (tutorId = '', sessionId = '') => {
@@ -535,7 +553,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnView.type = 'button';
       btnView.className = 'btn btn--secondary btn--full';
       btnView.setAttribute('data-action', 'view-member');
-      btnView.setAttribute('data-member-id', member.id);
+      btnView.setAttribute('data-member-id', member.userId || member.id);
       btnView.textContent = 'Ver Detalle';
 
       const actions = document.createElement('div');
@@ -713,6 +731,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       manageButton.textContent = 'Gestionar';
       tdActions.appendChild(manageButton);
 
+      if (rec.status === 'Pendiente') {
+        const approveQuickBtn = document.createElement('button');
+        approveQuickBtn.type = 'button';
+        approveQuickBtn.className = 'btn btn--success';
+        approveQuickBtn.setAttribute('data-action', 'quick-approve');
+        approveQuickBtn.setAttribute('data-session-id', rec.id);
+        approveQuickBtn.style.marginLeft = '6px';
+        approveQuickBtn.textContent = '✓ Aprobar';
+        tdActions.appendChild(approveQuickBtn);
+      }
+
       if (rec.evidencePath) {
         const evidenceBtn = document.createElement('button');
         evidenceBtn.type = 'button';
@@ -880,47 +909,61 @@ document.addEventListener('DOMContentLoaded', async () => {
   // --------------------------------------------------------------------------
   // 9. Modal Nativo (<dialog>): Ficha Detallada del Mentor
   // --------------------------------------------------------------------------
+  let currentSelectedMemberId = null;
+
   const openMemberModal = (memberId) => {
-    const member = state.members.find(m => m.id === memberId);
+    const member = state.members.find(m => m.userId === memberId || m.id === memberId);
     if (!member || !elements.memberModal) return;
+
+    currentSelectedMemberId = member.userId;
 
     if (elements.dialogMemberInitials) {
       elements.dialogMemberInitials.textContent = member.initials || getInitials(member.name);
     }
-    elements.dialogMemberRole.textContent = member.role;
-    elements.dialogMemberStatus.textContent = member.status;
-    elements.dialogMemberStatus.className = `status-badge ${getStatusBadgeClass(member.status)}`;
-    elements.dialogMemberName.textContent = member.name;
-    elements.dialogMemberId.textContent = member.id;
+    if (elements.dialogMemberRole) elements.dialogMemberRole.textContent = member.role;
+    if (elements.dialogMemberStatus) {
+      elements.dialogMemberStatus.textContent = member.status;
+      elements.dialogMemberStatus.className = `status-badge ${getStatusBadgeClass(member.status)}`;
+    }
+    if (elements.dialogMemberName) elements.dialogMemberName.textContent = member.name;
+    if (elements.dialogMemberId) elements.dialogMemberId.textContent = member.id;
 
-    elements.dialogMemberHours.textContent = Number(member.totalHours).toFixed(1);
-    elements.dialogMemberTarget.textContent = member.targetHours;
+    if (elements.dialogMemberHours) elements.dialogMemberHours.textContent = Number(member.totalHours).toFixed(1);
+    if (elements.dialogMemberTarget) elements.dialogMemberTarget.textContent = member.targetHours;
 
     const percentage = Math.min(100, Math.round((member.totalHours / member.targetHours) * 100));
-    elements.dialogProgressTrack.setAttribute('aria-valuenow', String(member.totalHours));
-    elements.dialogProgressBar.style.width = `${percentage}%`;
+    if (elements.dialogProgressTrack) elements.dialogProgressTrack.setAttribute('aria-valuenow', String(member.totalHours));
+    if (elements.dialogProgressBar) elements.dialogProgressBar.style.width = `${percentage}%`;
 
-    elements.dialogMemberSemester.textContent = member.semester;
-    elements.dialogMemberEmail.textContent = member.email;
-    elements.dialogMemberPhone.textContent = member.phone;
+    if (elements.dialogMemberSemester) elements.dialogMemberSemester.textContent = member.semester || 'Sin especificar';
+    if (elements.dialogMemberEmail) elements.dialogMemberEmail.textContent = member.email || 'No disponible';
+    if (elements.dialogMemberPhone) elements.dialogMemberPhone.textContent = member.phone || 'No registrado';
 
     // Render seguro de chips de materias
-    elements.dialogMemberSubjects.innerHTML = '';
-    member.subjects.forEach(sub => {
-      const chip = document.createElement('span');
-      chip.className = 'subject-chip';
-      chip.setAttribute('role', 'listitem');
-      chip.textContent = sub;
-      elements.dialogMemberSubjects.appendChild(chip);
-    });
+    if (elements.dialogMemberSubjects) {
+      elements.dialogMemberSubjects.innerHTML = '';
+      if (member.subjects && member.subjects.length > 0) {
+        member.subjects.forEach(sub => {
+          const chip = document.createElement('span');
+          chip.className = 'subject-chip';
+          chip.setAttribute('role', 'listitem');
+          chip.textContent = sub;
+          elements.dialogMemberSubjects.appendChild(chip);
+        });
+      } else {
+        const chip = document.createElement('span');
+        chip.className = 'subject-chip subject-chip--empty';
+        chip.textContent = 'Sin materias asignadas';
+        elements.dialogMemberSubjects.appendChild(chip);
+      }
+    }
 
-    elements.dialogMemberBio.textContent = member.bio;
+    if (elements.dialogMemberBio) elements.dialogMemberBio.textContent = member.bio || 'Sin descripción pedagógica registrada.';
 
     if (elements.dialogViewCalendarBtn) {
       elements.dialogViewCalendarBtn.href = `dashboard.html?tutor=${encodeURIComponent(member.userId)}&chapter=${encodeURIComponent(activeChapterId)}`;
     }
     
-    addEventListener("click", )
     elements.memberModal.showModal();
   };
 
@@ -929,6 +972,60 @@ document.addEventListener('DOMContentLoaded', async () => {
       elements.memberModal.close();
     }
   };
+
+  elements.dialogCloseBtn?.addEventListener('click', closeMemberModal);
+  elements.dialogCloseFooterBtn?.addEventListener('click', closeMemberModal);
+  elements.memberModal?.addEventListener('click', (e) => {
+    if (e.target === elements.memberModal) closeMemberModal();
+  });
+
+  const dialogDeleteButton = document.getElementById('dialogDeleteButton');
+  const onDeleteConfirmation = document.getElementById('onDeleteConfirmation');
+  const confirmDeletion = document.getElementById('confirmDeletion');
+  const cancelDeletion = document.getElementById('cancelDeletion');
+  const cancelDeletionClose = document.getElementById('cancelDeletionClose');
+
+  if (dialogDeleteButton && onDeleteConfirmation) {
+    dialogDeleteButton.addEventListener('click', () => {
+      onDeleteConfirmation.showModal();
+    });
+  }
+
+  const closeDeleteConfirmation = () => {
+    if (onDeleteConfirmation && onDeleteConfirmation.open) {
+      onDeleteConfirmation.close();
+    }
+  };
+
+  cancelDeletion?.addEventListener('click', closeDeleteConfirmation);
+  cancelDeletionClose?.addEventListener('click', closeDeleteConfirmation);
+  onDeleteConfirmation?.addEventListener('click', (e) => {
+    if (e.target === onDeleteConfirmation) closeDeleteConfirmation();
+  });
+
+  confirmDeletion?.addEventListener('click', async () => {
+    if (!currentSelectedMemberId || !activeChapterId) return;
+    try {
+      confirmDeletion.disabled = true;
+      const { error } = await supabase
+        .from('chapter_members')
+        .delete()
+        .eq('chapter_id', activeChapterId)
+        .eq('user_id', currentSelectedMemberId);
+
+      if (error) throw error;
+      
+      closeDeleteConfirmation();
+      closeMemberModal();
+      await reloadRemoteData();
+      showToast('Miembro desvinculado del capítulo exitosamente.');
+    } catch (err) {
+      console.error('Error al desvincular miembro del capítulo:', err);
+      showToast(err.message || 'No se pudo desvincular al miembro del capítulo.', 'error');
+    } finally {
+      confirmDeletion.disabled = false;
+    }
+  });
 
   const minutesFromTime = (value) => {
     const [hours, minutes] = String(value).slice(0, 5).split(':').map(Number);
@@ -1168,6 +1265,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isTarget = panel.id === `panel-${targetTab}`;
         panel.classList.toggle('is-active', isTarget);
       });
+
+      if (targetTab === 'requests') {
+        extensionTabs.requests?.refresh?.();
+        extensionTabs.evidence?.refresh?.();
+      } else if (targetTab === 'analytics') {
+        extensionTabs.analytics?.refresh?.();
+      } else if (targetTab === 'settings') {
+        extensionTabs.settings?.refresh?.();
+      }
     });
   }
 
@@ -1190,9 +1296,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   if (elements.recordsTable) {
-    elements.recordsTable.addEventListener('click', (event) => {
+    elements.recordsTable.addEventListener('click', async (event) => {
       const button = event.target.closest('[data-action="manage-session"]');
       if (button) openSessionManager('', button.getAttribute('data-session-id'));
+
+      const quickApproveBtn = event.target.closest('[data-action="quick-approve"]');
+      if (quickApproveBtn) {
+        const sessionId = quickApproveBtn.getAttribute('data-session-id');
+        if (!sessionId) return;
+        try {
+          quickApproveBtn.disabled = true;
+          const { error } = await supabase.from('tutoring_sessions').update({ status: 'APPROVED' }).eq('id', sessionId);
+          if (error) throw error;
+          await reloadRemoteData();
+          showToast('Sesión aprobada exitosamente.');
+        } catch (error) {
+          console.error('Error al aprobar sesión:', error);
+          showToast('Hubo un error al aprobar la sesión', 'error');
+        } finally {
+          quickApproveBtn.disabled = false;
+        }
+      }
 
       const evidenceBtn = event.target.closest('[data-action="view-evidence"]');
       if (evidenceBtn) {
@@ -1228,6 +1352,45 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast(error.message || 'No se pudo actualizar el calendario.');
     }
   });
+
+  const btnApproveManager = document.getElementById('btnSessionManagerApprove');
+  const btnRejectManager = document.getElementById('btnSessionManagerReject');
+
+  if (btnApproveManager) {
+    btnApproveManager.addEventListener('click', async () => {
+      const sessionId = elements.managerSession?.value;
+      if (!sessionId) return;
+      try {
+        const { error } = await supabase.from('tutoring_sessions').update({ status: 'APPROVED' }).eq('id', sessionId);
+        if (error) throw error;
+        await reloadRemoteData();
+        elements.sessionManagerModal.close();
+        showToast('Sesión aprobada exitosamente.');
+      } catch (error) {
+        console.error('Error al aprobar sesión:', error);
+        showToast('Hubo un error al aprobar la sesión', 'error');
+      }
+    });
+  }
+
+  if (btnRejectManager) {
+    btnRejectManager.addEventListener('click', async () => {
+      const sessionId = elements.managerSession?.value;
+      if (!sessionId) return;
+      const reason = window.prompt('Motivo de rechazo (opcional):');
+      if (reason === null) return;
+      try {
+        const { error } = await supabase.from('tutoring_sessions').update({ status: 'REJECTED' }).eq('id', sessionId);
+        if (error) throw error;
+        await reloadRemoteData();
+        elements.sessionManagerModal.close();
+        showToast('Sesión rechazada.');
+      } catch (error) {
+        console.error('Error al rechazar sesión:', error);
+        showToast('Hubo un error al rechazar la sesión', 'error');
+      }
+    });
+  }
 
   // C) Filtro por Tutor en Toolbar
   if (elements.memberFilterSelect) {
@@ -1350,7 +1513,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   let adminLogicalTimer = null;
-  let extensionTabs = { requests: null, evidence: null, analytics: null, settings: null };
   try {
     await init();
     adminLogicalTimer = initLogicalTimer({
