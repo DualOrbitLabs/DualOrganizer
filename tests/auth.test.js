@@ -18,8 +18,7 @@ function isStrongPassword(password) {
   if (typeof password !== 'string') return false;
   return password.length >= 8
     && password.length <= 128
-    && /[a-z]/.test(password)
-    && /[A-Z]/.test(password)
+    && /[a-zA-Z]/.test(password)
     && /\d/.test(password)
     && /[^A-Za-z0-9]/.test(password);
 }
@@ -33,6 +32,33 @@ function getRegistrationErrorMessage(error) {
     return 'Ese correo ya está asociado a una cuenta. Inicia sesión o usa “¿Olvidaste tu contraseña?”.';
   }
   return 'No se pudo crear la cuenta. Revisa el correo e inténtalo de nuevo.';
+}
+
+function generateChapterCode(chapterName = '') {
+  const clean = String(chapterName || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z0-9\s]/g, '')
+    .trim();
+
+  const words = clean.split(/\s+/).filter(Boolean);
+  let prefix = '';
+
+  if (words.length >= 3) {
+    prefix = (words[0][0] + words[1][0] + words[2][0]).toUpperCase();
+  } else if (words.length === 2) {
+    prefix = (words[0].slice(0, 2) + words[1][0]).toUpperCase();
+  } else if (words.length === 1 && words[0].length >= 3) {
+    prefix = words[0].slice(0, 3).toUpperCase();
+  } else if (words.length === 1) {
+    prefix = words[0].padEnd(3, 'X').toUpperCase();
+  } else {
+    prefix = 'CAP';
+  }
+
+  const year = new Date().getFullYear();
+  const randomDigits = String(Math.floor(Math.random() * 900 + 100));
+  return `${prefix}-${year}-${randomDigits}`;
 }
 
 function validateLoginInput(identifier, password) {
@@ -137,19 +163,40 @@ describe('Authentication & Security Guards Test Suite (Tier 1 - Tier 4)', () => 
       }
     });
 
-    it('should enforce strong password policy (8-128 chars with 4 character classes)', () => {
-      // Must have lowercase, uppercase, digit, special character
+    it('should enforce password policy matching user message (8-128 chars with letters, numbers and symbols)', () => {
+      // Must have letters, digits, special character
       assert.ok(isStrongPassword('Tutor2026*Pass'), 'Conforming tutor password must pass');
       assert.ok(isStrongPassword('Admin2026*Secure'), 'Conforming admin password must pass');
       assert.ok(isStrongPassword('P@ssw0rd123!'), 'Standard strong password must pass');
+      assert.ok(isStrongPassword('tutor2026*pass'), 'Lowercase with numbers and symbols must pass per message');
+      assert.ok(isStrongPassword('ADMIN2026*SECURE'), 'Uppercase with numbers and symbols must pass per message');
 
       // Failure cases:
       assert.equal(isStrongPassword('Short1!'), false, 'Password < 8 chars must fail');
-      assert.equal(isStrongPassword('nouppercase123!'), false, 'Password without uppercase must fail');
-      assert.equal(isStrongPassword('NOLOWERCASE123!'), false, 'Password without lowercase must fail');
+      assert.equal(isStrongPassword('12345678!@#'), false, 'Password without letters must fail');
       assert.equal(isStrongPassword('NoDigitsHere!'), false, 'Password without digits must fail');
       assert.equal(isStrongPassword('NoSymbols12345'), false, 'Password without symbol must fail');
       assert.equal(isStrongPassword('A'.repeat(129) + '1!a'), false, 'Password > 128 chars must fail');
+    });
+
+    it('should generate institutional, uppercase chapter codes conforming to SIGLAS-YYYY-NUM', () => {
+      const currentYear = new Date().getFullYear();
+      const codeRegex = new RegExp(`^[A-Z]{3}-${currentYear}-\\d{3}$`);
+
+      // Multi-word chapter
+      const codeMed = generateChapterCode('Facultad de Medicina');
+      assert.ok(codeRegex.test(codeMed), `Expected ${codeMed} to match SIGLAS-YYYY-NUM`);
+      assert.ok(codeMed.startsWith('FDM-'), `Expected code to start with FDM, got ${codeMed}`);
+
+      // Single word chapter
+      const codeMat = generateChapterCode('Matemáticas');
+      assert.ok(codeRegex.test(codeMat), `Expected ${codeMat} to match SIGLAS-YYYY-NUM`);
+      assert.ok(codeMat.startsWith('MAT-'), `Expected code to start with MAT, got ${codeMat}`);
+
+      // Empty / fallback chapter
+      const codeFallback = generateChapterCode('');
+      assert.ok(codeRegex.test(codeFallback), `Expected ${codeFallback} to match SIGLAS-YYYY-NUM`);
+      assert.ok(codeFallback.startsWith('CAP-'), `Expected code to start with CAP, got ${codeFallback}`);
     });
   });
 

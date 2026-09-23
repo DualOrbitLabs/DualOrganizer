@@ -154,14 +154,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 3200);
   }
 
-  function generateChapterCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const length = Math.floor(Math.random() * (16 - 12 + 1)) + 12; // 12 to 16 characters
-    let code = '';
-    for (let i = 0; i < length; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
+  function generateChapterCode(chapterName = '') {
+    const clean = String(chapterName || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^A-Za-z0-9\s]/g, '')
+      .trim();
+
+    const words = clean.split(/\s+/).filter(Boolean);
+    let prefix = '';
+
+    if (words.length >= 3) {
+      prefix = (words[0][0] + words[1][0] + words[2][0]).toUpperCase();
+    } else if (words.length === 2) {
+      prefix = (words[0].slice(0, 2) + words[1][0]).toUpperCase();
+    } else if (words.length === 1 && words[0].length >= 3) {
+      prefix = words[0].slice(0, 3).toUpperCase();
+    } else if (words.length === 1) {
+      prefix = words[0].padEnd(3, 'X').toUpperCase();
+    } else {
+      prefix = 'CAP';
     }
-    return code;
+
+    const year = new Date().getFullYear();
+    const randomDigits = String(Math.floor(Math.random() * 900 + 100)); // 100-999
+    return `${prefix}-${year}-${randomDigits}`;
   }
 
   // --------------------------------------------------------------------------
@@ -418,7 +435,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { data: foundChapter } = await supabase
         .from('chapters')
         .select('id, code, name, institution, department, description')
-        .eq('code', rawCode)
+        .ilike('code', rawCode)
         .maybeSingle();
       if (foundChapter) {
         chapterPreviewBox.classList.remove('is-hidden');
@@ -480,7 +497,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const { data: found, error: findError } = await supabase
           .from('chapters')
           .select('id, name')
-          .eq('code', rawCode)
+          .ilike('code', rawCode)
           .single();
         if (findError) throw findError;
 

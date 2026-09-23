@@ -126,10 +126,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function isStrongPassword(password) {
+    if (typeof password !== 'string') return false;
     return password.length >= 8
       && password.length <= 128
-      && /[a-z]/.test(password)
-      && /[A-Z]/.test(password)
+      && /[a-zA-Z]/.test(password)
       && /\d/.test(password)
       && /[^A-Za-z0-9]/.test(password);
   }
@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Validación 2: Longitud de contraseña
-      if (password.length < 6 || password.length > 128) {
+      if (password.length < 8 || password.length > 128) {
         showAlert('La contraseña debe contener al menos 8 caracteres');
         passwordInput.focus();
         return;
@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isStrongPassword(newPassword)) {
         if (resetAlert) {
           resetAlert.className = 'login-alert danger';
-          resetAlert.textContent = 'La contraseña debe tener al menos 12 caracteres e incluir mayúsculas, minúsculas, un número y un símbolo.';
+          resetAlert.textContent = 'La contraseña debe tener al menos 8 caracteres e incluir letras, números y un símbolo.';
           resetAlert.removeAttribute('hidden');
         }
         return;
