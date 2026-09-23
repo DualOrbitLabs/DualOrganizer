@@ -74,7 +74,10 @@ function renderSettingsPanel(container, settings, announcements, callbacks) {
                 </label>
                 <label>
                     Código del Capítulo
-                    <input type=\"text\" id=\"settingChapterCode\" value=\"${settings.chapter.code || ''}\" readonly disabled>
+                    <div style=\"display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem;\">
+                        <input type=\"text\" id=\"settingChapterCode\" value=\"${settings.chapter.code || ''}\" readonly disabled style=\"font-variant-numeric: tabular-nums; flex: 1;\">
+                        <button type=\"button\" id=\"btnCopyChapterCode\" data-action=\"copy-chapter-code\" style=\"padding: 0.4rem 0.8rem; cursor: pointer; white-space: nowrap;\">Copiar</button>
+                    </div>
                 </label>
                 <label>
                     Horas Objetivo Semestrales
@@ -205,6 +208,14 @@ export function initSettingsTab({ supabase, chapterId, adminId, showToast, eleme
         }
         else if (action === 'btnSaveSettings') {
             const state = getFormState();
+            if (!state.name || state.name.trim().length < 3 || state.name.trim().length > 80) {
+                showToast('El nombre del capítulo debe tener entre 3 y 80 caracteres', 'error');
+                return;
+            }
+            if (isNaN(state.semester_target_hours) || state.semester_target_hours < 1 || state.semester_target_hours > 500) {
+                showToast('Las horas objetivo deben ser un número entre 1 y 500', 'error');
+                return;
+            }
             try {
                 await saveChapterSettings(supabase, chapterId, state);
                 showToast('Configuración guardada', 'success');
@@ -214,13 +225,24 @@ export function initSettingsTab({ supabase, chapterId, adminId, showToast, eleme
                 showToast('Error al guardar', 'error');
             }
         }
+        else if (action === 'copy-chapter-code' || action === 'btnCopyChapterCode') {
+            const code = container.querySelector('#settingChapterCode')?.value;
+            if (code) {
+                try {
+                    await navigator.clipboard.writeText(code);
+                    showToast('Código copiado al portapapeles', 'success');
+                } catch {
+                    showToast(`Código: ${code}`, 'info');
+                }
+            }
+        }
         else if (action === 'btnDiscardSettings') {
             await refresh();
         }
         else if (action === 'publish-announcement' || action === 'btnPublishAnnouncement') {
             const title = container.querySelector('#announcementTitle').value;
             const body = container.querySelector('#announcementBody').value;
-            if (!title) return alert('El título es requerido');
+            if (!title) return showToast('El título del anuncio es obligatorio', 'error');
             try {
                 await createAnnouncement(supabase, chapterId, adminId, title, body);
                 showToast('Anuncio publicado', 'success');

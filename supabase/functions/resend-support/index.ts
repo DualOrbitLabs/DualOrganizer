@@ -1,5 +1,5 @@
 // supabase/functions/resend-support/index.ts
-import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const SUPPORT_EMAIL = Deno.env.get('SUPPORT_EMAIL') || 'dualorbitlabs@gmail.com';
@@ -20,7 +20,7 @@ function escapeHtml(str: unknown): string {
     .replace(/'/g, '&#039;');
 }
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   // Preflight CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
